@@ -5,8 +5,10 @@ class MidiPlayer {
   int portOut;
 
   fun void init(int pIn, int pOut) {
-    _connectIn(pIn);
-    _connectOut(pOut);
+    pIn => portIn;
+    pOut => portOut;
+    _connectIn();
+    _connectOut();
   }
 
   fun void readIn() {
@@ -15,25 +17,37 @@ class MidiPlayer {
       MidiMsg msg;
       midiIn => now;
       while(midiIn.recv(msg)) {
-        <<<msg.data1,msg.data2,msg.data3,"MIDI Message">>>;
+        <<<msg.data1,msg.data2,msg.data3>>>;
       }
     }
   }
 
-  fun void _connectIn(int port) {
-    if (!midiIn.open(port)) {
+  fun void play() {
+    while (true) {
+      // Use the MIDI Event from MidiIn
+      MidiMsg msg;
+      midiIn => now;
+      while(midiIn.recv(msg)) {
+        midiOut.send(msg);
+        <<<msg.data1,msg.data2,msg.data3>>>;
+      }
+    }
+  }
+
+  fun void _connectIn() {
+    if (!midiIn.open(portIn)) {
       <<< "get_midi_in FAILED for args [" >>>;
-      <<< port >>>;
+      <<< portIn >>>;
       <<< "]" >>>;
       me.exit();
     }
     <<< midiIn >>>;
   }
 
-  fun void _connectOut(int port) {
-    if (!midiOut.open(port)) {
+  fun void _connectOut() {
+    if (!midiOut.open(portOut)) {
       <<< "get_midi_out FAILED for args [" >>>;
-      <<< port >>>;
+      <<< portOut >>>;
       <<< "]" >>>;
       me.exit();
     }
@@ -48,7 +62,8 @@ fun void main() {
 
   MidiPlayer midiPlayer;
   midiPlayer.init(MIDI_PORT, MIDI_PORT);
-  midiPlayer.readIn();
+  /* midiPlayer.readIn(); */
+  midiPlayer.play();
 }
 
 main();
