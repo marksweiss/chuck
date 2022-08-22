@@ -1,3 +1,14 @@
+/**
+* Class that encapsulates connecting to a MIDI input device on a MIDI channel,
+* and connecting to a MIDI output device on a MIDI channel, and then communicating
+* with the devices.
+*
+* To hear output:
+* - run `chuck --probe` and identify the ouptut port of the 'IAC Driver Bus 1' device
+* - select that device as input device in a software synth
+* - run the application
+*/
+
 class MidiPlayer {
   0x90 => int NOTE_ON;
   0x80 => int NOTE_OFF;
@@ -22,17 +33,25 @@ class MidiPlayer {
     _connectOut();
   }
 
+  /**
+  * Loops forever receiving MIDIMsgs from the input device and logging them. Useful
+  * for debugging mostly.
+  */
   fun void readIn() {
     while (true) {
       // Use the MIDI Event from MidiIn
       MidiMsg msg;
       midiIn => now;
       while(midiIn.recv(msg)) {
-        <<< msg.data1,msg.data2,msg.data3 >>>;
+        <<< msg.data1, msg.data2, msg.data3 >>>;
       }
     }
   }
 
+  /**
+  * Loops forever receiving MIDIMsgs from the input device and sending
+  * them unaltered to the output device. Equivalent to a MIDI Thru. 
+  */
   fun void play() {
     while (true) {
       // Use the MIDI Event from MidiIn
@@ -40,25 +59,30 @@ class MidiPlayer {
       midiIn => now;
       while(midiIn.recv(msg)) {
         midiOut.send(msg);
-        <<< msg.data1,msg.data2,msg.data3,"play()">>>;
+        <<< msg.data1, msg.data2, msg.data3, "play()">>>;
       }
     }
   }
 
+  /**
+  * Takes parameters of a MIDI NoteOn Event, constructs a MidiMsg and sends it
+  * to the MIDI output device. Event will sound for as long as the value of duration.
+  * 
+  */
   fun void play(int note, int velocity, float duration) {
     MidiMsg msg;
     NOTE_ON + channelOut => msg. data1;
     note => msg.data2;
     velocity => msg.data3;
     midiOut.send(msg);
-    <<< msg.data1,msg.data2,msg.data3,duration,"play NOTE_ON + channel, note, velocity, duration msecs" >>>;
+    <<< msg.data1, msg.data2, msg.data3, duration, "play NOTE_ON + channel, note, velocity, duration msecs" >>>;
 
     duration::ms => now;
   }
 
   fun void _connectIn() {
     if (!midiIn.open(portIn)) {
-      <<< "get_midi_in FAILED for args [", portIn, "]" >>>;
+      <<< "Connect MidiIn FAILED for args [", portIn, "]" >>>;
       me.exit();
     }
     <<< midiIn >>>;
@@ -66,7 +90,7 @@ class MidiPlayer {
 
   fun void _connectOut() {
     if (!midiOut.open(portOut)) {
-      <<< "get_midi_out FAILED for args [",portOut,"]" >>>;
+      <<< "Connect MidiOut FAILED for args [", portOut, "]" >>>;
       me.exit();
     }
     <<< midiOut >>>;
