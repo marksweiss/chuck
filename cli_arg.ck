@@ -5,14 +5,14 @@ class CliArgBase {
   2 => int STRING;
 
   string name;
+  // set by assignment after arg is constructed
   string val;
   int type;
 
   /**
    * name_ - name of the argument
-   * val_ - the value of the argument, as a string (passed in from the command line as a string)
    */
-  fun void init(string name_, string val_) {
+  fun void init(string name_) {
     name_ => name;
     val_ => val;
   }

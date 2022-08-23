@@ -1,4 +1,17 @@
 class ArgParser {
+  // TODO
+  // associative array of CliArgBase
+  // method to add arg of type CliArgBase
+  // contruct and add a concreate-type Arg for each input arg
+  // each arg is added to associate array, keyed by flag name
+  // for each arg in me.args(), 
+  //  - get the arg name
+  //  - get the CliArgBase with the matching name from the associated array
+  //  - set its val member value
+  //  - call getVal() to get val converted to its actual type
+  // Now we have an object with associative array of wrapper objects for args of any type, with
+  //  value always retrieved by calling getVal() and always keyed to the input arg name
+
 
   // TODO THIS ONLY HANDLES INT ARGS, NEED A TYPE/CAST MAP
   /* Expected Args: */
