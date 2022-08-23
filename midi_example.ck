@@ -23,10 +23,6 @@
 class MidiPlayer {
   0x90 => int NOTE_ON;
   0x80 => int NOTE_OFF;
-  0 => int STATUS;
-  0 => int CHANNEL; // MIDI Channel 1-15
-  1 => int NOTE; // pitch 0-127
-  2 => int VELOCITY; // volume / amplitude 0-127
 
   string name;
   MidiIn midiIn;
