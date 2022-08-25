@@ -1,12 +1,10 @@
-class CliArgBase {
+public class CliArgBase {
   // type enums to suport asking an arg for its value type
   0 => int INT;
   1 => int FLOAT;
   2 => int STRING;
 
   string name;
-  // set by assignment after arg is constructed
-  string val;
   int type;
 
   /**
@@ -14,7 +12,6 @@ class CliArgBase {
    */
   fun void init(string name_) {
     name_ => name;
-    val_ => val;
   }
 
   /**
@@ -37,40 +34,3 @@ class CliArgBase {
     return "--" + flag;
   }
 }
-
-class CliIntArg extends CliArgBase {
-  INT => type;
-
-  fun int getVal() {
-    return val.toInt();
-  }
-}
-
-class CliFloatArg extends CliArgBase {
-  FLOAT => type;
-
-  fun float getVal() {
-    return val.toFloat();
-  }
-}
-
-class CliStringArg extends CliArgBase {
-  STRING => type;
-
-  fun string getVal() {
-    return val;
-  }
-}
-
-CliIntArg cliIntArg;
-cliIntArg.init("argInt", "10");
-<<< cliIntArg.name, cliIntArg.nameToFlag(), cliIntArg.type, cliIntArg.getVal() >>>;
-
-CliFloatArg cliFloatArg;
-cliFloatArg.init("argFloat", "20.01");
-<<< cliFloatArg.name, cliFloatArg.nameToFlag(), cliFloatArg.type, cliFloatArg.getVal() >>>;
-
-CliStringArg cliStrArg;
-cliStrArg.init("argString", "Hello and Goodbye");
-<<< cliStrArg.name, cliStrArg.nameToFlag(), cliStrArg.type, "\"", cliStrArg.getVal(), "\"" >>>;
-
