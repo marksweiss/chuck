@@ -1,18 +1,13 @@
 public class CliArgBase {
   // type enums to suport asking an arg for its value type
-  0 => int INT;
-  1 => int FLOAT;
-  2 => int STRING;
+  0 => static int CLI_ARG_INT;
+  1 => static int CLI_ARG_FLOAT;
+  2 => static int CLI_ARG_STRING;
 
   string name;
-  int type;
-
-  /**
-   * name_ - name of the argument
-   */
-  fun void init(string name_) {
-    name_ => name;
-  }
+  int intVal;
+  float fltVal;
+  string strVal;
 
   /**
    * Converts a camelcase arg name to a *nix-style flag syntax, e.g. 'argOne' => '--arg-one'

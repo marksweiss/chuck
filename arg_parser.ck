@@ -1,47 +1,73 @@
-Machine.add("arg_parser_imports.ck");
+// depends on arg_parser_imports.ck
 
 class ArgParser {
-  // TODO
-  // associative array of CliArgBase
-  // method to add arg of type CliArgBase
-  // contruct and add a concreate-type Arg for each input arg
-  // each arg is added to associate array, keyed by flag name
-  // for each arg in me.args(), 
-  //  - get the arg name
-  //  - get the CliArgBase with the matching name from the associated array
-  //  - set its val member value
-  //  - call getVal() to get val converted to its actual type
-  // Now we have an object with associative array of wrapper objects for args of any type, with
-  //  value always retrieved by calling getVal() and always keyed to the input arg name
+  int numArgs;
+  CliArgBase args[1];  // size doesn't matter because using as associative array */
+  int types[1];
 
+  fun void addIntArg(string name, int val) {
+    CliIntArg.make(name, val) @=> CliIntArg arg;
+    arg.nameToFlag() => string flag;
+    <<< flag, val, arg.intVal >>>;
+    arg @=> args[flag];
+    arg.type @=> types[flag];
+    /* <<< flag, args[flag].name, args[flag].intVal, args[flag] >>>; */
+    numArgs++;
+  }
+  fun void addFloatArg(string name, float val) {
+    CliFloatArg.make(name, val) @=> CliFloatArg arg;
+    arg.nameToFlag() => string flag;
+    arg @=> args[flag];
+    arg.type @=> types[flag];
+    numArgs++;
+  }
 
-  // TODO THIS ONLY HANDLES INT ARGS, NEED A TYPE/CAST MAP
-  /* Expected Args: */
-  /* --controller-port-in external controller MIDI input port */
-  /* --controller-port-out external controller MIDI output port */
-  /* --internal-port-out MIDI input port to which class-generated MidiMsg Events send output */
-  /* --channel-in MIDI input channel */
-  /* --channel-out MIDI output channel */
-  /* CliArgBase args[1];  // size doesn't matter because using as associative array */
-  5 => int NUM_ARG_ENTRIES;  // total number of arg names and values in command-line
-  CliIntArg contollerPortIn;
-  contollerPortIn.init("contollerPortIn");
-  contollerPortIn => args["--controller-port-in"];  // one entry for each argument
-  /* 0 => args["--controller-port-out"]; */
-  /* 0 => args["--internal-port-in"]; */
-  /* 0 => args["--channel-in"]; */
-  /* 0 => args["--channel-out"]; */
-  // read args into array
-  /* for (int i; i < NUM_ARG_ENTRIES; ++i) { */
-  /*   if (i % 2 == 0) { */
-  /*     if (me.arg(i).substring(0, 2) != "--") { */
-  /*       <<< "Invalid arg, expecting arg name with leading '--' but got: ", me.arg(i) >>>; */
-  /*     } */
-  /*     <<< "arg name: ", me.arg(i) >>>; */
-  /*   } else { */
-  /*     <<< "arg value: ", me.arg(i) >>>; */
-  /*     Std.atoi(me.arg(i)) => int argVal; */
-  /*     argVal => args[me.arg(i - 1)]; */
-  /*   } */ 
-  /* } */
+  fun void addStringArg(string name, string val) {
+    CliStringArg.make(name, val) @=> CliStringArg arg;
+    arg.nameToFlag() => string flag;
+    arg @=> args[flag];
+    arg.type @=> types[flag];
+    numArgs++;
+  }
+
+  fun void loadArgs() {
+    /* <<< args, me.args() >>>; */
+    for (int i; i < me.args(); i++) {
+      /* <<< me.arg(i) >>>; */
+      if (i % 2 == 0) {
+        if (me.arg(i).substring(0, 2) != "--") {
+          <<< "Invalid arg, expecting arg name with leading '--' but got: ", me.arg(i) >>>;
+        }
+        /* <<< "arg name: ", me.arg(i) >>>; */
+      } else {
+        /* <<< "arg value: ", me.arg(i) >>>; */
+        me.arg(i - 1) => string flag;
+        if (types[flag] == CliIntArg.type) {
+          <<< me.arg(i), flag >>>;
+          Std.atoi(me.arg(i)) @=> args[flag].intVal;
+          <<< me.arg(i), flag, args[flag].intVal >>>;
+        } else if (types[flag] == CliFloatArg.type) {
+          Std.atof(me.arg(i)) @=> args[flag].fltVal;
+        } else if (types[flag] == CliStringArg.type) {
+          me.arg(i) @=> args[flag].strVal;
+        }
+      } 
+    }
+  }
 }
+
+/* Expected Args: */
+/* --controller-port-in external controller MIDI input port */
+/* --controller-port-out external controller MIDI output port */
+/* --internal-port-out MIDI input port to which class-generated MidiMsg Events send output */
+/* --channel-in MIDI input channel */
+/* --channel-out MIDI output channel */
+ArgParser argParser;
+argParser.addIntArg("controllerPortIn", 0);
+argParser.addIntArg("controllerPortOut", 0);
+argParser.addIntArg("internalPortOut", 0);
+argParser.addIntArg("channelIn", 0);
+argParser.addIntArg("channelOut", 0);
+argParser.loadArgs();
+
+<<< "numArgs: ", argParser.numArgs, "args: ", argParser.args, "types: ", argParser.types >>>;

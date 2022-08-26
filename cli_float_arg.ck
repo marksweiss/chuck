@@ -1,17 +1,16 @@
 public class CliFloatArg extends CliArgBase {
-  FLOAT => type;
-  float val;
+  CLI_ARG_FLOAT => static int type;
 
   /**
    * Factory method ot make an from a name and a value
    */
   fun static CliFloatArg make(string name, float val) {
     CliFloatArg arg;
-    arg.init(name);
-    val => val;
+    name => arg.name; 
+    val => arg.fltVal;
     return arg;
   }
 }
 
 CliFloatArg.make("argFloat", 20.01) @=> CliFloatArg arg; 
-<<< arg.name, arg.nameToFlag(), arg.type, arg.val >>>;
+<<< arg.name, arg.nameToFlag(), arg.type, arg.fltVal >>>;

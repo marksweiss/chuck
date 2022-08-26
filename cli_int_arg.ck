@@ -1,17 +1,16 @@
 public class CliIntArg extends CliArgBase {
-  INT => type;
-  int val;
+  CLI_ARG_INT => static int type;
 
   /**
    * Factory method ot make an from a name and a value
    */
   fun static CliIntArg make(string name, int val) {
     CliIntArg arg;
-    arg.init(name);
-    val => arg.val;
+    name => arg.name;
+    val => arg.intVal;
     return arg;
   }
 }
 
 CliIntArg.make("argInt", 10) @=> CliIntArg arg;
-<<< arg.name, arg.nameToFlag(), arg.type, arg.val >>>;
+<<< arg.name, arg.nameToFlag(), arg.type, arg.intVal >>>;
