@@ -8,7 +8,7 @@ class ArgParser {
   fun void addIntArg(string name, int val) {
     CliIntArg.make(name, val) @=> CliIntArg arg;
     arg.nameToFlag() => string flag;
-    <<< flag, val, arg.intVal >>>;
+    /* <<< flag, val, arg.intVal >>>; */
     arg @=> args[flag];
     arg.type @=> types[flag];
     /* <<< flag, args[flag].name, args[flag].intVal, args[flag] >>>; */
@@ -43,9 +43,9 @@ class ArgParser {
         /* <<< "arg value: ", me.arg(i) >>>; */
         me.arg(i - 1) => string flag;
         if (types[flag] == CliIntArg.type) {
-          <<< me.arg(i), flag >>>;
+          /* <<< me.arg(i), flag >>>; */
           Std.atoi(me.arg(i)) @=> args[flag].intVal;
-          <<< me.arg(i), flag, args[flag].intVal >>>;
+          /* <<< me.arg(i), flag, args[flag].intVal >>>; */
         } else if (types[flag] == CliFloatArg.type) {
           Std.atof(me.arg(i)) @=> args[flag].fltVal;
         } else if (types[flag] == CliStringArg.type) {
