@@ -15,6 +15,7 @@ public class ArgParser {
     numArgs++;
     return arg;
   }
+
   fun FloatArg addFloatArg(string name, float val) {
     FloatArg.make(name, val) @=> FloatArg arg;
     arg.nameToFlag() => string flag;
