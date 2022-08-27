@@ -1,3 +1,5 @@
+// Depends on: Machine.add("arg_parser_imports.ck");
+
 /**
 * Class that encapsulates connecting to a MIDI input device on a MIDI channel,
 * and connecting to a MIDI output device on a MIDI channel, and then communicating
@@ -105,46 +107,35 @@ class MidiPlayer {
     }
     <<< midiOut >>>;
   }
-
 }
 
 fun void main() {
   1 => int DEFAULT_PORT;
 
-  // TODO THIS ONLY HANDLES INT ARGS, NEED A TYPE/CAST MAP
-  /* Expected Args: */
-  /* --controller-port-in external controller MIDI input port */
-  /* --controller-port-out external controller MIDI output port */
-  /* --internal-port-out MIDI input port to which class-generated MidiMsg Events send output */
-  /* --channel-in MIDI input channel */
-  /* --channel-out MIDI output channel */
-  int args[1];  // size doesn't matter because using as associative array
-  10 => int NUM_ARG_ENTRIES;  // total number of arg names and values in command-line
-  0 => args["--controller-port-in"];  // one entry for each argument
-  0 => args["--controller-port-out"];
-  0 => args["--internal-port-in"];
-  0 => args["--channel-in"];
-  0 => args["--channel-out"];
-  // read args into array
-  for (int i; i < NUM_ARG_ENTRIES; ++i) {
-    if (i % 2 == 0) {
-      if (me.arg(i).substring(0, 2) != "--") {
-        <<< "Invalid arg, expecting arg name with leading '--' but got: ", me.arg(i) >>>;
-      }
-      <<< "arg name: ", me.arg(i) >>>;
-    } else {
-      <<< "arg value: ", me.arg(i) >>>;
-      Std.atoi(me.arg(i)) => int argVal;
-      argVal => args[me.arg(i - 1)];
-    } 
-  }
+  ArgParser argParser;
+  argParser.addIntArg("controllerPortIn", 0) @=> IntArg controllerPortIn;
+  argParser.addIntArg("controllerPortOut", 0) @=> IntArg controllerPortOut;
+  argParser.addIntArg("internalPortOut", 0) @=> IntArg internalPortOut;
+  argParser.addIntArg("channelIn", 0) @=> IntArg channelIn;
+  argParser.addIntArg("channelOut", 0) @=> IntArg channelOut;
+  argParser.loadArgs();
 
   MidiPlayer controllerPlayer;
-  controllerPlayer.init("Controller", args["--controller-port-in"], args["--controller-port-out"],
-    args["--channel-in"], args["--channel-out"]);
+  controllerPlayer.init(
+    "Controller",
+    argParser.args[controllerPortIn.nameToFlag()].intVal,
+    argParser.args[controllerPortOut.nameToFlag()].intVal,
+    argParser.args[channelIn.nameToFlag()].intVal,
+    argParser.args[channelOut.nameToFlag()].intVal
+  );
   MidiPlayer internalPlayer;
-  internalPlayer.init("Internal", args["--internal-port-in"], DEFAULT_PORT, args["--channel-in"],
-    args["--channel-out"]);
+  internalPlayer.init(
+    "Internal",
+    argParser.args[internalPortOut.nameToFlag()].intVal,
+    DEFAULT_PORT,
+    argParser.args[channelIn.nameToFlag()].intVal,
+    argParser.args[channelOut.nameToFlag()].intVal
+  );
 
   internalPlayer.play(60, 100, 1000);  // noteOn */
   internalPlayer.play(60, 0, 10);  // noteOff, velocity 0 */

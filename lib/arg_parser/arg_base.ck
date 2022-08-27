@@ -1,8 +1,8 @@
-public class CliArgBase {
+public class ArgBase {
   // type enums to suport asking an arg for its value type
-  0 => static int CLI_ARG_INT;
-  1 => static int CLI_ARG_FLOAT;
-  2 => static int CLI_ARG_STRING;
+  0 => static int ARG_INT;
+  1 => static int ARG_FLOAT;
+  2 => static int ARG_STRING;
 
   string name;
   int intVal;
