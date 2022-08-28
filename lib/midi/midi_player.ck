@@ -17,8 +17,10 @@
 *    --internal-port-out:1:--channel-in:1:--channel-out:2  
 *
 * To hear output:
-* - run `chuck --probe` and identify the ouptut port of the 'IAC Driver Bus 1' device
-* - select that device as input device in a software synth
+* - run `chuck --probe` and identify desired input and output devices / ports
+*  - e.g. - 'IAC Driver Bus 1' is an internal device
+*  - e.g. - controllers that are plugged in will show up as their own devices
+* - set up arguments
 * - run the application
 */
 
@@ -137,9 +139,9 @@ fun void main() {
     argParser.args[channelOut.nameToFlag()].intVal
   );
 
-  internalPlayer.play(60, 100, 1000);  // noteOn */
-  internalPlayer.play(60, 0, 10);  // noteOff, velocity 0 */
-  controllerPlayer.play();
+  /* internalPlayer.play(60, 100, 1000);  // noteOn *1/ */
+  /* internalPlayer.play(60, 0, 10);  // noteOff, velocity 0 *1/ */
+  /* controllerPlayer.play(); */
 }
 
 main();
