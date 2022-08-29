@@ -2,7 +2,18 @@
 // author: Graham Coleman
 // updates by Ge Wang and Matt Wright (2021)
 
-class Scale {
+/*
+[0,2,3,1,4,2,6,3,4,4] @=> int mel[]; //sequence data
+[0,2,4,5,7,9,11,12] @=> int major[]; //major scale
+
+for (0=>int i; ; i++) { //infinite loop
+  std.mtof( 48 + scale( mel[i%mel.cap()], major )) => inst.freq; //set the note
+  inst.noteOn( 0.5 ); //play a note at half volume
+  300::ms => now; //compute audio for 0.3 sec
+}
+*/
+
+public class Scale {
   // default to Western 12-note "piano" scale
   12 => static int NUM_NOTES_IN_OCTAVE;
 
@@ -21,18 +32,7 @@ class Scale {
   [0, 2, 4, 7, 9] @=> static int MAJOR_PENTATONIC[]; // major pentatonic
   [0, 2, 4, 6, 8, 10] @=> static int WHOLE_TONE[]; // the whole tone scale
   [0, 2, 3, 5, 6, 8, 9, 11] @=> static int DIMINISHED[]; // diminished scale 
-
-  /*
-  [0,2,3,1,4,2,6,3,4,4] @=> int mel[]; //sequence data
-  [0,2,4,5,7,9,11,12] @=> int major[]; //major scale
-
-  for (0=>int i; ; i++) { //infinite loop
-    std.mtof( 48 + scale( mel[i%mel.cap()], major )) => inst.freq; //set the note
-    inst.noteOn( 0.5 ); //play a note at half volume
-    300::ms => now; //compute audio for 0.3 sec
-  }
-` */
-  
+ 
   /** 
    * Translates an index into a scale into the degree of that index position in the scale,
    * and then offsets that degree upward from `octave * NUM_NOTES_IN_OCTAVE` to get a final
@@ -43,8 +43,8 @@ class Scale {
    * note_poisition - the index in the scale to return the degree for
    * scale - the scale from which to select the degree for notePosition
   */
-  fun static int getNoteInScale(int octave, int notePosition, int scale[]) {
-    return getNoteInScale(octave, notePosition, scale, NUM_NOTES_IN_OCTAVE);
+  fun static int note(int octave, int notePosition, int scale[]) {
+    return note(octave, notePosition, scale, NUM_NOTES_IN_OCTAVE);
   }
 
   /** 
@@ -57,7 +57,7 @@ class Scale {
    * scale - the scale from which to select the degree for notePosition
    * num_notes_in_octave - instead of using class static default, override for other scales
   */ 
-  fun static int getNoteInScale(int octave, int notePosition, int scale[], int numNotesInOctave) {
+  fun static int note(int octave, int notePosition, int scale[], int numNotesInOctave) {
     notePosition % scale.cap() => int offset;
     return (octave * numNotesInOctave) + scale[offset];
   }
@@ -69,8 +69,8 @@ class Scale {
    * note_poisition - the index in the scale to return the frequency for
    * scale - the scale from which to select the frequency for notePosition
   */ 
-  fun static float getFreqInScale(int octave, int notePosition, int scale[]) {
-    return getFreqInScale(octave, notePosition, scale, NUM_NOTES_IN_OCTAVE);
+  fun static float freq(int octave, int notePosition, int scale[]) {
+    return freq(octave, notePosition, scale, NUM_NOTES_IN_OCTAVE);
   }
 
   /** 
@@ -81,11 +81,18 @@ class Scale {
    * scale - the scale from which to select the frequency for notePosition
    * num_notes_in_octave - instead of using class static default, override for other scales
   */ 
-  fun static float getFreqInScale(int octave, int notePosition, int scale[], int numNotesInOctave) {
-    return Std.mtof(getNoteInScale(octave, notePosition, scale, numNotesInOctave));
+  fun static float freq(int octave, int notePosition, int scale[], int numNotesInOctave) {
+    return Std.mtof(note(octave, notePosition, scale, numNotesInOctave));
   }
 }
 
-Scale s;
-<<< s.getNoteInScale(4, 2, Scale.MAJOR) >>>;
-<<< s.getFreqInScale(4, 2, Scale.MAJOR) >>>;
+fun void main() {
+  4 => int octave;
+  2 => int notePosition;
+  // static functions are broken and can't be called except through an object reference, i.e. not static
+  Scale s;
+  <<< s.note(octave, notePosition, Scale.MAJOR) >>>;
+  <<< s.freq(octave, notePosition, Scale.MAJOR) >>>;
+}
+
+main();
