@@ -17,6 +17,39 @@ public class Scale {
   // default to Western 12-note "piano" scale
   12 => static int NUM_NOTES_IN_OCTAVE;
 
+  // Notes
+  // Enums for the 12 tones in the Western scale, based on C as root
+  0 => static int C;
+  1 => static int C_shp;
+  1 => static int D_flt;
+  2 => static int D;
+  3 => static int D_shp;
+  3 => static int E_flt;
+  4 => static int E;
+  5 => static int F;
+  6 => static int F_shp;
+  6 => static int G_flt;
+  7 => static int G;
+  8 => static int G_shp;
+  8 => static int A_flt;
+  9 => static int A;
+  10 => static int A_shp;
+  10 => static int B_flt;
+  11 => static int B;
+
+  string NOTE_STR_MAP[12];
+  "C" @=> NOTE_STR_MAP[0];
+  "C_shp" @=> NOTE_STR_MAP[1];
+  "D" @=> NOTE_STR_MAP[2];
+  "E_flt" @=> NOTE_STR_MAP[3];
+  "F" @=> NOTE_STR_MAP[5];
+  "F_shp" @=> NOTE_STR_MAP[6];
+  "G" @=> NOTE_STR_MAP[7];
+  "A_flt" @=> NOTE_STR_MAP[8];
+  "A" @=> NOTE_STR_MAP[9]; 
+  "B_flt" @=> NOTE_STR_MAP[10]; 
+  "B" @=> NOTE_STR_MAP[11]; 
+
   // Scale Intervals - Intervals also called Degrees
   // minor scales
   [0, 2, 3, 5, 7, 8, 10] @=> static int MINOR[]; // minor mode
@@ -46,6 +79,15 @@ public class Scale {
   [0, 4, 8] @=> static int aug[];
   
   // SCALE API
+  // Should be static but uses array, which can't be static
+  fun string noteName(int notePosition) {
+    return noteName(notePosition, NUM_NOTES_IN_OCTAVE);
+  } 
+
+  fun string noteName(int notePosition, int numNotesInOctave) {
+    return NOTE_STR_MAP[notePosition % numNotesInOctave];
+  } 
+
   /** 
    * Translates an index into a scale into the degree of that index position in the scale,
    * and then offsets that degree upward from `octave * NUM_NOTES_IN_OCTAVE` to get a final
@@ -98,6 +140,7 @@ public class Scale {
     return Std.mtof(note(octave, notePosition, scale, numNotesInOctave));
   }
 
+  // TODO DOC STRINGS
   // CHORD API
   fun static int[] triad(int octave, int rootNotePosition, int scale[], int chord[]) {
     return triad(octave, rootNotePosition, Scale.NUM_NOTES_IN_OCTAVE, scale, chord);
@@ -115,14 +158,14 @@ public class Scale {
 
 fun void main() {
   4 => int octave;
-  2 => int notePosition;
   // static functions are broken and can't be called except through an object reference, i.e. not static
   Scale s;
-  <<< s.note(octave, notePosition, Scale.MAJOR) >>>;
-  <<< s.freq(octave, notePosition, Scale.MAJOR) >>>;
-  s.triad(octave, notePosition, Scale.MAJOR, Scale.MAJOR_TRIAD) @=> int chordNotes[];
+  <<< s.note(octave, Scale.D, Scale.MAJOR) >>>;
+  <<< s.freq(octave, Scale.D, Scale.MAJOR) >>>;
+  s.triad(octave, Scale.D, Scale.MAJOR, Scale.MAJOR_TRIAD) @=> int chordNotes[];
   <<< "Chord:", chordNotes >>>;
   <<< "Notes:", chordNotes[0], chordNotes[1], chordNotes[2] >>>;
+  <<< Scale.D, "==", s.noteName(Scale.D) >>>;
 }
 
 main();
