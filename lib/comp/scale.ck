@@ -33,6 +33,19 @@ public class Scale {
   [0, 2, 4, 6, 8, 10] @=> static int WHOLE_TONE[]; // the whole tone scale
   [0, 2, 3, 5, 6, 8, 9, 11] @=> static int DIMINISHED[]; // diminished scale 
  
+  // Chords
+  // common triads in Western music, as degrees from the chord root
+  // Note these are 0-based, but in traditional music theory scales etc. are 1-based
+  [0, 4, 7] @=> static int MAJOR_TRIAD[];  // So, 0th, 2nd and 4th offset are degrees 1, 4, 7 e.g. C-E-G for C MAJOR
+  [0, 4, 7] @=> static int M[];  // common alias
+  [0, 3, 7] @=> static int MINOR_TRIAD[];  
+  [0, 3, 7] @=> static int m[];  
+  [0, 3, 6] @=> static int DIMINISHED_TRIAD[];
+  [0, 3, 6] @=> static int dim[];
+  [0, 4, 8] @=> static int AUGMENTED_TRIAD[];
+  [0, 4, 8] @=> static int aug[];
+  
+  // SCALE API
   /** 
    * Translates an index into a scale into the degree of that index position in the scale,
    * and then offsets that degree upward from `octave * NUM_NOTES_IN_OCTAVE` to get a final
@@ -84,6 +97,20 @@ public class Scale {
   fun static float freq(int octave, int notePosition, int scale[], int numNotesInOctave) {
     return Std.mtof(note(octave, notePosition, scale, numNotesInOctave));
   }
+
+  // CHORD API
+  fun static int[] triad(int octave, int rootNotePosition, int scale[], int chord[]) {
+    return triad(octave, rootNotePosition, Scale.NUM_NOTES_IN_OCTAVE, scale, chord);
+  } 
+
+  // Because field can't be static, functions using it can't be either, which isn't so terrible
+  // because static functions are also broken and need to be called through an object ref anyway,
+  // so this being non-static doesn't change client call syntax
+  fun static int[] triad(int octave, int rootNotePosition, int numNotesInOctave, int scale[],
+      int chord[]) {
+    note(octave, rootNotePosition, scale, numNotesInOctave) => int note;
+    return [note, note + chord[1], note + chord[2]];
+  } 
 }
 
 fun void main() {
@@ -93,6 +120,9 @@ fun void main() {
   Scale s;
   <<< s.note(octave, notePosition, Scale.MAJOR) >>>;
   <<< s.freq(octave, notePosition, Scale.MAJOR) >>>;
+  s.triad(octave, notePosition, Scale.MAJOR, Scale.MAJOR_TRIAD) @=> int chordNotes[];
+  <<< "Chord:", chordNotes >>>;
+  <<< "Notes:", chordNotes[0], chordNotes[1], chordNotes[2] >>>;
 }
 
 main();
