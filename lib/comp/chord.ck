@@ -71,7 +71,6 @@ fun void main() {
   <<< "DMajor", DMaj >>>;
   <<< "DMajor notes", DMaj.notes >>>;
   <<< "DMajor notes pitches", DMaj.notes[0].pitch, DMaj.notes[1].pitch, DMaj.notes[2].pitch >>>;
-  
 }
 
 main();

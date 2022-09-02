@@ -34,6 +34,15 @@ public class ArgParser {
     return arg;
   }
 
+  fun bool hasArg(string name) {
+    for (0 => int i; i < args.cap(); i++) {
+      if (args[i].name == name) {
+        return true;
+      } 
+    }
+    return false;
+  }
+
   fun void loadArgs() {
     /* <<< args, me.args() >>>; */
     for (int i; i < me.args(); i++) {
