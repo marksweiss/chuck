@@ -88,6 +88,14 @@ public class Scale {
     return PITCH_STR_MAP[pitchPosition % numNotesInOctave];
   } 
 
+  fun static int pitch(int octave, int pitchName) {
+    return octave + pitchName;
+  }
+
+  fun static float freq(int octave, int pitchName) {
+    return Std.mtof(octave + pitchName);
+  }
+
   /** 
    * Translates an index into a scale into the degree of that index position in the scale,
    * and then offsets that degree upward from `octave * NUM_NOTES_IN_OCTAVE` to get a final
@@ -121,7 +129,7 @@ public class Scale {
    * Translates an index into a scale into the frequency of the note at that index, offset to octave.
    *  
    * octave - octave in which to place note
-   * note_poisition - the index in the scale to return the frequency for
+   * pitchPosition - the index in the scale to return the degree for
    * scale - the scale from which to select the frequency for pitchPosition
   */ 
   fun static float freq(int octave, int pitchPosition, int scale[]) {
@@ -142,6 +150,15 @@ public class Scale {
 
   // TODO DOC STRINGS
   // CHORD API
+  fun static int[] triad(int octave, int rootPitch, int chord[], int numNotesInOctave) {
+    (octave * numNotesInOctave) + rootPitch => int pitch;
+    return [pitch, pitch + chord[1], pitch + chord[2]];
+  } 
+
+  fun static int[] triad(int octave, int rootPitch, int chord[]) {
+    return triad(octave, rootPitch, chord, NUM_NOTES_IN_OCTAVE);
+  } 
+
   fun static int[] triad(int octave, int rootPitchPosition, int scale[], int chord[]) {
     return triad(octave, rootPitchPosition, Scale.NUM_NOTES_IN_OCTAVE, scale, chord);
   } 
