@@ -1,31 +1,34 @@
 // Machine.add("lib/arg_parser/arg_parser.ck")
 // Machine.add("lib/comp/note.ck")
+// Machine.add("lib/comp/chord.ck")
 
 /**
  * Base interface for an Instrument, which wraps a UGen. Concrete classes add one more more UGen
  * members, implement configure to take the arguments to initialize the state of their Ugen(s),
  * and define a no-arg play, which would typically loop forever and send pitch and gain values
- * to the UGen from Notes, as well as advance the global clock using Note duration values.
+ * to the UGen from chords, as well as advance the global clock using Note duration values.
  */
 public class Instrument {
-  128 => static int DEFAULT_NUM_NOTES;
-  Note notes[DEFAULT_NUM_NOTES];
-  int numNotes;
-  int maxNumNotes;
+  128 => static int DEFAULT_NUM_CHORDS;
+  Chord chords[DEFAULT_NUM_CHORDS];
+  int numChords;
+  int maxNumChords;
+  3 => static int DEFAULT_NUM_PLAYERS;
+  DEFAULT_NUM_PLAYERS => int numPlayers;
 
-  fun init(() {
-    0 => numNotes;
-    DEFAULT_NUM_NOTES => maxNumNotes;
+  fun init() {
+    0 => numChords;
+    DEFAULT_NUM_CHORDS => maxNumChords;
   }
 
-  fun void addNotes(Note newNotes[]) {
-    if (numNotes + newNotes.cap() >= ) {
-      <<< "ERROR: Cannot add more notes than", maxNumNotes >>>;
+  fun void addChords(Chord newChords[]) {
+    if (numChords + newChords.cap() >= ) {
+      <<< "ERROR: Cannot add more chords than", maxNumChords >>>;
       me.exit();
     }
-    for (0 => int i; i < newNotes.cap(); i++) {
-      notes[i] @=> notes[numNotes];
-      numNotes++;
+    for (0 => int i; i < newChords.cap(); i++) {
+      newChords[i] @=> chords[numChords];
+      numChords++;
     }
   }
 

@@ -1,19 +1,35 @@
 // Machine.add("lib/comp/instrument/instrument.ck")
 
-public class SinOsc extends Instrument {
-  SinOsc so => Gain g => dac;
+public class InstrSinOsc extends Instrument {
+  SinOsc so0 => Gain g => dac;
+  SinOsc so1 => Gain g => dac;
+  SinOsc so2 => Gain g => dac;
+  SinOsc players[DEFAULT_NUM_PLAYERS];
+
   false => bool convertPitchToFreq;
+  "pitch" => static string PITCH;
+
+  fun void init() {
+    // super()
+    0 => numChords;
+    DEFAULT_NUM_CHORDS => maxNumChords;
+    //
+    so0 @=> players[0];
+    so1 @=> players[1];
+    so2 @=> players[2];
+  }
 
   fun void help() {
     <<< "Args:\n'gain' - float - [0.0..1.0]" >>>;
-    <<< "Usage: Expects Notes to have freq set. To use with pitch pass '--pitch = true' arg" >>>;
+    <<< "Usage: Expects chords to have freq set. To use with pitch pass '--pitch = true' arg" >>>;
   }
 
   fun void configure(ArgParser conf) {
     conf["--gain"].floatVal => g.gain;
-    if cont.hasArg("pitch") {
+    if cont.hasArg(PITCH) {
       true => convertPitchToFreq;
     }
+    init();
   }
 
   fun void play() {
@@ -23,10 +39,17 @@ public class SinOsc extends Instrument {
 
     0 => int i;
     while (true) {
-      so.freq(notes[i].freq); 
-      notes[i].gain => g.gain;
-      notes[i].duration => now;
-      (i + 1) % numNotes => i;
+      chords[i] @=> Chord c;
+      for (0 => int j; j < c.notes.cap(); j++) {
+        c.notes[j] @=> Note n;
+        players[i].freq(n.freq); 
+        n[j].gain => g.gain;
+
+        // TODO TIME
+        // n.duration => now;
+      }
+
+      (i + 1) % numChords => i;
     }
   }
 
@@ -34,10 +57,37 @@ public class SinOsc extends Instrument {
   fun void playConvertingPitch() {
     0 => int i;
     while (true) {
-      so.freq(Std.mtof(notes[i].pitch)); 
-      notes[i].gain => g.gain;
-      notes[i].duration => now;
-      (i + 1) % numNotes => i;
+      chords[i] @=> Chord c;
+      for (0 => int j; j < c.notes.cap(); j++) {
+        c.notes[j] @=> Note n;
+        players[i].freq(n.Std.mtof(freq)); 
+        n[j].gain => g.gain;
+
+        // TODO TIME
+        // n.duration => now;
+      }
+
+      (i + 1) % numChords => i;
     }
   }
 }
+
+fun void main () {
+  ArgParser args;
+  args.addFloatArg("gain", 0.5);
+
+  Chord chords[2];
+  Chord C;
+  C.make(S.triad(4, S.C, S.MAJOR_TRIAD)) @=> Chord CMaj;
+  C.make(S.triad(4, S.D, S.MAJOR_TRIAD)) @=> Chord DMaj;
+  CMaj @=> chords[0];
+  DMaj @=> chords[1];
+
+  InstrSinOsc instr;
+  instr.configure(args);
+  instr.addChords(chords);
+
+  instr.play(); 
+}
+
+main();
