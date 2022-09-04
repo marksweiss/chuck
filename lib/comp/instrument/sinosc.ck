@@ -9,8 +9,12 @@ public class InstrSinOsc extends Instrument {
   false => bool convertPitchToFreq;
   "pitch" => static string PITCH;
 
-  fun void init() {
+  Time clock;
+
+  fun void init(Time clock) {
     // super()
+    clock @=> this.clock;
+    //
     0 => numChords;
     DEFAULT_NUM_CHORDS => maxNumChords;
     //
@@ -29,7 +33,6 @@ public class InstrSinOsc extends Instrument {
     if cont.hasArg(PITCH) {
       true => convertPitchToFreq;
     }
-    init();
   }
 
   fun void play() {
@@ -38,18 +41,27 @@ public class InstrSinOsc extends Instrument {
     }
 
     0 => int i;
+    0::ms => dur sinceLastNote;
+    0::ms => dur nextNoteDur; 
     while (true) {
+      // get next note to play
       chords[i] @=> Chord c;
-      for (0 => int j; j < c.notes.cap(); j++) {
-        c.notes[j] @=> Note n;
-        players[i].freq(n.freq); 
-        n[j].gain => g.gain;
+      c.notes[j] @=> Note n;
 
-        // TODO TIME
-        // n.duration => now;
+      // block on event of next beat step broadcast by clock
+      clock.STEP => now;
+      sinceLastNote +=> clock.beatStepDur;
+
+      // if enough time has passed, emit the note
+      if (sinceLastNote == n.duration) {
+        for (0 => int j; j < c.notes.cap(); j++) {
+          players[i].freq(n.freq); 
+          n[j].gain => g.gain;
+        }
+
+        0::ms => sinceLastNote;
+        (i + 1) % numChords => i;
       }
-
-      (i + 1) % numChords => i;
     }
   }
 
