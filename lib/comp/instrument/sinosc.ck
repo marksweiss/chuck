@@ -155,11 +155,13 @@ fun void main () {
   Chord c;
   Scale s;
   4 => int octave;
-  Chord chords[2];
+  Chord chords[3];
   c.make(s.triad(octave, s.C, s.MAJOR_TRIAD)) @=> Chord CMaj;
   c.make(s.triad(octave, s.D, s.MAJOR_TRIAD)) @=> Chord DMaj;
+  c.make(s.triad(octave + 1, s.G, s.MAJOR_TRIAD)) @=> Chord GMaj;
   CMaj @=> chords[0];
   DMaj @=> chords[1];
+  GMaj @=> chords[2];
   instr.addChords(chords);
 
   <<< "IN SINOSC MAIN AFTER INSTR.ADD_CHORDS()" >>>;
