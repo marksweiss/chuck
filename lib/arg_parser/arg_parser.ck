@@ -8,10 +8,8 @@ public class ArgParser {
   fun IntArg addIntArg(string name, int val) {
     IntArg.make(name, val) @=> IntArg arg;
     arg.nameToFlag() => string flag;
-    /* <<< flag, val, arg.intVal >>>; */
     arg @=> args[flag];
     arg.type @=> types[flag];
-    /* <<< flag, args[flag].name, args[flag].intVal, args[flag] >>>; */
     numArgs++;
     return arg;
   }
@@ -49,21 +47,15 @@ public class ArgParser {
   }
 
   fun void loadArgs() {
-    /* <<< args, me.args() >>>; */
     for (int i; i < me.args(); i++) {
-      /* <<< me.arg(i) >>>; */
       if (i % 2 == 0) {
         if (me.arg(i).substring(0, 2) != "--") {
           <<< "Invalid arg, expecting arg name with leading '--' but got: ", me.arg(i) >>>;
         }
-        /* <<< "arg name: ", me.arg(i) >>>; */
       } else {
-        /* <<< "arg value: ", me.arg(i) >>>; */
         me.arg(i - 1) => string flag;
         if (types[flag] == IntArg.type) {
-          /* <<< me.arg(i), flag >>>; */
           Std.atoi(me.arg(i)) @=> args[flag].intVal;
-          /* <<< me.arg(i), flag, args[flag].intVal >>>; */
         } else if (types[flag] == FloatArg.type) {
           Std.atof(me.arg(i)) @=> args[flag].fltVal;
         } else if (types[flag] == StringArg.type) {

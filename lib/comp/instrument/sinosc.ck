@@ -20,11 +20,15 @@
 
 // For client to spork, which requires a free function as entry point
 public void playTime(Time time_) {
+  <<< "IN playTime" >>>;
+
   time_.play();
 }
 
 // For client to spork, which requires a free function as entry point
 public void playInstrSinOsc(InstrSinOsc instr) {
+  <<< "IN playInstr" >>>;
+
   instr.play();
 }
 
@@ -53,11 +57,16 @@ public class InstrSinOsc extends Instrument {
       true => convertPitchToFreq;
     }
 
-    <<< "DEBUG", convertPitchToFreq >>>;
+    <<< "DEBUG convertPitchToFreq:", convertPitchToFreq >>>;
+    <<< "DEBUG gain:", conf.args[ARG_GAIN].fltVal >>>;
     
     startEvent @=> this.startEvent;    
     stepEvent @=> this.stepEvent;    
     stepDur => this.stepDur;
+
+    <<< "DEBUG this.startEvent:", startEvent >>>;
+    <<< "DEBUG this.stepEvent:", stepEvent >>>;
+    <<< "DEBUG this.stepDur:", stepDur, "ms" >>>;
   }
 
   fun void instrHelp() {
@@ -125,44 +134,51 @@ public class InstrSinOsc extends Instrument {
 }
 
 fun void main () {
-  <<< "IN SINOSC MAIN" >>>;
+  <<< "--------------------------\nIN SINOSC MAIN" >>>;
+
   120 => int BPM; 
 
   Event startEvent;
   Event stepEvent; 
 
-  InstrSinOsc instr;
-
   Time time_;
   time_.init(BPM, startEvent, stepEvent);
 
+  InstrSinOsc instr;
   ArgParser conf;
   conf.addFloatArg("gain", 0.5);
   conf.loadArgs();
-
   instr.init(conf, startEvent, stepEvent, time_.getStepDur());
 
   <<< "IN SINOSC MAIN AFTER INSTR.INIT()" >>>;
 
   Chord c;
   Scale s;
+  4 => int octave;
   Chord chords[2];
-  c.make(s.triad(4, s.C, s.MAJOR_TRIAD)) @=> Chord CMaj;
-  c.make(s.triad(4, s.D, s.MAJOR_TRIAD)) @=> Chord DMaj;
+  c.make(s.triad(octave, s.C, s.MAJOR_TRIAD)) @=> Chord CMaj;
+  c.make(s.triad(octave, s.D, s.MAJOR_TRIAD)) @=> Chord DMaj;
   CMaj @=> chords[0];
   DMaj @=> chords[1];
   instr.addChords(chords);
 
   <<< "IN SINOSC MAIN AFTER INSTR.ADD_CHORDS()" >>>;
 
-
-  <<< "IN SINOSC MAIN AFTER SET_BPM_AND_SYNC BEFORE SPORK" >>>;
-
   time_.sync();
+
+  <<< "IN SINOSC MAIN AFTER SYNC BEFORE SPORK" >>>;
+
   spork ~ playTime(time_);
   spork ~ playInstrSinOsc(instr);
 
   <<< "IN SINOSC MAIN AFTER SPORK" >>>;
+
+  // yield to Time and Player event loops to perform the composition
+  me.yield();
+  // need last statement in outer scope to block process exit to force child threads to run
+  while (true) {
+    1::second => now;
+  }
 }
 
 main();

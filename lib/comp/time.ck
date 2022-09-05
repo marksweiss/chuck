@@ -27,13 +27,20 @@ public class Time {
 
   fun void play() {
     <<< "IN TIME PLAY BEFORE START" >>>;
-    startEvent.broadcast();
+
+    this.startEvent.broadcast();
+
     <<< "START passed" >>>;
+
     while (true) {
       <<< "IN TIME EVENT LOOP BEFORE STEP BROADCAST" >>>;
+
       stepEvent.broadcast();
+
       <<< "IN TIME EVENT LOOP AFTER STEP BROADCAST BEFORE PITCHING" >>>;
+
       stepDur => now;
+
       <<< "IN TIME EVENT LOOP AFTER PITCHING STEP_DUR => NOW" >>>;
     }
   }
