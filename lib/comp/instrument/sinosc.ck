@@ -1,62 +1,101 @@
-// Machine.add("lib/comp/instrument/instrument.ck")
+// arg_parser
+/* Machine.add("lib/arg_parser/arg_base.ck"); */
+/* Machine.add("lib/arg_parser/int_arg.ck"); */
+/* Machine.add("lib/arg_parser/float_arg.ck"); */
+/* Machine.add("lib/arg_parser/string_arg.ck"); */
+/* Machine.add("lib/arg_parser/arg_parser.ck"); */
+// comp
+/* Machine.add("lib/comp/scale.ck"); */
+/* Machine.add("lib/comp/note.ck"); */
+/* Machine.add("lib/comp/chord.ck"); */
+/* Machine.add("lib/comp/time.ck"); */
+// comp/instrument
+/* Machine.add("lib/comp/instrument/instrument.ck"); */
+
+// cli: $> chuck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck \
+//               lib/arg_parser/float_arg.ck lib/arg_parser/string_arg.ck \
+//               lib/arg_parser/arg_parser.ck lib/comp/scale.ck lib/comp/note.ck \
+//               lib/comp/chord.ck lib/comp/instrument/instrument.ck lib/comp/time.ck
+//               lib/comp/instrument/sinosc.ck
+
+// For client to spork, which requires a free function as entry point
+public void playTime(Time time_) {
+  time_.play();
+}
+
+// For client to spork, which requires a free function as entry point
+public void playInstrSinOsc(InstrSinOsc instr) {
+  instr.play();
+}
 
 public class InstrSinOsc extends Instrument {
-  SinOsc so0 => Gain g => dac;
-  SinOsc so1 => Gain g => dac;
-  SinOsc so2 => Gain g => dac;
+  // ugen setup
+  Gain g;
+  SinOsc so0 => g => dac;
+  SinOsc so1 => g => dac;
+  SinOsc so2 => g => dac;
   SinOsc players[DEFAULT_NUM_PLAYERS];
+  so0 @=> players[0];
+  so1 @=> players[1];
+  so2 @=> players[2];
+  // args specific to this instr
+  false => int convertPitchToFreq;
+  "--gain" => string ARG_GAIN;
+  "--pitch" => string ARG_PITCH;
+  // events
+  Event startEvent;
+  Event stepEvent;
+  dur stepDur;
 
-  false => bool convertPitchToFreq;
-  "pitch" => static string PITCH;
+  fun void init(ArgParser conf, Event startEvent, Event playEvent, dur stepDur) {
+    conf.args[ARG_GAIN].fltVal => g.gain;
+    if (conf.hasArg(ARG_PITCH)) {
+      true => convertPitchToFreq;
+    }
 
-  Time clock;
-
-  fun void init(Time clock) {
-    // super()
-    clock @=> this.clock;
-    //
-    0 => numChords;
-    DEFAULT_NUM_CHORDS => maxNumChords;
-    //
-    so0 @=> players[0];
-    so1 @=> players[1];
-    so2 @=> players[2];
+    <<< "DEBUG", convertPitchToFreq >>>;
+    
+    startEvent @=> this.startEvent;    
+    stepEvent @=> this.stepEvent;    
+    stepDur => this.stepDur;
   }
 
-  fun void help() {
+  fun void instrHelp() {
     <<< "Args:\n'gain' - float - [0.0..1.0]" >>>;
     <<< "Usage: Expects chords to have freq set. To use with pitch pass '--pitch = true' arg" >>>;
   }
 
-  fun void configure(ArgParser conf) {
-    conf["--gain"].floatVal => g.gain;
-    if cont.hasArg(PITCH) {
-      true => convertPitchToFreq;
-    }
-  }
-
   fun void play() {
-    if (convertPitchToFreq) {
-      playConvertingPitch();
-    }
+    <<< "IN INSTR PLAY BEFORE START" >>>;
+
+    /* if (convertPitchToFreq) { */
+    /*   playConvertingPitch(); */
+    /* } */
+
+    // block on START
+    startEvent => now;
+
+    <<< "START passed in Instr" >>>;
 
     0 => int i;
     0::ms => dur sinceLastNote;
-    0::ms => dur nextNoteDur; 
     while (true) {
       // get next note to play
       chords[i] @=> Chord c;
-      c.notes[j] @=> Note n;
+      // TODO assumes all notes in chord have same duration
+      c.notes[0].duration => dur nextNoteDur;
 
       // block on event of next beat step broadcast by clock
-      clock.STEP => now;
-      sinceLastNote +=> clock.beatStepDur;
+      stepEvent => now;
+      sinceLastNote +=> stepDur; 
+      <<< "STEP passed in Instr", sinceLastNote >>>;
 
       // if enough time has passed, emit the note
-      if (sinceLastNote == n.duration) {
+      if (sinceLastNote == nextNoteDur) {
         for (0 => int j; j < c.notes.cap(); j++) {
-          players[i].freq(n.freq); 
-          n[j].gain => g.gain;
+          c.notes[j] @=> Note n;
+          players[i].freq(Std.mtof(n.pitch)); 
+          n.gain => g.gain;
         }
 
         0::ms => sinceLastNote;
@@ -65,41 +104,65 @@ public class InstrSinOsc extends Instrument {
     }
   }
 
+  // TODO FIX THIS
   // To avoid an extra if check on every note play
-  fun void playConvertingPitch() {
-    0 => int i;
-    while (true) {
-      chords[i] @=> Chord c;
-      for (0 => int j; j < c.notes.cap(); j++) {
-        c.notes[j] @=> Note n;
-        players[i].freq(n.Std.mtof(freq)); 
-        n[j].gain => g.gain;
+  /* fun void playConvertingPitch() { */
+  /*   0 => int i; */
+  /*   while (true) { */
+  /*     chords[i] @=> Chord c; */
+  /*     for (0 => int j; j < c.notes.cap(); j++) { */
+  /*       c.notes[j] @=> Note n; */
+  /*       players[i].freq(n.Std.mtof(freq)); */ 
+  /*       n[j].gain => g.gain; */
 
-        // TODO TIME
-        // n.duration => now;
-      }
+  /*       // TODO TIME */
+  /*       // n.duration => now; */
+  /*     } */
 
-      (i + 1) % numChords => i;
-    }
-  }
+  /*     (i + 1) % numChords => i; */
+  /*   } */
+  /* } */
 }
 
 fun void main () {
-  ArgParser args;
-  args.addFloatArg("gain", 0.5);
+  <<< "IN SINOSC MAIN" >>>;
+  120 => int BPM; 
 
-  Chord chords[2];
-  Chord C;
-  C.make(S.triad(4, S.C, S.MAJOR_TRIAD)) @=> Chord CMaj;
-  C.make(S.triad(4, S.D, S.MAJOR_TRIAD)) @=> Chord DMaj;
-  CMaj @=> chords[0];
-  DMaj @=> chords[1];
+  Event startEvent;
+  Event stepEvent; 
 
   InstrSinOsc instr;
-  instr.configure(args);
+
+  Time time_;
+  time_.init(BPM, startEvent, stepEvent);
+
+  ArgParser conf;
+  conf.addFloatArg("gain", 0.5);
+  conf.loadArgs();
+
+  instr.init(conf, startEvent, stepEvent, time_.getStepDur());
+
+  <<< "IN SINOSC MAIN AFTER INSTR.INIT()" >>>;
+
+  Chord c;
+  Scale s;
+  Chord chords[2];
+  c.make(s.triad(4, s.C, s.MAJOR_TRIAD)) @=> Chord CMaj;
+  c.make(s.triad(4, s.D, s.MAJOR_TRIAD)) @=> Chord DMaj;
+  CMaj @=> chords[0];
+  DMaj @=> chords[1];
   instr.addChords(chords);
 
-  instr.play(); 
+  <<< "IN SINOSC MAIN AFTER INSTR.ADD_CHORDS()" >>>;
+
+
+  <<< "IN SINOSC MAIN AFTER SET_BPM_AND_SYNC BEFORE SPORK" >>>;
+
+  time_.sync();
+  spork ~ playTime(time_);
+  spork ~ playInstrSinOsc(instr);
+
+  <<< "IN SINOSC MAIN AFTER SPORK" >>>;
 }
 
 main();

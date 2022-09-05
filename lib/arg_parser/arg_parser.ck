@@ -34,7 +34,12 @@ public class ArgParser {
     return arg;
   }
 
-  fun bool hasArg(string name) {
+  fun int hasArg(string name) {
+    // strip "--" if present
+    if (name.find("--") == 0) {
+      name.substring(2) => name;
+    }
+
     for (0 => int i; i < args.cap(); i++) {
       if (args[i].name == name) {
         return true;

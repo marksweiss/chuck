@@ -22,6 +22,9 @@
 *  - e.g. - controllers that are plugged in will show up as their own devices
 * - set up arguments
 * - run the application
+* - cli: $> chuck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck \
+*           lib/arg_parser/float_arg.ck lib/arg_parser/string_arg.ck \
+*           lib/arg_parser/arg_parser.ck lib/midi/midi_player.ck
 */
 
 class MidiPlayer {
