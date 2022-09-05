@@ -39,9 +39,9 @@ public class InstrSinOsc extends Instrument {
   so1 @=> players[1];
   so2 @=> players[2];
   // args specific to this instr
-  false => int convertPitchToFreq;
   "--gain" => string ARG_GAIN;
   "--pitch" => string ARG_PITCH;
+  false => int convertPitchToFreq;
   // events
   Event startEvent;
   Event stepEvent;
