@@ -5,7 +5,7 @@
 // desc: TimeGrid class; basic timing operations abbreviated
 // author: Graham Coleman 
 
-public class Time {
+public class Clock {
   4 => static int QUARTER_NOTE; 
   64 => static int BEAT_STEP_NOTE;
   // the resolution in note duration (not actual time duration) of each beat step,
@@ -20,28 +20,30 @@ public class Time {
   // bpm - beats per minute, number of quarter notes per minute
   // i.e. 60 bpm means a quarter note is 1 second
   fun void init(int bpm, Event startEvent, Event stepEvent) {
-    1::minute / bpm / BEAT_STEP => this.stepDur;
+    (1::minute / bpm) / BEAT_STEP => this.stepDur;
     startEvent @=> this.startEvent; 
     stepEvent @=> this.stepEvent;
   }
 
   fun void play() {
-    <<< "IN TIME PLAY BEFORE START" >>>;
+    /* <<< "IN CLOCK PLAY BEFORE START, shred id:", me.id() >>>; */
+
+    sync();
 
     this.startEvent.broadcast();
+    me.yield();
 
-    <<< "START passed" >>>;
+    /* <<< "IN CLOCK START passed" >>>; */
 
     while (true) {
-      <<< "IN TIME EVENT LOOP BEFORE STEP BROADCAST" >>>;
-
       stepEvent.broadcast();
+      me.yield();
 
-      <<< "IN TIME EVENT LOOP AFTER STEP BROADCAST BEFORE PITCHING" >>>;
+      /* <<< "IN CLOCK EVENT LOOP AFTER STEP BROADCAST BEFORE PITCHING", now, stepDur >>>; */
 
       stepDur => now;
 
-      <<< "IN TIME EVENT LOOP AFTER PITCHING STEP_DUR => NOW" >>>;
+      /* <<< "IN CLOCK EVENT LOOP AFTER PITCHING STEP_DUR => NOW", now >>>; */
     }
   }
 

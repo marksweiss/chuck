@@ -3,7 +3,8 @@
 public class Note {
   0.5 => static float DEFAULT_GAIN; 
   1.0::second => static dur DEFAULT_DUR;
- 
+
+  string name; 
   int pitch;
   // TODO OVERLOAD TO TAKE FREQ INSTEAD OF PITCH
   /* float freq; */
@@ -19,6 +20,8 @@ public class Note {
     pitch_ => pitch;
     gain_ => gain;
     duration_ => duration;
+
+    Std.itoa(me.id()) => name;
   }
 
   fun static Note make(int pitch_, float gain_, dur duration_) {

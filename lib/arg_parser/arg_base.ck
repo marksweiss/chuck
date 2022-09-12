@@ -10,7 +10,7 @@ public class ArgBase {
   string strVal;
 
   /**
-   * Converts a camelcase arg name to a *nix-style flag syntax, e.g. 'argOne' => '--arg-one'
+   * Converts a camelcase arg name to a *nix-style flag syntax
    */
   fun string nameToFlag() {
     "" @=> string flag;

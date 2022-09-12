@@ -84,6 +84,7 @@ public class Scale {
     return pitchName(pitchPosition, NUM_NOTES_IN_OCTAVE);
   } 
 
+  // Should be static but uses array, which can't be static
   fun string pitchName(int pitchPosition, int numNotesInOctave) {
     return PITCH_STR_MAP[pitchPosition % numNotesInOctave];
   } 
