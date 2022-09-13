@@ -6,11 +6,13 @@
 // author: Graham Coleman 
 
 public class Clock {
-  4 => static int QUARTER_NOTE; 
-  64 => static int BEAT_STEP_NOTE;
+  4 => static float QUARTER_NOTE; 
+  64 => static float BEAT_STEP_NOTE;
   // the resolution in note duration (not actual time duration) of each beat step,
   // i.e.. each advance of time (each addition to 'now')
-  BEAT_STEP_NOTE / QUARTER_NOTE => static int BEAT_STEP;
+  BEAT_STEP_NOTE / QUARTER_NOTE => static float BEAT_STEP;
+  44100.0 => static float SAMPLING_RATE_PER_SEC;
+  1::minute / 60 => dur SAMPLES_PER_SEC;
 
   dur stepDur;
 
@@ -19,8 +21,22 @@ public class Clock {
 
   // bpm - beats per minute, number of quarter notes per minute
   // i.e. 60 bpm means a quarter note is 1 second
-  fun void init(int bpm, Event startEvent, Event stepEvent) {
-    (1::minute / bpm) / BEAT_STEP => this.stepDur;
+  fun void init(float bpm, Event startEvent, Event stepEvent) {
+    <<< "BEAT_STEP", BEAT_STEP >>>;
+    <<< "SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
+
+    bpm / 60.0 => float beatsPerSec;
+
+    <<< "bpm", bpm, "beatsPerSec", beatsPerSec >>>;
+
+    SAMPLES_PER_SEC / beatsPerSec =>  dur samplesPerBeat;
+
+    <<< "SAMPLES PER BEAT", samplesPerBeat >>>;
+
+    samplesPerBeat / BEAT_STEP => stepDur;
+
+    <<< "stepDur", stepDur >>>;
+
     startEvent @=> this.startEvent; 
     stepEvent @=> this.stepEvent;
   }

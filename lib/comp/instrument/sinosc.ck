@@ -56,6 +56,10 @@ public class InstrSinOsc extends Instrument {
     while (true) {
       // get next note to play
       chords[i] @=> Chord c;
+
+      <<< "IN INSTR TOP OF LOOP on chord index:", i, "Chord", c >>>;
+
+      // TODO THIS IS THE BUG WE NEED TEMPO HERE, BPM-ADJUSTED
       // TODO assumes all notes in chord have same duration
       c.notes[0].duration => dur nextNoteDur;
 
@@ -69,7 +73,7 @@ public class InstrSinOsc extends Instrument {
       // TODO FIX TO ==
       if (sinceLastNote == nextNoteDur) {
 
-        /* <<< "IN INSTR Note dur equaled, sinceLastNote:", sinceLastNote, "nextNoteDur:", nextNoteDur >>>; */
+        <<< "IN INSTR Note dur equaled, sinceLastNote:", sinceLastNote, "nextNoteDur:", nextNoteDur >>>;
         Scale s;
 
         for (0 => int j; j < c.notes.cap(); j++) {
@@ -87,7 +91,7 @@ public class InstrSinOsc extends Instrument {
         0::samp => sinceLastNote;
 
         (i + 1) % numChords => i;
-        /* <<< "IN INSTR on chord index:", i >>>; */
+        <<< "IN INSTR on chord index:", i >>>;
 
         me.yield();
       }
