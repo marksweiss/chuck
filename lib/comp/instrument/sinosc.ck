@@ -18,17 +18,24 @@ public void playInstrSinOsc(InstrSinOsc instr) {
   instr.play();
 }
 
+// TODO Instr only has one UGen, paired with gain and event loop
+// Then we can compose by having instruments chain to each other and then to output
 public class InstrSinOsc extends Instrument {
   // ugen setup
-  Gain g;
-  SinOsc so0 => g => dac;
-  SinOsc so1 => g => dac;
-  SinOsc so2 => g => dac;
+  Gain g0;
+  Gain g1;
+  Gain g2;
+  Gain g3;
+  Gain gains[DEFAULT_NUM_PLAYERS + 1];
+  SinOsc so0 => g0 => dac;
+  SinOsc so1 => g1 => dac;
+  SinOsc so2 => g2 => dac;
+  SinOsc so3 => g3 => dac;
   SinOsc players[DEFAULT_NUM_PLAYERS + 1];
   so0 @=> players[0];
   so1 @=> players[1];
   so2 @=> players[2];
-  so2 @=> players[3];
+  so3 @=> players[3];
   // args specific to this instr
   "--gain" => string ARG_GAIN;
   // events
@@ -37,7 +44,9 @@ public class InstrSinOsc extends Instrument {
   dur stepDur;
 
   fun void init(ArgParser conf, Event startEvent, Event stepEvent, dur stepDur) {
-    conf.args[ARG_GAIN].fltVal => g.gain;
+    for (0 => int i; i < DEFAULT_NUM_PLAYERS + 1; ++i) {
+      conf.args[ARG_GAIN].fltVal => gains[i].gain;
+    }
     startEvent @=> this.startEvent;    
     stepEvent @=> this.stepEvent;    
     stepDur => this.stepDur;
@@ -69,8 +78,9 @@ public class InstrSinOsc extends Instrument {
 
       /* <<< "IN INSTR BEFORE Note dur equaled, now:", now, "sinceLastNote:", sinceLastNote, "nextNoteDur:", nextNoteDur >>>; */
 
-      // if enough time has passed, emit the note
-      // TODO FIX TO ==
+      // if enough time has passed, emit the next note, silence the previous note
+      // TODO support turning off notes of any duration, not just one coninous chain of
+      // notes of the same duration
       if (sinceLastNote == nextNoteDur) {
 
         <<< "IN INSTR Note dur equaled, sinceLastNote:", sinceLastNote, "nextNoteDur:", nextNoteDur >>>;
@@ -78,18 +88,20 @@ public class InstrSinOsc extends Instrument {
 
         for (0 => int j; j < c.notes.cap(); j++) {
           c.notes[j] @=> Note n;
+          
+         <<< "IN INSTR note gain", n.gain >>>; 
 
           /* <<< "IN INSTR NOTE BEING ADDED name:", n.name, "pitch:", s.pitchName(n.pitch) >>>; */
 
           // TODO float freq support
           players[i].freq(Std.mtof(n.pitch)); 
-          n.gain => g.gain;
+          n.gain => gains[i].gain;
+          0 => gains[(i + 1) % numChords].gain;
 
           /* <<< "IN INSTR Note emitted at Note index:", i >>>; */
         }
 
         0::samp => sinceLastNote;
-
         (i + 1) % numChords => i;
         /* <<< "IN INSTR on chord index:", i >>>; */
 
