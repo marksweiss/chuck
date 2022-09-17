@@ -57,7 +57,7 @@ public class InstrSinOsc extends Instrument {
       // get next note to play
       chords[i] @=> Chord c;
 
-      <<< "IN INSTR TOP OF LOOP on chord index:", i, "Chord", c >>>;
+      /* <<< "IN INSTR TOP OF LOOP on chord index:", i, "Chord", c >>>; */
 
       // TODO THIS IS THE BUG WE NEED TEMPO HERE, BPM-ADJUSTED
       // TODO assumes all notes in chord have same duration
@@ -91,7 +91,7 @@ public class InstrSinOsc extends Instrument {
         0::samp => sinceLastNote;
 
         (i + 1) % numChords => i;
-        <<< "IN INSTR on chord index:", i >>>;
+        /* <<< "IN INSTR on chord index:", i >>>; */
 
         me.yield();
       }
@@ -102,8 +102,9 @@ public class InstrSinOsc extends Instrument {
 fun void main () {
   <<< "--------------------------\nIN SINOSC MAIN, shred id:" >>>;
 
-  120 => int BPM; 
+  240 => int BPM; 
   4 => int OCTAVE;
+  0.75 => float GAIN;
 
   Event startEvent;
   Event stepEvent; 
@@ -111,21 +112,23 @@ fun void main () {
   Clock clock;
   clock.init(BPM, startEvent, stepEvent);
 
+  clock.quarterDur() => dur quarterDur;
+
   InstrSinOsc instr;
   ArgParser conf;
-  conf.addFloatArg("gain", 0.5);
+  conf.addFloatArg("gain", GAIN);
   conf.loadArgs();
-  instr.init(conf, startEvent, stepEvent, clock.getStepDur());
+  instr.init(conf, startEvent, stepEvent, clock.stepDur);
 
   <<< "IN SINOSC MAIN AFTER INSTR.INIT()" >>>;
 
   Chord c;
   Scale s;
   Chord chords[4];
-  c.make(s.triad(OCTAVE, s.C, s.MAJOR_TRIAD)) @=> Chord CMaj;
-  c.make(s.triad(OCTAVE, s.D, s.MAJOR_TRIAD)) @=> Chord DMaj;
-  c.make(s.triad(OCTAVE + 1, s.G, s.MAJOR_TRIAD)) @=> Chord GMaj;
-  c.make(s.triad(OCTAVE, s.C, s.MAJOR_TRIAD)) @=> Chord CMaj_Rest;
+  c.make(s.triad(OCTAVE, s.C, s.MAJOR_TRIAD), GAIN, quarterDur) @=> Chord CMaj;
+  c.make(s.triad(OCTAVE, s.D, s.MAJOR_TRIAD), GAIN, quarterDur) @=> Chord DMaj;
+  c.make(s.triad(OCTAVE + 1, s.G, s.MAJOR_TRIAD), GAIN, quarterDur) @=> Chord GMaj;
+  c.make(s.triad(OCTAVE, s.C, s.MAJOR_TRIAD), GAIN, quarterDur) @=> Chord CMaj_Rest;
   CMaj @=> chords[0];
   DMaj @=> chords[1];
   GMaj @=> chords[2];

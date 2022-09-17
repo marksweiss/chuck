@@ -15,6 +15,7 @@ public class Clock {
   1::minute / 60 => dur SAMPLES_PER_SEC;
 
   dur stepDur;
+  dur beatDur;
 
   Event startEvent;
   Event stepEvent;
@@ -33,6 +34,7 @@ public class Clock {
 
     <<< "SAMPLES PER BEAT", samplesPerBeat >>>;
 
+    samplesPerBeat => beatDur;
     samplesPerBeat / BEAT_STEP => stepDur;
 
     <<< "stepDur", stepDur >>>;
@@ -63,8 +65,33 @@ public class Clock {
     }
   }
 
-  fun dur getStepDur() {
-    return this.stepDur;
+  // Western notation note durations
+  fun dur wholeDur() {
+    return this.beatDur * 4;
+  }
+
+  fun dur halfDur() {
+    return this.beatDur * 2;
+  }
+
+  fun dur quarterDur() {
+    return this.beatDur;
+  }
+
+  fun dur eighthDur() {
+    return this.beatDur / 2;
+  }
+
+  fun dur sixteenthDur() {
+    return this.beatDur / 4;
+  }
+
+  fun dur thirtySecondDur() {
+    return this.beatDur / 8;
+  }
+
+  fun dur sixtyFourthDur() {
+    return this.beatDur / 16;
   }
 
   // TODO PRIVATE? TODO DO WE NEED THIS?
