@@ -66,32 +66,36 @@ public class Clock {
   }
 
   // Western notation note durations
-  fun dur wholeDur() {
+  fun dur whole() {
     return this.beatDur * 4;
   }
 
-  fun dur halfDur() {
+  fun dur half() {
     return this.beatDur * 2;
   }
 
-  fun dur quarterDur() {
+  fun dur quarter() {
     return this.beatDur;
   }
 
-  fun dur eighthDur() {
+  fun dur eighth() {
     return this.beatDur / 2;
   }
 
-  fun dur sixteenthDur() {
+  fun dur sixteenth() {
     return this.beatDur / 4;
   }
 
-  fun dur thirtySecondDur() {
+  fun dur thirtySecond() {
     return this.beatDur / 8;
   }
 
-  fun dur sixtyFourthDur() {
+  fun dur sixtyFourth() {
     return this.beatDur / 16;
+  }
+
+  fun dur D(float noteDur) {
+    return (this.beatDur * 4) * noteDur;
   }
 
   // TODO PRIVATE? TODO DO WE NEED THIS?

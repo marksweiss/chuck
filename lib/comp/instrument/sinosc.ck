@@ -19,23 +19,12 @@ public void playInstrSinOsc(InstrSinOsc instr) {
 }
 
 // TODO Instr only has one UGen, paired with gain and event loop
+// TODO GET RID OF NUM PLAYERS ETC. in base class
 // Then we can compose by having instruments chain to each other and then to output
 public class InstrSinOsc extends Instrument {
   // ugen setup
-  Gain g0;
-  Gain g1;
-  Gain g2;
-  Gain g3;
-  Gain gains[DEFAULT_NUM_PLAYERS + 1];
-  SinOsc so0 => g0 => dac;
-  SinOsc so1 => g1 => dac;
-  SinOsc so2 => g2 => dac;
-  SinOsc so3 => g3 => dac;
-  SinOsc players[DEFAULT_NUM_PLAYERS + 1];
-  so0 @=> players[0];
-  so1 @=> players[1];
-  so2 @=> players[2];
-  so3 @=> players[3];
+  Gain g;
+  SinOsc so => g => dac;
   // args specific to this instr
   "--gain" => string ARG_GAIN;
   // events
@@ -45,7 +34,7 @@ public class InstrSinOsc extends Instrument {
 
   fun void init(ArgParser conf, Event startEvent, Event stepEvent, dur stepDur) {
     for (0 => int i; i < DEFAULT_NUM_PLAYERS + 1; ++i) {
-      conf.args[ARG_GAIN].fltVal => gains[i].gain;
+      conf.args[ARG_GAIN].fltVal => g.gain;
     }
     startEvent @=> this.startEvent;    
     stepEvent @=> this.stepEvent;    
@@ -94,9 +83,8 @@ public class InstrSinOsc extends Instrument {
           /* <<< "IN INSTR NOTE BEING ADDED name:", n.name, "pitch:", s.pitchName(n.pitch) >>>; */
 
           // TODO float freq support
-          players[i].freq(Std.mtof(n.pitch)); 
-          n.gain => gains[i].gain;
-          0 => gains[(i + 1) % numChords].gain;
+          so.freq(Std.mtof(n.pitch)); 
+          n.gain => g.gain;
 
           /* <<< "IN INSTR Note emitted at Note index:", i >>>; */
         }
@@ -124,7 +112,10 @@ fun void main () {
   Clock clock;
   clock.init(BPM, startEvent, stepEvent);
 
-  clock.quarterDur() => dur quarterDur;
+  clock.D(0.25) => dur QRTR;
+  /* clock.quarter() => dur QRTR; */
+
+  <<< "IN SINOSC MAIN QUARTER_DUR", QRTR >>>;
 
   InstrSinOsc instr;
   ArgParser conf;
@@ -137,12 +128,12 @@ fun void main () {
   Chord c;
   Scale s;
   Chord chords[4];
-  c.make(s.triad(OCTAVE, s.C, s.MAJOR_TRIAD), GAIN, quarterDur) @=> Chord CMaj;
-  c.make(s.triad(OCTAVE, s.D, s.MAJOR_TRIAD), GAIN, quarterDur) @=> Chord DMaj;
-  c.make(s.triad(OCTAVE + 1, s.G, s.MAJOR_TRIAD), GAIN, quarterDur) @=> Chord GMaj;
-  c.make(s.triad(OCTAVE, s.C, s.MAJOR_TRIAD), GAIN, quarterDur) @=> Chord CMaj_Rest;
+  c.make(s.triad(OCTAVE, s.C, s.M), GAIN * 0.8, QRTR) @=> Chord CMaj;
+  c.make(s.triad(OCTAVE, s.F, s.m), GAIN, QRTR) @=> Chord FMin;
+  c.make(s.triad(OCTAVE + 1, s.G, s.M), GAIN * 0.8, QRTR) @=> Chord GMaj;
+  c.make(s.triad(OCTAVE, s.C, s.M), GAIN, QRTR) @=> Chord CMaj_Rest;
   CMaj @=> chords[0];
-  DMaj @=> chords[1];
+  FMin @=> chords[1];
   GMaj @=> chords[2];
   CMaj_Rest @=> chords[3];
   for (0 => int i; i < CMaj_Rest.notes.cap(); i++) {
