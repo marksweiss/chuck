@@ -131,14 +131,11 @@ fun void main () {
   c.make(s.triad(OCTAVE, s.C, s.M), GAIN * 0.8, QRTR) @=> Chord CMaj;
   c.make(s.triad(OCTAVE, s.F, s.m), GAIN, QRTR) @=> Chord FMin;
   c.make(s.triad(OCTAVE + 1, s.G, s.M), GAIN * 0.8, QRTR) @=> Chord GMaj;
-  c.make(s.triad(OCTAVE, s.C, s.M), GAIN, QRTR) @=> Chord CMaj_Rest;
+  c.make(s.triad(OCTAVE, s.C, s.M), 0.0, QRTR) @=> Chord CMaj_Rest;
   CMaj @=> chords[0];
   FMin @=> chords[1];
   GMaj @=> chords[2];
   CMaj_Rest @=> chords[3];
-  for (0 => int i; i < CMaj_Rest.notes.cap(); i++) {
-    0.0 => CMaj_Rest.notes[i].gain;
-  }
   instr.addChords(chords);
 
   <<< "IN SINOSC MAIN AFTER SYNC BEFORE SPORK" >>>;
