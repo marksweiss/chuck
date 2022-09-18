@@ -14,8 +14,6 @@ public class Instrument {
   Chord chords[DEFAULT_NUM_CHORDS];
   int numChords;
   int maxNumChords;
-  3 => static int DEFAULT_NUM_PLAYERS;
-  DEFAULT_NUM_PLAYERS => int numPlayers;
 
   0 => numChords;
   DEFAULT_NUM_CHORDS => maxNumChords;
