@@ -9,7 +9,7 @@
  * and define a no-arg play, which would typically loop forever and send pitch and gain values
  * to the UGen from chords, as well as advance the global clock using Note duration values.
  */
-public class Instrument {
+public class InstrumentBase {
   128 => static int DEFAULT_NUM_CHORDS;
   Chord chords[DEFAULT_NUM_CHORDS];
   int numChords;

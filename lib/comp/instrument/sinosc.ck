@@ -2,9 +2,9 @@
 // Machine.add("lib/comp/note.ck");
 // Machine.add("lib/comp/chord.ck");
 // Machine.add("lib/comp/clock.ck");
-// Machine.add("lib/comp/instrument/instrument.ck");
+// Machine.add("lib/comp/instrument/instrument_base.ck");
 
-public class InstrSinOsc extends Instrument {
+public class InstrSinOsc extends InstrumentBase {
   // generator
   SinOsc so;
   // envelope

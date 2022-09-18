@@ -11,7 +11,7 @@ public class ArgBase {
   float fltVal;
   string strVal;
   dur durVal;
-  time timeVal
+  time timeVal;
 
   /**
    * Converts a camelcase arg name to a *nix-style flag syntax

@@ -1,7 +1,7 @@
 // cli: $> chuck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck \
 //               lib/arg_parser/float_arg.ck lib/arg_parser/string_arg.ck \
 //               lib/arg_parser/arg_parser.ck lib/comp/scale.ck lib/comp/note.ck \
-//               lib/comp/chord.ck lib/comp/instrument/instrument.ck lib/comp/clock.ck
+//               lib/comp/chord.ck lib/comp/instrument/instrument_base.ck lib/comp/clock.ck
 //               lib/comp/instrument/sinosc.ck comps/sinosc_1.ck
 
 // For client to spork, which requires a free function as entry point
