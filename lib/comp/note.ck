@@ -40,15 +40,15 @@ public class Note {
   } 
 }
 
-fun void main() {
-  Scale.D => int pitch;
-  .75 => float gain;
-  2.0::second => dur duration;
-  Note n;
-  <<< n.make(pitch) >>>;
-  <<< n.make(pitch, gain, duration) >>>;
-  n.make(pitch, gain, duration) @=> Note newNote;
-  <<< newNote.pitch, newNote.gain, newNote.duration >>>;
-}
+/* fun void main() { */
+/*   Scale.D => int pitch; */
+/*   .75 => float gain; */
+/*   2.0::second => dur duration; */
+/*   Note n; */
+/*   <<< n.make(pitch) >>>; */
+/*   <<< n.make(pitch, gain, duration) >>>; */
+/*   n.make(pitch, gain, duration) @=> Note newNote; */
+/*   <<< newNote.pitch, newNote.gain, newNote.duration >>>; */
+/* } */
 
-main();
+/* main(); */

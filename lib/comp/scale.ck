@@ -174,16 +174,16 @@ public class Scale {
   } 
 }
 
-fun void main() {
-  4 => int octave;
-  // static functions are broken and can't be called except through an object reference, i.e. not static
-  Scale s;
-  <<< s.pitch(octave, Scale.D, Scale.MAJOR) >>>;
-  <<< s.freq(octave, Scale.D, Scale.MAJOR) >>>;
-  s.triad(octave, Scale.D, Scale.MAJOR, Scale.MAJOR_TRIAD) @=> int chordPitches[];
-  <<< "Chord:", chordPitches, "Length:", chordPitches.cap() >>>;
-  <<< "Pitches:", chordPitches[0], chordPitches[1], chordPitches[2] >>>;
-  <<< Scale.D, "==", s.pitchName(Scale.D) >>>;
-}
+/* fun void main() { */
+/*   4 => int octave; */
+/*   // static functions are broken and can't be called except through an object reference, i.e. not static */
+/*   Scale s; */
+/*   <<< s.pitch(octave, Scale.D, Scale.MAJOR) >>>; */
+/*   <<< s.freq(octave, Scale.D, Scale.MAJOR) >>>; */
+/*   s.triad(octave, Scale.D, Scale.MAJOR, Scale.MAJOR_TRIAD) @=> int chordPitches[]; */
+/*   <<< "Chord:", chordPitches, "Length:", chordPitches.cap() >>>; */
+/*   <<< "Pitches:", chordPitches[0], chordPitches[1], chordPitches[2] >>>; */
+/*   <<< Scale.D, "==", s.pitchName(Scale.D) >>>; */
+/* } */
 
-main();
+/* main(); */

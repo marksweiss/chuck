@@ -5,70 +5,76 @@
 // Machine.add("lib/comp/instrument/instrument.ck");
 
 public class InstrSinOsc extends Instrument {
-  // ugen setup
-  Gain g;
-  SinOsc so => g => dac;
-  // args specific to this instr
-  "--gain" => string ARG_GAIN;
-  // events
+  // generator
+  SinOsc so;
+  // envelope
+  // in this basic instrument ADSR is not parameterized and just set to defaults to avoid
+  // clipping on transitions from sounding notes to rests and back
+  ADSR env;
+  // patch chain
+  so => env => dac;
+
+  // events, boilerplate but must be assigned by reference per instance because they are bound
+  // to a particular spork and possibly spawned by one or another parent event loop
   Event startEvent;
   Event stepEvent;
   dur stepDur;
 
   fun void init(ArgParser conf, Event startEvent, Event stepEvent, dur stepDur) {
+    // ArgParser no-op for this instrument
+    // boilerplate event assignment
     startEvent @=> this.startEvent;    
     stepEvent @=> this.stepEvent;    
     stepDur => this.stepDur;
   }
 
   fun void instrHelp() {
-    <<< "Args:\n'gain' - float - [0.0..1.0]" >>>;
+    <<< "No args accepted" >>>;
   }
 
   fun void play() {
     // block on START
     startEvent => now;
 
+    // index of chord in sequence to play
     0 => int i;
+    // state triggering time elapsed is == to the duration of previous note played,
+    // time to play the next one
     0::samp => dur sinceLastNote;
     while (true) {
-      // get next note to play
+      // get next chord  to play
       chords[i] @=> Chord c;
-
-      /* <<< "IN INSTR TOP OF LOOP on chord index:", i, "Chord", c >>>; */
-
       c.notes[0].duration => dur nextNoteDur;
 
       // block on event of next beat step broadcast by clock
       stepEvent => now;
       sinceLastNote + stepDur => sinceLastNote; 
-
-      /* <<< "IN INSTR BEFORE Note dur equaled, now:", now, "sinceLastNote:", sinceLastNote, "nextNoteDur:", nextNoteDur >>>; */
-
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote == nextNoteDur) {
-
-        /* <<< "IN INSTR Note dur equaled, sinceLastNote:", sinceLastNote, "nextNoteDur:", nextNoteDur >>>; */
         Scale s;
+        
+        // previous note ending, trigger release
+        env.keyOff();
+        env.releaseTime() => now;
 
+        // load the next note into the gen
         for (0 => int j; j < c.notes.cap(); j++) {
           c.notes[j] @=> Note n;
-          
-          /* <<< "IN INSTR note gain", n.gain >>>; */ 
-          /* <<< "IN INSTR NOTE BEING ADDED name:", n.name, "pitch:", s.pitchName(n.pitch) >>>; */
-
           // TODO float freq support
           so.freq(Std.mtof(n.pitch)); 
-          n.gain => g.gain;
-
-          /* <<< "IN INSTR NOTE EMITTED, g.gain", g.gain(), "note dur", n.duration, now >>>; */
+          n.gain => so.gain;
         }
 
+        // reset note triggering state
         0::samp => sinceLastNote;
         (i + 1) % numChords => i;
 
-        /* <<< "IN INSTR on chord index:", i >>>; */
+        // trigger envelope start
+        // default envelope behavior to avoid clipping
+        env.set(10::ms, 2::ms, 0.8, 10::ms);
+        env.keyOn();
 
+        // note emitted, yield to clock
         me.yield();
       }
     }

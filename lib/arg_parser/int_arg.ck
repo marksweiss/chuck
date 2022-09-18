@@ -12,5 +12,5 @@ public class IntArg extends ArgBase {
   }
 }
 
-IntArg.make("argInt", 10) @=> IntArg arg;
-<<< arg.name, arg.nameToFlag(), arg.type, arg.intVal >>>;
+/* IntArg.make("argInt", 10) @=> IntArg arg; */
+/* <<< arg.name, arg.nameToFlag(), arg.type, arg.intVal >>>; */

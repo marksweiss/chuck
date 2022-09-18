@@ -12,5 +12,5 @@ public class FloatArg extends ArgBase {
   }
 }
 
-FloatArg.make("argFloat", 20.01) @=> FloatArg arg; 
-<<< arg.name, arg.nameToFlag(), arg.type, arg.fltVal >>>;
+/* FloatArg.make("argFloat", 20.01) @=> FloatArg arg; */ 
+/* <<< arg.name, arg.nameToFlag(), arg.type, arg.fltVal >>>; */

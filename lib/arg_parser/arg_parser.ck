@@ -1,5 +1,12 @@
 // depends on arg_parser_imports.ck
 
+/*
+* Arg names and values are seperated by colons
+* Example:
+*  chuck midi_example.ck:--controller-port-in:0:--controller-port-out:1: \
+*    --internal-port-out:1:--channel-in:1:--channel-out:2  
+*/
+
 public class ArgParser {
   int numArgs;
   ArgBase args[1];  // size doesn't matter because using as associative array */

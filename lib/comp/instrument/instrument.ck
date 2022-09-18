@@ -34,6 +34,13 @@ public class Instrument {
   // configure and the behavior of the instrument.
   fun void instrHelp() {}
 
+  // Helper used to print standard formatted instrument help lines for each arg
+  fun void printInstrHelpForArg(string argName, string description, string type,
+                                string domainOfValues) {
+    <<< argName, "-", type, "-", description, "-", domainOfValues >>>;
+  }
+
+
   // Override
   fun void play() {}
 }

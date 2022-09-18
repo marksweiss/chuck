@@ -6,15 +6,10 @@
 
 // For client to spork, which requires a free function as entry point
 public void playClock(Clock clock) {
-  <<< "IN playClock" >>>;
-
   clock.play();
 }
 
-// For client to spork, which requires a free function as entry point
 public void playInstrSinOsc(InstrSinOsc instr) {
-  <<< "IN playInstr" >>>;
-
   instr.play();
 }
 
@@ -30,21 +25,16 @@ fun void main () {
 
   Clock clock;
   clock.init(BPM, startEvent, stepEvent);
-
   clock.D(0.25) => dur QRTR;
   clock.D(0.5) => dur HLF;
   clock.D(1.0) => dur WHL;
-  /* clock.quarter() => dur QRTR; */
-
-  <<< "IN SINOSC MAIN QUARTER_DUR", QRTR >>>;
 
   InstrSinOsc instr;
   ArgParser conf;
   conf.addFloatArg("gain", GAIN);
   conf.loadArgs();
-  instr.init(conf, startEvent, stepEvent, clock.stepDur);
 
-  <<< "IN SINOSC MAIN AFTER INSTR.INIT()" >>>;
+  instr.init(conf, startEvent, stepEvent, clock.stepDur);
 
   Chord c;
   Scale s;
@@ -52,20 +42,15 @@ fun void main () {
   c.make(s.triad(OCTAVE, s.C, s.M), GAIN * 0.8, WHL) @=> Chord CMaj;
   /* c.make(s.triad(OCTAVE, s.F, s.m), GAIN, QRTR) @=> Chord FMin; */
   /* c.make(s.triad(OCTAVE + 1, s.G, s.M), GAIN * 0.8, QRTR) @=> Chord GMaj; */
-  c.make(s.triad(OCTAVE, s.C, s.M), 0.0, WHL) @=> Chord CMaj_Rest;
+  c.rest(WHL) @=> Chord rest;
   CMaj @=> chords[0];
   /* FMin @=> chords[1]; */
   /* GMaj @=> chords[2]; */
-  CMaj_Rest @=> chords[1];
+  rest @=> chords[1];
   instr.addChords(chords);
-
-  <<< "IN SINOSC MAIN AFTER SYNC BEFORE SPORK" >>>;
 
   spork ~ playClock(clock);
   spork ~ playInstrSinOsc(instr);
-
-  <<< "IN SINOSC MAIN AFTER SPORK" >>>;
- 
   me.yield();  // yield to Clock and Instrument event loops 
   while (true) {1::second => now;}  // block process exit to force child threads to run
 }
