@@ -53,6 +53,7 @@ public class Clock {
 
     /* <<< "IN CLOCK START passed" >>>; */
 
+    sync();
     while (true) {
       stepEvent.broadcast();
       me.yield();

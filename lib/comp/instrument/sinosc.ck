@@ -33,9 +33,9 @@ public class InstrSinOsc extends Instrument {
   dur stepDur;
 
   fun void init(ArgParser conf, Event startEvent, Event stepEvent, dur stepDur) {
-    for (0 => int i; i < DEFAULT_NUM_PLAYERS + 1; ++i) {
-      conf.args[ARG_GAIN].fltVal => g.gain;
-    }
+    /* for (0 => int i; i < DEFAULT_NUM_PLAYERS + 1; ++i) { */
+    /*   conf.args[ARG_GAIN].fltVal => g.gain; */
+    /* } */
     startEvent @=> this.startEvent;    
     stepEvent @=> this.stepEvent;    
     stepDur => this.stepDur;
@@ -72,21 +72,25 @@ public class InstrSinOsc extends Instrument {
       // notes of the same duration
       if (sinceLastNote == nextNoteDur) {
 
-        <<< "IN INSTR Note dur equaled, sinceLastNote:", sinceLastNote, "nextNoteDur:", nextNoteDur >>>;
+        /* <<< "IN INSTR Note dur equaled, sinceLastNote:", sinceLastNote, "nextNoteDur:", nextNoteDur >>>; */
         Scale s;
 
         for (0 => int j; j < c.notes.cap(); j++) {
           c.notes[j] @=> Note n;
           
-         <<< "IN INSTR note gain", n.gain >>>; 
+         /* <<< "IN INSTR note gain", n.gain >>>; */ 
 
           /* <<< "IN INSTR NOTE BEING ADDED name:", n.name, "pitch:", s.pitchName(n.pitch) >>>; */
 
           // TODO float freq support
           so.freq(Std.mtof(n.pitch)); 
           n.gain => g.gain;
-
-          /* <<< "IN INSTR Note emitted at Note index:", i >>>; */
+          /* if (n.gain == 0.0) { */
+          /*   so => g => blackhole; */
+          /* } else { */
+          /*   so => g => dac; */
+          /* } */
+          <<< "IN INSTR NOTE EMITTED, g.gain", g.gain(), "note dur", n.duration, now >>>;
         }
 
         0::samp => sinceLastNote;
@@ -113,6 +117,8 @@ fun void main () {
   clock.init(BPM, startEvent, stepEvent);
 
   clock.D(0.25) => dur QRTR;
+  clock.D(0.5) => dur HLF;
+  clock.D(1.0) => dur WHL;
   /* clock.quarter() => dur QRTR; */
 
   <<< "IN SINOSC MAIN QUARTER_DUR", QRTR >>>;
@@ -127,15 +133,15 @@ fun void main () {
 
   Chord c;
   Scale s;
-  Chord chords[4];
-  c.make(s.triad(OCTAVE, s.C, s.M), GAIN * 0.8, QRTR) @=> Chord CMaj;
-  c.make(s.triad(OCTAVE, s.F, s.m), GAIN, QRTR) @=> Chord FMin;
-  c.make(s.triad(OCTAVE + 1, s.G, s.M), GAIN * 0.8, QRTR) @=> Chord GMaj;
-  c.make(s.triad(OCTAVE, s.C, s.M), 0.0, QRTR) @=> Chord CMaj_Rest;
+  Chord chords[2];
+  c.make(s.triad(OCTAVE, s.C, s.M), GAIN * 0.8, WHL) @=> Chord CMaj;
+  /* c.make(s.triad(OCTAVE, s.F, s.m), GAIN, QRTR) @=> Chord FMin; */
+  /* c.make(s.triad(OCTAVE + 1, s.G, s.M), GAIN * 0.8, QRTR) @=> Chord GMaj; */
+  c.make(s.triad(OCTAVE, s.C, s.M), 0.0, WHL) @=> Chord CMaj_Rest;
   CMaj @=> chords[0];
-  FMin @=> chords[1];
-  GMaj @=> chords[2];
-  CMaj_Rest @=> chords[3];
+  /* FMin @=> chords[1]; */
+  /* GMaj @=> chords[2]; */
+  CMaj_Rest @=> chords[1];
   instr.addChords(chords);
 
   <<< "IN SINOSC MAIN AFTER SYNC BEFORE SPORK" >>>;
