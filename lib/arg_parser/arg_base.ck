@@ -3,11 +3,15 @@ public class ArgBase {
   0 => static int ARG_INT;
   1 => static int ARG_FLOAT;
   2 => static int ARG_STRING;
+  3 => static int ARG_DURATION;
+  4 => static int ARG_TIME;
 
   string name;
   int intVal;
   float fltVal;
   string strVal;
+  dur durVal;
+  time timeVal
 
   /**
    * Converts a camelcase arg name to a *nix-style flag syntax

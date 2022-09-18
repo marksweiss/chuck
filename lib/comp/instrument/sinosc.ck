@@ -67,6 +67,7 @@ public class InstrSinOsc extends Instrument {
 
         // reset note triggering state
         0::samp => sinceLastNote;
+        // increment counter of which chord in sequence
         (i + 1) % numChords => i;
 
         // trigger envelope start
