@@ -12,7 +12,7 @@ public class Chord {
 
   fun void init(Note notes_[]) {
     notes_.cap() => cap;
-    notes_ @=> notes;
+    notes_ @=> this.notes;
   }
 
   fun static Chord make(Note notes_[]) {

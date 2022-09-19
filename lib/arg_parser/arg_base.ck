@@ -17,6 +17,11 @@ public class ArgBase {
    * Converts a camelcase arg name to a *nix-style flag syntax
    */
   fun string nameToFlag() {
+    if (name.length() == 0) {
+      <<< "name must not be empty string" >>>;
+      me.exit(); 
+    }
+
     "" @=> string flag;
     for (0 => int i; i < name.length(); ++i) {
       // insert '-' where there is an upper-case character and make that character lower case

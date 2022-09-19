@@ -39,18 +39,12 @@ public class ArgParser {
     return arg;
   }
 
-  fun int hasArg(string name) {
-    // strip "--" if present
-    if (name.find("--") == 0) {
-      name.substring(2) => name;
+  fun int hasArg(string nameToMatch) {
+    if (args.find(nameToMatch) > 1) {
+      <<< "arg name key found more than once" >>>;
+      me.exit();
     }
-
-    for (0 => int i; i < args.cap(); i++) {
-      if (args[i].name == name) {
-        return true;
-      } 
-    }
-    return false;
+    return args.find(nameToMatch) == 1;
   }
 
   fun void loadArgs() {
