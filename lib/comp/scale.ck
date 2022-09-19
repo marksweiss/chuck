@@ -89,14 +89,53 @@ public class Scale {
     return PITCH_STR_MAP[pitchPosition % numNotesInOctave];
   } 
 
+  // TODO TESTS FOR THESE FOUR METHODS AND THE REST OF THIS CLASS
   fun static int pitch(int octave, int pitchName) {
-    return octave + pitchName;
+    return pitch(octave, pitchName, NUM_NOTES_IN_OCTAVE);
+  }
+
+  fun static int pitch(int octave, int pitchName, int numNotesInOctave) {
+    return (octave * numNotesInOctave) + pitchName;
   }
 
   fun static float freq(int octave, int pitchName) {
-    return Std.mtof(octave + pitchName);
+    return freq(octave, pitchName, NUM_NOTES_IN_OCTAVE);
   }
 
+  fun static float freq(int octave, int pitchName, int numNotesInOctave) {
+    return Std.mtof(pitch(octave, pitchName, numNotesInOctave));
+  }
+
+  /** 
+   * Translates an index into a scale into the degree of that index position in the scale,
+   * and then offsets that degree upward from `octave * NUM_NOTES_IN_OCTAVE` to get a final
+   * integer note value. This can be used directly in MIDI or translated to a frequency with std.mtof().
+   * Uses default NUM_NOTES_IN_OCTAVE to compute final note.
+   *  
+   * octave - octave in which to place note
+   * pitchPosition - the index in the scale to return the degree for
+   * scale - the scale from which to select the degree for pitchPosition
+  */
+  fun static int pitch(int octave, int pitchPosition, int scale[]) {
+    return pitch(octave, pitchPosition, scale, NUM_NOTES_IN_OCTAVE);
+  }
+
+  /** 
+   * Translates an index into a scale into the degree of that index position in the scale,
+   * and then offsets that degree upward from `octave * NUM_NOTES_IN_OCTAVE` to get a final
+   * integer note value. This can be used directly in MIDI or translated to a frequency with std.mtof().
+   * 
+   * octave - octave in which to place note
+   * pitchPosition - the index in the scale to return the degree for
+   * scale - the scale from which to select the degree for pitchPosition
+   * numNotesInOctave - instead of using class static default, override for other scales
+  */ 
+  fun static int pitch(int octave, int pitchPosition, int scale[], int numNotesInOctave) {
+    pitchPosition % scale.cap() => int offset;
+    return (octave * numNotesInOctave) + scale[offset];
+  }
+
+  /** 
   /** 
    * Translates an index into a scale into the degree of that index position in the scale,
    * and then offsets that degree upward from `octave * NUM_NOTES_IN_OCTAVE` to get a final
@@ -173,17 +212,3 @@ public class Scale {
     return [pitch, pitch + chord[1], pitch + chord[2]];
   } 
 }
-
-/* fun void main() { */
-/*   4 => int octave; */
-/*   // static functions are broken and can't be called except through an object reference, i.e. not static */
-/*   Scale s; */
-/*   <<< s.pitch(octave, Scale.D, Scale.MAJOR) >>>; */
-/*   <<< s.freq(octave, Scale.D, Scale.MAJOR) >>>; */
-/*   s.triad(octave, Scale.D, Scale.MAJOR, Scale.MAJOR_TRIAD) @=> int chordPitches[]; */
-/*   <<< "Chord:", chordPitches, "Length:", chordPitches.cap() >>>; */
-/*   <<< "Pitches:", chordPitches[0], chordPitches[1], chordPitches[2] >>>; */
-/*   <<< Scale.D, "==", s.pitchName(Scale.D) >>>; */
-/* } */
-
-/* main(); */
