@@ -39,6 +39,24 @@ public class ArgParser {
     return arg;
   }
 
+  fun DurationArg addDurationArg(string name, dur val) {
+    DurationArg.make(name, val) @=> DurationArg arg;
+    arg.nameToFlag() => string flag;
+    arg @=> args[flag];
+    arg.type @=> types[flag];
+    numArgs++;
+    return arg;
+  }
+
+  fun TimeArg addTimeArg(string name, time val) {
+    TimeArg.make(name, val) @=> TimeArg arg;
+    arg.nameToFlag() => string flag;
+    arg @=> args[flag];
+    arg.type @=> types[flag];
+    numArgs++;
+    return arg;
+  }
+
   fun int hasArg(string nameToMatch) {
     if (args.find(nameToMatch) > 1) {
       <<< "arg name key found more than once" >>>;

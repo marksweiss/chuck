@@ -65,6 +65,46 @@ fun void testAddStringArgHasArg() {
   Assert.assert(expected, actual, testName, msg);
 }
 
+fun void testAddDurationArgHasArg() {
+  // setup
+  "testAddDurationArgHasArg" => string testName;
+  "parser has arg with given name" => string msg;
+  
+  ArgParser argParser;
+  "newDurationArg" => string argName;
+
+  // call
+  argParser.addDurationArg(argName, 100::ms) @=> DurationArg arg;
+  // assert val
+  Assert.assert(100::ms, arg.durVal, testName, msg);
+
+  // call hasArg
+  argParser.hasArg(arg.nameToFlag()) => int actual;
+  // assert hasArg
+  true => int expected;
+  Assert.assert(expected, actual, testName, msg);
+}
+
+fun void testAddTimeArgHasArg() {
+  // setup
+  "testAddTimeArgHasArg" => string testName;
+  "parser has arg with given name" => string msg;
+  
+  ArgParser argParser;
+  "newTimeArg" => string argName;
+
+  // call
+  argParser.addTimeArg(argName, 100::ms + now) @=> TimeArg arg;
+  // assert val
+  Assert.assert(100::ms + now, arg.timeVal, testName, msg);
+
+  // call hasArg
+  argParser.hasArg(arg.nameToFlag()) => int actual;
+  // assert hasArg
+  true => int expected;
+  Assert.assert(expected, actual, testName, msg);
+}
+
 fun void testHasArgNotFound() {
   // setup
   "testAddArgHasArgNotFound" => string testName;
@@ -105,6 +145,8 @@ fun void test() {
   testAddIntArgHasArg();
   testAddFloatArgHasArg();
   testAddStringArgHasArg();
+  testAddDurationArgHasArg();
+  testAddTimeArgHasArg();
   testHasArgNotFound();
   testNumArgs();
 }
