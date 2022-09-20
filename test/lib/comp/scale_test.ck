@@ -104,9 +104,7 @@ fun void testTriad() {
 
   // assert
   [60, 64, 67] @=> int expected[];
-  for (0 => int i; i < actual.cap(); i++) {
-    Assert.assert(expected[i], actual[i], testName, msg);
-  }
+  Assert.assert(expected, actual, testName, msg);
 }
 
 fun void test() {
