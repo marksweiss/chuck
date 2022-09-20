@@ -60,23 +60,3 @@ public class Chord {
     return pitches;
   }
 }
-
-/* fun void main() { */
-/*   Scale S; */
-/*   // manually build major triad */
-/*   [S.pitch(4, S.D), S.pitch(4, 2, S.MAJOR), S.pitch(4, 4, S.MAJOR)] @=> int pitches[]; */
-/*   0.75 => float gain; */
-/*   2::second @=> dur duration; */
-/*   // manually build Chord of Notes from pitches */
-/*   Chord C; */
-/*   <<< C.make(pitches) >>>; */
-/*   <<< C.make(pitches, gain, duration) >>>; */
-
-/*   // Use Scale module Chord API */
-/*   C.make(S.triad(4, S.D, S.MAJOR_TRIAD)) @=> Chord DMaj; */
-/*   <<< "DMajor", DMaj >>>; */
-/*   <<< "DMajor notes", DMaj.notes >>>; */
-/*   <<< "DMajor notes pitches", DMaj.notes[0].pitch, DMaj.notes[1].pitch, DMaj.notes[2].pitch >>>; */
-/* } */
-
-/* main(); */
