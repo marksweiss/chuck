@@ -11,7 +11,7 @@ public class Chord {
   Note notes[MAX_NUM_CHORD_NOTES];
 
   fun void init(Note notes_[]) {
-    notes_.cap() => cap;
+    notes_.size() => cap;
     notes_ @=> this.notes;
   }
 
@@ -24,8 +24,8 @@ public class Chord {
   fun static Chord make(int pitches[], float gain, dur duration) {
     Chord c;
     Note n;
-    Note chordNotes[pitches.cap()];
-    for (0 => int i; i < pitches.cap(); i++) {
+    Note chordNotes[pitches.size()];
+    for (0 => int i; i < pitches.size(); i++) {
       n.make(pitches[i], gain, duration) @=> Note chordNote;
       chordNote @=> chordNotes[i]; 
     }
@@ -53,8 +53,8 @@ public class Chord {
   }
 
   fun /*private*/ static int[] chordPitchesForRoot(int rootPitch, int chordPitches[]) {
-    int pitches[chordPitches.cap()];
-    for (0 => int i; i < pitches.cap(); i++) {
+    int pitches[chordPitches.size()];
+    for (0 => int i; i < pitches.size(); i++) {
       rootPitch + chordPitches[i] @=> pitches[i];
     }
     return pitches;

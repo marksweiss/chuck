@@ -7,7 +7,7 @@
 [0,2,4,5,7,9,11,12] @=> int major[]; //major scale
 
 for (0=>int i; ; i++) { //infinite loop
-  std.mtof( 48 + scale( mel[i%mel.cap()], major )) => inst.freq; //set the note
+  std.mtof( 48 + scale( mel[i%mel.size()], major )) => inst.freq; //set the note
   inst.noteOn( 0.5 ); //play a note at half volume
   300::ms => now; //compute audio for 0.3 sec
 }
@@ -131,7 +131,7 @@ public class Scale {
    * numNotesInOctave - instead of using class static default, override for other scales
   */ 
   fun static int pitch(int octave, int pitchPosition, int scale[], int numNotesInOctave) {
-    pitchPosition % scale.cap() => int offset;
+    pitchPosition % scale.size() => int offset;
     return (octave * numNotesInOctave) + scale[offset];
   }
 
@@ -161,7 +161,7 @@ public class Scale {
    * numNotesInOctave - instead of using class static default, override for other scales
   */ 
   fun static int pitch(int octave, int pitchPosition, int scale[], int numNotesInOctave) {
-    pitchPosition % scale.cap() => int offset;
+    pitchPosition % scale.size() => int offset;
     return (octave * numNotesInOctave) + scale[offset];
   }
 

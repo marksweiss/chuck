@@ -1,4 +1,4 @@
-// cli: chuck lib/test/assert.ck lib/arg_parser/arg_base.ck test/lib/arg_parser/arg_base_test.ck
+// cli: chuck test/assert.ck lib/arg_parser/arg_base.ck test/lib/arg_parser/arg_base_test.ck
 
 "Test ArgBase" => string TEST_SUITE;
 

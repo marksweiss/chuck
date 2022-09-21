@@ -4,6 +4,9 @@
 // Machine.add("lib/comp/clock.ck");
 // Machine.add("lib/comp/instrument/instrument_base.ck");
 
+/**
+ * Basic SinOsc wrapper, adding only default ADSR to avoid clipping
+ */ 
 public class InstrSinOsc extends InstrumentBase {
   // generator
   SinOsc so;
@@ -58,7 +61,7 @@ public class InstrSinOsc extends InstrumentBase {
         env.releaseTime() => now;
 
         // load the next note into the gen
-        for (0 => int j; j < c.notes.cap(); j++) {
+        for (0 => int j; j < c.notes.size(); j++) {
           c.notes[j] @=> Note n;
           // TODO float freq support
           so.freq(Std.mtof(n.pitch)); 

@@ -19,11 +19,11 @@ public class InstrumentBase {
   DEFAULT_NUM_CHORDS => maxNumChords;
 
   fun void addChords(Chord newChords[]) {
-    if (numChords + newChords.cap() >= maxNumChords) {
+    if (numChords + newChords.size() >= maxNumChords) {
       <<< "ERROR: Cannot add more chords than", maxNumChords >>>;
       me.exit();
     }
-    for (0 => int i; i < newChords.cap(); i++) {
+    for (0 => int i; i < newChords.size(); i++) {
       newChords[i] @=> chords[numChords];
       numChords++;
     }
