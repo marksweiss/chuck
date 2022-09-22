@@ -65,6 +65,19 @@ public class ArgParser {
     return args.find(nameToMatch) == 1;
   }
 
+  fun int hasAnyArg(string namesToMatch[]) {
+    for (0 => int i; i < namesToMatch.size(); i++) {
+      if (args.find(namesToMatch[i]) > 1) {
+        <<< "arg name key found more than once" >>>;
+        me.exit();
+      }
+      if (args.find(namesToMatch[i]) == 1) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   fun void loadArgs() {
     for (int i; i < me.args(); i++) {
       if (i % 2 == 0) {

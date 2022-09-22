@@ -3,6 +3,7 @@
 // Machine.add("lib/comp/chord.ck");
 // Machine.add("lib/comp/clock.ck");
 // Machine.add("lib/comp/instrument/instrument_base.ck");
+// Machine.add("test/assert.ck");
 
 /**
  * SinOsc wrapper, with envelope, adjustable global gain and multiple effects,
@@ -11,11 +12,14 @@
 public class InstrSinOsc2 extends InstrumentBase {
   // generator
   SinOsc so;
+
   // envelope
   ADSR env;
 
   // effects
+  // chorus
   Chorus chorus; // .modFreq, .modDepth, .mix
+ 
   Modulate modulate;  // .vibratoRate, .vibratoGain, .randomGain
   // delay
   DelayL delay;  // .delay, .max
@@ -24,10 +28,11 @@ public class InstrSinOsc2 extends InstrumentBase {
   PRCRev rev; // .mix
   // mix
   Pan2 pan;  // -1 to 1 // .pan
-  Mix2 mix  // stereo to mono mixdown  // .pan
+  Mix2 mix;  // stereo to mono mixdown  // .pan
 
   // patch chain
-  so => env => chorus => modulate => delay => echo => rev => pan => mix => dac;
+  /* so => env => chorus => modulate => delay => echo => rev => pan => mix => dac; */
+  so => env =>  echo => chorus => modulate => delay => rev => env => pan => dac;
 
   // events, boilerplate but must be assigned by reference per instance because they are bound
   // to a particular spork and possibly spawned by one or another parent event loop
@@ -37,39 +42,41 @@ public class InstrSinOsc2 extends InstrumentBase {
 
   fun void init(ArgParser conf, Event startEvent, Event stepEvent, dur stepDur) {
     // args
-    // env
-    conf.args[adsrAttack.nameToFlag()].durVal => dur adsrAttack;
-    conf.args[adsrDecay.nameToFlag()].durVal => dur adsrDecay;
-    conf.args[adsrSustain.nameToFlag()].fltVal => dur adsrSustain;
-    conf.args[adsrRelease.nameToFlag()].durVal => dur adsrRelease;
-    env.set(adsrAttack, adsrDecay, adsrSustain, adsrRelease);
+    if (conf.hasArg("--adsr-attack")) {conf.args["--adsr-attack"].durVal => env.attackTime;}
+    if (conf.hasArg("--adsr-decay")) {conf.args["--adsr-decay"].durVal => env.decayTime;}
+    if (conf.hasArg("--adsr-sustain")) {conf.args["--adsr-sustain"].fltVal => env.sustainLevel;}
+    if (conf.hasArg("--adsr-release")) {conf.args["--adsr-release"].durVal => env.releaseTime;}
     // chorus
-    conf.args[chorusModFreq.nameToFlag()].fltVal => chorus.modFreq;
-    conf.args[chorusModDepth.nameToFlag()].fltVal => chorus.modDepth;
-    conf.args[chorusMix.nameToFlag()].fltVal => float chorus.mix;
+    if (conf.hasArg("--chorus-mod-freq")) {conf.args["--chorus-mod-freq"].fltVal => chorus.modFreq;}
+    if (conf.hasArg("--chorus-mod-depth")) {conf.args["--chorus-mod-depth"].fltVal => chorus.modDepth;}
+    if (conf.hasArg("--chorus-mix")) {conf.args["--chorus-mix"].fltVal => chorus.mix;}
     // modulate
-    conf.args[modulateVibrationRate.nameToFlag()].fltVal => modulate.vibrationRate;
-    conf.args[modulateVibrationGain.nameToFlag()].fltVal => modulate.vibrationGain;
-    conf.args[modulateRandomGain.nameToFlag()].fltVal => float modulate.randomGain;
+    if (conf.hasArg("--modulate-vibrato-rate")) {conf.args["--modulate-vibrato-rate"].fltVal => modulate.vibratoRate;}
+    if (conf.hasArg("--modulate-vibrato-gain")) {conf.args["--modulate-vibrato-gain"].fltVal => modulate.vibratoGain;}
+    if (conf.hasArg("--modulate-random-gain")) {conf.args["--modulate-random-gain"].fltVal => modulate.randomGain;}
     // delay
-    conf.args[delayDelay.nameToFlag()].durVal => delay.delay;
-    conf.args[delayMax.nameToFlag()].durVal => delay.max;
+    if (conf.hasArg("--delay-delay")) {conf.args["--delay-delay"].durVal => delay.delay;}
+    if (conf.hasArg("--delay-max")) {conf.args["--delay-max"].durVal => delay.max;}
     // echo
-    conf.args[echoDelay.nameToFlag()].durVal => echo.delay;
-    conf.args[echoMax.nameToFlag()].durVal => echo.max;
-    conf.args[echoMin.nameToFlag()].durVal => echo.min;
+    if (conf.hasArg("--echo-delay")) {conf.args["--echo-delay"].durVal => echo.delay;}
+    if (conf.hasArg("--echo-max")) {conf.args["--echo-max"].durVal => echo.max;}
+    if (conf.hasArg("--echo-mix")) {conf.args["--echo-mix"].fltVal => echo.mix;}
     // rev
-    conf.args[reverbMix.nameToFlag()].fltVal => float rev.mix;
+    if (conf.hasArg("--reverb-mix")) {conf.args["--reverb-mix"].fltVal => rev.mix;}
     // pan
-    // validate -1 to 1
-    panPan.nameToFlag()].fltVal => float panPanVal;
-    Assert.validate(panPanVal, -1.0, 1.0);
-    panPanVal => pan.pan;
+    if (conf.hasArg("--pan-pan")) {
+      conf.args["--pan-pan"].fltVal => float panPanVal;
+      // TODO UNIT TEST AND FIX
+      /* Assert.validate(panPanVal, -1.0, 1.0); */
+      panPanVal => pan.pan;
+    }
     // mix
-    // validate 0 to 1
-    mixPan.nameToFlag()].fltVal => float mixPanVal;
-    Assert.validate(mixPanVal, 0.0, 1.0);
-    mixPanVal => mix.pan;
+    if (conf.hasArg("--mix-pan")) {
+      conf.args["--mix-pan"].fltVal => float mixPanVal;
+      // TODO UNIT TEST AND FIX
+      /* Assert.validate(mixPanVal, 0.0, 1.0); */
+      mixPanVal => mix.pan;
+    }
     
     // boilerplate event assignment
     startEvent @=> this.startEvent;    
