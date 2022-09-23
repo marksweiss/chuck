@@ -31,23 +31,23 @@ fun void main () {
 
   InstrSinOsc2 instr;
   ArgParser conf;
-  conf.addDurationArg("adsrAttack", 10::ms);
-  conf.addDurationArg("adsrDecay", 2::ms);
-  conf.addFloatArg("adsrSustain", 0.05);
-  conf.addDurationArg("adsrRelease", 30::ms);
-  conf.addFloatArg("chorusModFreq", 500.0);
-  conf.addFloatArg("chorusModDepth", 0.8);
+  conf.addDurationArg("adsrAttack", 120::ms);
+  conf.addDurationArg("adsrDecay", 70::ms);
+  conf.addFloatArg("adsrSustain", 0.8);
+  conf.addDurationArg("adsrRelease", 300::ms);
+  conf.addFloatArg("chorusModFreq", 4000.0);
+  conf.addFloatArg("chorusModDepth", 0.7);
   conf.addFloatArg("chorusMix", 0.4);
-  conf.addFloatArg("modulateVibratoRate", 1000.0);
+  conf.addFloatArg("modulateVibratoRate", 300.0);
   conf.addFloatArg("modulateVibratoGain", 0.05);
   conf.addFloatArg("modulateRandomGain", 0.1);
   conf.addDurationArg("delayDelay", 50::ms);
-  conf.addDurationArg("delayMax", 50::ms);
-  conf.addDurationArg("echoDelay", 50::ms);
-  conf.addDurationArg("echoMax", 100::ms);
-  conf.addFloatArg("echoMix", 0.5);
-  conf.addFloatArg("reverbMix", 0.5);
-  conf.addFloatArg("panPan", 0.2);
+  /* conf.addDurationArg("delayMax", 50::ms); */
+  conf.addDurationArg("echoDelay", 200::ms);
+  /* conf.addDurationArg("echoMax", 100::ms); */
+  conf.addFloatArg("echoMix", 0.6);
+  conf.addFloatArg("reverbMix", 1.1);
+  conf.addFloatArg("panPan", 0.0);
   conf.addFloatArg("mixPan", 1.0);
   conf.loadArgs();
 
@@ -55,15 +55,15 @@ fun void main () {
 
   Chord c;
   Scale s;
-  Chord chords[2];
-  c.make(s.triad(OCTAVE, s.C, s.M), GAIN * 0.8, WHL) @=> Chord CMaj;
-  /* c.make(s.triad(OCTAVE, s.F, s.m), GAIN, QRTR) @=> Chord FMin; */
-  /* c.make(s.triad(OCTAVE + 1, s.G, s.M), GAIN * 0.8, QRTR) @=> Chord GMaj; */
+  Chord chords[4];
+  c.make(s.triad(OCTAVE, s.C, s.M), GAIN * 0.8, HLF) @=> Chord CMaj;
+  c.make(s.triad(OCTAVE, s.F, s.M), GAIN, QRTR) @=> Chord FMaj;
+  c.make(s.triad(OCTAVE, s.G, s.M), GAIN * 0.8, QRTR) @=> Chord GMaj;
   c.rest(WHL) @=> Chord rest;
   CMaj @=> chords[0];
-  /* FMin @=> chords[1]; */
-  /* GMaj @=> chords[2]; */
-  rest @=> chords[1];
+  FMaj @=> chords[1];
+  GMaj @=> chords[2];
+  rest @=> chords[3];
   instr.addChords(chords);
 
   spork ~ playClock(clock);

@@ -106,10 +106,9 @@ public class InstrSinOsc2 extends InstrumentBase {
       // block on event of next beat step broadcast by clock
       stepEvent => now;
       sinceLastNote + stepDur => sinceLastNote; 
+
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote == nextNoteDur) {
-        Scale s;
-        
         // previous note ending, trigger release
         env.keyOff();
         env.releaseTime() => now;
@@ -119,7 +118,6 @@ public class InstrSinOsc2 extends InstrumentBase {
         // load the next note into the gen
         for (0 => int j; j < c.notes.size(); j++) {
           c.notes[j] @=> Note n;
-          // TODO float freq support
           so.freq(Std.mtof(n.pitch)); 
           n.gain => so.gain;
         }
@@ -130,10 +128,7 @@ public class InstrSinOsc2 extends InstrumentBase {
         (i + 1) % numChords => i;
 
         // trigger envelope start
-        // default envelope behavior to avoid clipping
-        env.set(10::ms, 2::ms, 0.8, 10::ms);
         env.keyOn();
-
         // note emitted, yield to clock
         me.yield();
       }
