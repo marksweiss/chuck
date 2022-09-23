@@ -9,8 +9,33 @@ public void playClock(Clock clock) {
   clock.play();
 }
 
-public void playInstrSinOsc(InstrSinOsc2 instr) {
+public void playInstr(InstrSinOsc2 instr) {
   instr.play();
+}
+
+fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur release) {
+  ArgParser conf;
+  conf.addDurationArg("adsrAttack", attack);
+  conf.addDurationArg("adsrDecay", decay);
+  conf.addFloatArg("adsrSustain", 0.8);
+  conf.addDurationArg("adsrRelease", release);
+  conf.addFloatArg("chorusModFreq", 4000.0);
+  conf.addFloatArg("chorusModDepth", 0.7);
+  conf.addFloatArg("chorusMix", 0.4);
+  conf.addFloatArg("modulateVibratoRate", modulateVibratoRate);
+  conf.addFloatArg("modulateVibratoGain", 0.05);
+  conf.addFloatArg("modulateRandomGain", 0.1);
+  conf.addDurationArg("delayDelay", 50::ms);
+  /* conf.addDurationArg("delayMax", 50::ms); */
+  conf.addDurationArg("echoDelay", 200::ms);
+  /* conf.addDurationArg("echoMax", 100::ms); */
+  conf.addFloatArg("echoMix", 0.6);
+  conf.addFloatArg("reverbMix", 1.1);
+  conf.addFloatArg("panPan", 0.0);
+  conf.addFloatArg("mixPan", 1.0);
+  conf.loadArgs();
+
+  return conf;
 }
 
 fun void main () {
@@ -29,30 +54,6 @@ fun void main () {
   clock.D(0.5) => dur HLF;
   clock.D(1.0) => dur WHL;
 
-  InstrSinOsc2 instr;
-  ArgParser conf;
-  conf.addDurationArg("adsrAttack", 120::ms);
-  conf.addDurationArg("adsrDecay", 70::ms);
-  conf.addFloatArg("adsrSustain", 0.8);
-  conf.addDurationArg("adsrRelease", 300::ms);
-  conf.addFloatArg("chorusModFreq", 4000.0);
-  conf.addFloatArg("chorusModDepth", 0.7);
-  conf.addFloatArg("chorusMix", 0.4);
-  conf.addFloatArg("modulateVibratoRate", 300.0);
-  conf.addFloatArg("modulateVibratoGain", 0.05);
-  conf.addFloatArg("modulateRandomGain", 0.1);
-  conf.addDurationArg("delayDelay", 50::ms);
-  /* conf.addDurationArg("delayMax", 50::ms); */
-  conf.addDurationArg("echoDelay", 200::ms);
-  /* conf.addDurationArg("echoMax", 100::ms); */
-  conf.addFloatArg("echoMix", 0.6);
-  conf.addFloatArg("reverbMix", 1.1);
-  conf.addFloatArg("panPan", 0.0);
-  conf.addFloatArg("mixPan", 1.0);
-  conf.loadArgs();
-
-  instr.init(conf, startEvent, stepEvent, clock.stepDur);
-
   Chord c;
   Scale s;
   Chord chords[4];
@@ -64,10 +65,20 @@ fun void main () {
   FMaj @=> chords[1];
   GMaj @=> chords[2];
   rest @=> chords[3];
-  instr.addChords(chords);
+
+  getConf(100.0, 70::ms, 120::ms, 90::ms) @=> ArgParser conf1;
+  getConf(100, 10::ms, 120::ms, 90::ms) @=> ArgParser conf2;
+  InstrSinOsc2 instr1;
+  InstrSinOsc2 instr2; 
+  instr1.init(conf1, startEvent, stepEvent, clock.stepDur); 
+  instr2.init(conf2, startEvent, stepEvent, clock.stepDur); 
+  instr1.addChords(chords);
+  instr2.addChords(chords);
 
   spork ~ playClock(clock);
-  spork ~ playInstrSinOsc(instr);
+  spork ~ playInstr(instr1);
+  spork ~ playInstr(instr2);
+
   me.yield();  // yield to Clock and Instrument event loops 
   while (true) {1::second => now;}  // block process exit to force child threads to run
 }
