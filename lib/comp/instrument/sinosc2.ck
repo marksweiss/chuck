@@ -1,6 +1,7 @@
 // Machine.add("lib/comp/scale.ck");
 // Machine.add("lib/comp/note.ck");
 // Machine.add("lib/comp/chord.ck");
+// Machine.add("lib/comp/seqwuence.ck");
 // Machine.add("lib/comp/clock.ck");
 // Machine.add("lib/comp/instrument/instrument_base.ck");
 // Machine.add("test/assert.ck");
@@ -10,16 +11,15 @@
  * configurable from CLI args or programmatic call to init()
  */ 
 public class InstrSinOsc2 extends InstrumentBase {
+  Sequence chords;
+
   // generator
   SinOsc so;
-
   // envelope
   ADSR env;
-
   // effects
   // chorus
   Chorus chorus; // .modFreq, .modDepth, .mix
- 
   Modulate modulate;  // .vibratoRate, .vibratoGain, .randomGain
   // delay
   DelayL delay;  // .delay, .max
@@ -36,7 +36,12 @@ public class InstrSinOsc2 extends InstrumentBase {
   Event stepEvent;
   dur stepDur;
 
-  fun void init(ArgParser conf, Event startEvent, Event stepEvent, dur stepDur) {
+  fun void init(ArgParser conf, Sequence chords, Event startEvent, Event stepEvent, dur stepDur) {
+    chords @=> this.chords;
+    startEvent @=> this.startEvent;    
+    stepEvent @=> this.stepEvent;    
+    stepDur => this.stepDur;
+
     // init all ugens to passthu initially, only set ugens with conf arguments to be default sum inputs
     env.op(OP_PASSTHRU);
     chorus.op(OP_PASSTHRU);
@@ -110,11 +115,6 @@ public class InstrSinOsc2 extends InstrumentBase {
     
     // create patch chain
     so => env => echo => chorus => modulate => delay => rev => env => pan => dac;
-
-    // boilerplate event assignment to control time advancement and emitting notes
-    startEvent @=> this.startEvent;    
-    stepEvent @=> this.stepEvent;    
-    stepDur => this.stepDur;
   }
 
   // Override
@@ -129,7 +129,7 @@ public class InstrSinOsc2 extends InstrumentBase {
     0::samp => dur sinceLastNote;
     while (true) {
       // get next chord  to play
-      chords[i] @=> Chord c;
+      this.chords.next() @=> Chord c;
       c.notes[0].duration => dur nextNoteDur;
 
       // block on event of next beat step broadcast by clock
@@ -154,7 +154,7 @@ public class InstrSinOsc2 extends InstrumentBase {
         // reset note triggering state
         0::samp => sinceLastNote;
         // increment counter of which chord in sequence
-        (i + 1) % numChords => i;
+        (i + 1) % chords.size() => i;
 
         // trigger envelope start
         env.keyOn();

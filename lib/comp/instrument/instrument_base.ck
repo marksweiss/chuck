@@ -18,27 +18,6 @@ public class InstrumentBase {
   3 => static int OP_MULTIPLY;
   4 => static int OP_DIVIDE;
 
-  // TODO MOVE TO PLAYER/SEQUENCE
-  128 => static int DEFAULT_NUM_CHORDS;
-  Chord chords[DEFAULT_NUM_CHORDS];
-  int numChords;
-  int maxNumChords;
-
-  0 => numChords;
-  DEFAULT_NUM_CHORDS => maxNumChords;
-
-  fun void addChords(Chord newChords[]) {
-    if (numChords + newChords.size() >= maxNumChords) {
-      <<< "ERROR: Cannot add more chords than", maxNumChords >>>;
-      me.exit();
-    }
-    for (0 => int i; i < newChords.size(); i++) {
-      newChords[i] @=> chords[numChords];
-      numChords++;
-    }
-  }
-  // /TODO MOVE TO PLAYER/SEQUENCE
-
   // Override
   fun void play() {}
 
