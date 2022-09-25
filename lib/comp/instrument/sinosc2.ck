@@ -1,7 +1,8 @@
 // Machine.add("lib/comp/scale.ck");
 // Machine.add("lib/comp/note.ck");
 // Machine.add("lib/comp/chord.ck");
-// Machine.add("lib/comp/seqwuence.ck");
+// Machine.add("lib/comp/sequence.ck");
+// Machine.add("lib/comp/sequences.ck");
 // Machine.add("lib/comp/clock.ck");
 // Machine.add("lib/comp/instrument/instrument_base.ck");
 // Machine.add("test/assert.ck");
@@ -11,7 +12,7 @@
  * configurable from CLI args or programmatic call to init()
  */ 
 public class InstrSinOsc2 extends InstrumentBase {
-  Sequence chords;
+  Sequences seqs;
 
   // generator
   SinOsc so;
@@ -36,8 +37,8 @@ public class InstrSinOsc2 extends InstrumentBase {
   Event stepEvent;
   dur stepDur;
 
-  fun void init(ArgParser conf, Sequence chords, Event startEvent, Event stepEvent, dur stepDur) {
-    chords @=> this.chords;
+  fun void init(ArgParser conf, Sequences seqs, Event startEvent, Event stepEvent, dur stepDur) {
+    seqs @=> this.seqs;
     startEvent @=> this.startEvent;    
     stepEvent @=> this.stepEvent;    
     stepDur => this.stepDur;
@@ -128,8 +129,13 @@ public class InstrSinOsc2 extends InstrumentBase {
     // time to play the next one
     0::samp => dur sinceLastNote;
     while (true) {
-      // get next chord  to play
-      this.chords.next() @=> Chord c;
+      // get next sequence to play and chord to play from that sequence
+
+      // TODO HANDLE seqs NEXT, RIGHT NOW JUST ONE seq in seqs so always call next()
+      /* this.seqs.next() @=> seq; */
+      this.seqs.next() @=> Sequence seq;
+
+      seq.next() @=> Chord c;
       c.notes[0].duration => dur nextNoteDur;
 
       // block on event of next beat step broadcast by clock
@@ -153,8 +159,11 @@ public class InstrSinOsc2 extends InstrumentBase {
 
         // reset note triggering state
         0::samp => sinceLastNote;
+
+        // TODO HANDLE seqs increment and NEXT
+
         // increment counter of which chord in sequence
-        (i + 1) % chords.size() => i;
+        (i + 1) % seq.size() => i;
 
         // trigger envelope start
         env.keyOn();

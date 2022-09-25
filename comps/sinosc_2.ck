@@ -1,8 +1,8 @@
 // cli: $> chuck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck \
 //               lib/arg_parser/float_arg.ck lib/arg_parser/float_arg.ck lib/arg_parser/time_arg.ck \
 //               lib/arg_parser/string_arg.ck lib/arg_parser/arg_parser.ck lib/comp/scale.ck lib/comp/note.ck \
-//               lib/comp/chord.ck lib/comp/sequence.ck lib/comp/instrument/instrument_base.ck lib/comp/clock.ck \
-//               test/assert.ck lib/comp/instrument/sinosc2.ck comps/sinosc_2.ck
+//               lib/comp/chord.ck lib/comp/sequence.ck lib/comp/sequenceick lib/comp/instrument/instrument_base.ck \
+//               lib/comp/clock.ck test/assert.ck lib/comp/instrument/sinosc2.ck comps/sinosc_2.ck
 
 // For client to spork, which requires a free function as entry point
 public void playClock(Clock clock) {
@@ -72,13 +72,19 @@ fun void main () {
   seq2.init(isLooping);
   seq1.add(chords);
   seq2.add(chords);
+  Sequences seqs1;
+  seqs1.init(isLooping);
+  seqs1.add(seq1);
+  Sequences seqs2;
+  seqs2.init(isLooping);
+  seqs2.add(seq2);
 
   getConf(100, 70::ms, 120::ms, 90::ms) @=> ArgParser conf1;
   getConf(250, 10::ms, 120::ms, 90::ms) @=> ArgParser conf2;
   InstrSinOsc2 instr1;
   InstrSinOsc2 instr2; 
-  instr1.init(conf1, seq1, startEvent, stepEvent, clock.stepDur); 
-  instr2.init(conf2, seq2, startEvent, stepEvent, clock.stepDur); 
+  instr1.init(conf1, seqs1, startEvent, stepEvent, clock.stepDur); 
+  instr2.init(conf2, seqs2, startEvent, stepEvent, clock.stepDur); 
 
 
   spork ~ playClock(clock);
