@@ -31,10 +31,12 @@ public class InstrSinOsc extends InstrumentBase {
     stepDur => this.stepDur;
   }
 
+  // Override
   fun void instrHelp() {
     <<< "No args accepted" >>>;
   }
 
+  // Override
   fun void play() {
     // block on START
     startEvent => now;
@@ -82,5 +84,10 @@ public class InstrSinOsc extends InstrumentBase {
         me.yield();
       }
     }
+  }
+
+  // Override
+  fun void setOp(int op) {
+    so.op(op);
   }
 }

@@ -11,6 +11,3 @@ public class StringArg extends ArgBase {
     return arg;
   }
 }
-
-/* StringArg.make("argString", "Hello and Goodbye") @=> StringArg arg; */
-/* <<< arg.name, arg.nameToFlag(), arg.type, "\"", arg.strVal, "\"" >>>; */

@@ -128,18 +128,18 @@ fun void main() {
   MidiPlayer controllerPlayer;
   controllerPlayer.init(
     "Controller",
-    argParser.args[controllerPortIn.nameToFlag()].intVal,
-    argParser.args[controllerPortOut.nameToFlag()].intVal,
-    argParser.args[channelIn.nameToFlag()].intVal,
-    argParser.args[channelOut.nameToFlag()].intVal
+    argParser.args[controllerPortIn.toFlag()].intVal,
+    argParser.args[controllerPortOut.toFlag()].intVal,
+    argParser.args[channelIn.toFlag()].intVal,
+    argParser.args[channelOut.toFlag()].intVal
   );
   MidiPlayer internalPlayer;
   internalPlayer.init(
     "Internal",
-    argParser.args[internalPortOut.nameToFlag()].intVal,
+    argParser.args[internalPortOut.toFlag()].intVal,
     DEFAULT_PORT,
-    argParser.args[channelIn.nameToFlag()].intVal,
-    argParser.args[channelOut.nameToFlag()].intVal
+    argParser.args[channelIn.toFlag()].intVal,
+    argParser.args[channelOut.toFlag()].intVal
   );
 
   /* internalPlayer.play(60, 100, 1000);  // noteOn *1/ */

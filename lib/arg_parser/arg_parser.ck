@@ -8,51 +8,63 @@
 */
 
 public class ArgParser {
+  // used to store keyNames only
+  128 => static int MAX_NUM_ARGS;
+  // redundant array of associative array arg key names because Chuck doesn't support retrieving
+  // or iterating over keys etc., and we want to support pattern matching on keys, that is, support
+  // checking for a key without being able to match on the exact key name
+  string keyNames[MAX_NUM_ARGS];
+
   int numArgs;
   ArgBase args[1];  // size doesn't matter because using as associative array */
   int types[1];
 
   fun IntArg addIntArg(string name, int val) {
     IntArg.make(name, val) @=> IntArg arg;
-    arg.nameToFlag() => string flag;
+    arg.toFlag() => string flag;
     arg @=> args[flag];
     arg.type @=> types[flag];
+    flag @=> keyNames[numArgs];
     numArgs++;
     return arg;
   }
 
   fun FloatArg addFloatArg(string name, float val) {
     FloatArg.make(name, val) @=> FloatArg arg;
-    arg.nameToFlag() => string flag;
+    arg.toFlag() => string flag;
     arg @=> args[flag];
     arg.type @=> types[flag];
+    flag @=> keyNames[numArgs];
     numArgs++;
     return arg;
   }
 
   fun StringArg addStringArg(string name, string val) {
     StringArg.make(name, val) @=> StringArg arg;
-    arg.nameToFlag() => string flag;
+    arg.toFlag() => string flag;
     arg @=> args[flag];
     arg.type @=> types[flag];
+    flag @=> keyNames[numArgs];
     numArgs++;
     return arg;
   }
 
   fun DurationArg addDurationArg(string name, dur val) {
     DurationArg.make(name, val) @=> DurationArg arg;
-    arg.nameToFlag() => string flag;
+    arg.toFlag() => string flag;
     arg @=> args[flag];
     arg.type @=> types[flag];
+    flag @=> keyNames[numArgs];
     numArgs++;
     return arg;
   }
 
   fun TimeArg addTimeArg(string name, time val) {
     TimeArg.make(name, val) @=> TimeArg arg;
-    arg.nameToFlag() => string flag;
+    arg.toFlag() => string flag;
     arg @=> args[flag];
     arg.type @=> types[flag];
+    flag @=> keyNames[numArgs];
     numArgs++;
     return arg;
   }
@@ -72,6 +84,18 @@ public class ArgParser {
         me.exit();
       }
       if (args.find(namesToMatch[i]) == 1) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Matches any argument that *starts* with prefixPattern. Supports "families" of arguments.
+   */
+  fun int hasAnyArg(string prefixPattern) {
+    for (0 => int i; i < keyNames.size(); i++) {
+      if (keyNames[i].find(prefixPattern) == 0) {
         return true;
       }
     }

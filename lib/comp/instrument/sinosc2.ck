@@ -30,10 +30,6 @@ public class InstrSinOsc2 extends InstrumentBase {
   Pan2 pan;  // -1 to 1 // .pan
   Mix2 mix;  // stereo to mono mixdown  // .pan
 
-  // patch chain
-  /* so => env => chorus => modulate => delay => echo => rev => pan => mix => dac; */
-  so => env =>  echo => chorus => modulate => delay => rev => env => pan => dac;
-
   // events, boilerplate but must be assigned by reference per instance because they are bound
   // to a particular spork and possibly spawned by one or another parent event loop
   Event startEvent;
@@ -41,34 +37,65 @@ public class InstrSinOsc2 extends InstrumentBase {
   dur stepDur;
 
   fun void init(ArgParser conf, Event startEvent, Event stepEvent, dur stepDur) {
+    // init all ugens to passthu initially, only set ugens with conf arguments to be default sum inputs
+    env.op(OP_PASSTHRU);
+    chorus.op(OP_PASSTHRU);
+    modulate.op(OP_PASSTHRU);
+    delay.op(OP_PASSTHRU);
+    echo.op(OP_PASSTHRU);
+    rev.op(OP_PASSTHRU);
+    pan.op(OP_PASSTHRU);
+    mix.op(OP_PASSTHRU);
+
     // args
     if (conf.hasArg("--adsr-attack")) {conf.args["--adsr-attack"].durVal => env.attackTime;}
     if (conf.hasArg("--adsr-decay")) {conf.args["--adsr-decay"].durVal => env.decayTime;}
     if (conf.hasArg("--adsr-sustain")) {conf.args["--adsr-sustain"].fltVal => env.sustainLevel;}
     if (conf.hasArg("--adsr-release")) {conf.args["--adsr-release"].durVal => env.releaseTime;}
+    if (conf.hasAnyArg("--adsr")) {
+      env.op(OP_SUM);
+    }
     // chorus
     if (conf.hasArg("--chorus-mod-freq")) {conf.args["--chorus-mod-freq"].fltVal => chorus.modFreq;}
     if (conf.hasArg("--chorus-mod-depth")) {conf.args["--chorus-mod-depth"].fltVal => chorus.modDepth;}
     if (conf.hasArg("--chorus-mix")) {conf.args["--chorus-mix"].fltVal => chorus.mix;}
+    if (conf.hasAnyArg("--chorus")) {
+      chorus.op(OP_SUM);
+    }
     // modulate
     if (conf.hasArg("--modulate-vibrato-rate")) {conf.args["--modulate-vibrato-rate"].fltVal => modulate.vibratoRate;}
     if (conf.hasArg("--modulate-vibrato-gain")) {conf.args["--modulate-vibrato-gain"].fltVal => modulate.vibratoGain;}
     if (conf.hasArg("--modulate-random-gain")) {conf.args["--modulate-random-gain"].fltVal => modulate.randomGain;}
+    if (conf.hasAnyArg("--modulate")) {
+      modulate.op(OP_SUM);
+    }
     // delay
     if (conf.hasArg("--delay-delay")) {conf.args["--delay-delay"].durVal => delay.delay;}
     if (conf.hasArg("--delay-max")) {conf.args["--delay-max"].durVal => delay.max;}
+    if (conf.hasAnyArg("--delay")) {
+      delay.op(OP_SUM);
+    }
     // echo
     if (conf.hasArg("--echo-delay")) {conf.args["--echo-delay"].durVal => echo.delay;}
     if (conf.hasArg("--echo-max")) {conf.args["--echo-max"].durVal => echo.max;}
     if (conf.hasArg("--echo-mix")) {conf.args["--echo-mix"].fltVal => echo.mix;}
+    if (conf.hasAnyArg("--echo")) {
+      echo.op(OP_SUM);
+    }
     // rev
     if (conf.hasArg("--reverb-mix")) {conf.args["--reverb-mix"].fltVal => rev.mix;}
+    if (conf.hasAnyArg("--reverb")) {
+      rev.op(OP_SUM);
+    }
     // pan
     if (conf.hasArg("--pan-pan")) {
       conf.args["--pan-pan"].fltVal => float panPanVal;
       // TODO UNIT TEST AND FIX
       /* Assert.validate(panPanVal, -1.0, 1.0); */
       panPanVal => pan.pan;
+    }
+    if (conf.hasAnyArg("--pan")) {
+      pan.op(OP_SUM);
     }
     // mix
     if (conf.hasArg("--mix-pan")) {
@@ -77,18 +104,20 @@ public class InstrSinOsc2 extends InstrumentBase {
       /* Assert.validate(mixPanVal, 0.0, 1.0); */
       mixPanVal => mix.pan;
     }
+    if (conf.hasAnyArg("--mix")) {
+      pan.op(OP_SUM);
+    }
     
-    // boilerplate event assignment
+    // create patch chain
+    so => env => echo => chorus => modulate => delay => rev => env => pan => dac;
+
+    // boilerplate event assignment to control time advancement and emitting notes
     startEvent @=> this.startEvent;    
     stepEvent @=> this.stepEvent;    
     stepDur => this.stepDur;
   }
 
-  // TODO
-  fun void instrHelp() {
-    <<< "Args:" >>>;
-  }
-
+  // Override
   fun void play() {
     // block on START
     startEvent => now;
@@ -134,4 +163,16 @@ public class InstrSinOsc2 extends InstrumentBase {
       }
     }
   }
+
+  // Override
+  fun void setOp(int op) {
+    so.op(op);
+  }
+
+  // Override
+  // TODO
+  fun void instrHelp() {
+    <<< "Args:" >>>;
+  }
+
 }

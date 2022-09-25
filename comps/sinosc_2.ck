@@ -66,8 +66,8 @@ fun void main () {
   GMaj @=> chords[2];
   rest @=> chords[3];
 
-  getConf(100.0, 70::ms, 120::ms, 90::ms) @=> ArgParser conf1;
-  getConf(100, 10::ms, 120::ms, 90::ms) @=> ArgParser conf2;
+  getConf(100, 70::ms, 120::ms, 90::ms) @=> ArgParser conf1;
+  getConf(550, 10::ms, 120::ms, 90::ms) @=> ArgParser conf2;
   InstrSinOsc2 instr1;
   InstrSinOsc2 instr2; 
   instr1.init(conf1, startEvent, stepEvent, clock.stepDur); 

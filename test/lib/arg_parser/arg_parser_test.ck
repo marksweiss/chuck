@@ -19,7 +19,7 @@ fun void testAddIntArgHasArg() {
   Assert.assert(100, arg.intVal, testName, msg);
 
   // call hasArg
-  argParser.hasArg(arg.nameToFlag()) => int actual;
+  argParser.hasArg(arg.toFlag()) => int actual;
   // assert hasArg
   true => int expected;
   Assert.assert(expected, actual, testName, msg);
@@ -39,7 +39,7 @@ fun void testAddFloatArgHasArg() {
   Assert.assert(100.0, arg.fltVal, testName, msg);
 
   // call hasArg
-  argParser.hasArg(arg.nameToFlag()) => int actual;
+  argParser.hasArg(arg.toFlag()) => int actual;
   // assert hasArg
   true => int expected;
   Assert.assert(expected, actual, testName, msg);
@@ -59,7 +59,7 @@ fun void testAddStringArgHasArg() {
   Assert.assert("100", arg.strVal, testName, msg);
 
   // call hasArg
-  argParser.hasArg(arg.nameToFlag()) => int actual;
+  argParser.hasArg(arg.toFlag()) => int actual;
   // assert hasArg
   true => int expected;
   Assert.assert(expected, actual, testName, msg);
@@ -79,7 +79,7 @@ fun void testAddDurationArgHasArg() {
   Assert.assert(100::ms, arg.durVal, testName, msg);
 
   // call hasArg
-  argParser.hasArg(arg.nameToFlag()) => int actual;
+  argParser.hasArg(arg.toFlag()) => int actual;
   // assert hasArg
   true => int expected;
   Assert.assert(expected, actual, testName, msg);
@@ -99,7 +99,7 @@ fun void testAddTimeArgHasArg() {
   Assert.assert(100::ms + now, arg.timeVal, testName, msg);
 
   // call hasArg
-  argParser.hasArg(arg.nameToFlag()) => int actual;
+  argParser.hasArg(arg.toFlag()) => int actual;
   // assert hasArg
   true => int expected;
   Assert.assert(expected, actual, testName, msg);
@@ -108,7 +108,7 @@ fun void testAddTimeArgHasArg() {
 fun void testHasArgNotFound() {
   // setup
   "testAddArgHasArgNotFound" => string testName;
-  "parser does note have arg with given name" => string msg;
+  "parser does not have arg with given name" => string msg;
   
   ArgParser argParser;
   "newIntArg" => string argName;
@@ -140,6 +140,67 @@ fun void testNumArgs() {
   Assert.assert(2, argParser.numArgs, testName, msg);
 }
 
+fun void testHasAnyArgNoArgs() {
+  // setup
+  "testHasAnyArgNoArgs" => string testName;
+  "parser has has no args matching args array input" => string msg;
+
+  ArgParser argParser;
+  ["--dummy-arg-name"] @=> string args[];
+
+  // call
+  argParser.hasAnyArg(args) => int actual;
+
+  // assert hasArg
+  false => int expected;
+  Assert.assert(expected, actual, testName, msg);
+}
+
+fun void testHasAnyArgHasArgs() {
+  // setup
+  "testHasAnyArgHasArgs" => string testName;
+  "parser has one or more args matching args array input" => string msg;
+
+  ArgParser argParser;
+  "newStringArg" => string argName;
+  argParser.addStringArg(argName, "100") @=> StringArg arg;
+  "newStringArg2" => string argName2;
+  argParser.addStringArg(argName2, "101");
+  // only match on one of the two args added, still returns true
+  [arg.toFlag()] @=> string args[];
+
+  // call
+  argParser.hasAnyArg(args) => int actual;
+
+  // assert hasArg
+  true => int expected;
+  Assert.assert(expected, actual, testName, msg);
+}
+
+fun void testHasAnyArgHasArgsMatchPattern() {
+  // setup
+  "testHasAnyArgHasArgsMatchPattern" => string testName;
+  "parser has one or more args matching args pattern" => string msg;
+
+  ArgParser argParser;
+  "newString" => string argNamePrefix;
+  argNamePrefix + "Arg" => string argName;
+  argParser.addStringArg(argName, "100");
+  argNamePrefix + "Arg2" => string argName2;
+  argParser.addStringArg(argName2, "101");
+
+  // static access but Chuck requires an instance to do so 
+  ArgBase argBase;
+  argBase.toFlag(argNamePrefix) => string patternPrefix;  
+ 
+  // call
+  argParser.hasAnyArg(patternPrefix) => int actual;
+
+  // assert hasArg
+  true => int expected;
+  Assert.assert(expected, actual, testName, msg);
+}
+
 fun void test() {
   <<< "\nRunning Test Suite:", TEST_SUITE >>>;
   testAddIntArgHasArg();
@@ -149,6 +210,9 @@ fun void test() {
   testAddTimeArgHasArg();
   testHasArgNotFound();
   testNumArgs();
+  testHasAnyArgNoArgs();
+  testHasAnyArgHasArgs();
+  testHasAnyArgHasArgsMatchPattern();
 }
 
 test();

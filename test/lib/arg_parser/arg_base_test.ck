@@ -12,7 +12,7 @@ fun void testNameToFlagSingleWordName() {
   "--flag" => string expected;
 
   // call
-  argBase.nameToFlag() => string actual;
+  argBase.toFlag() => string actual;
 
   // assert
   Assert.assert(expected, actual, testName, msg);
@@ -28,7 +28,7 @@ fun void testNameToFlag() {
   "--flag-with-more-words" => string expected;
 
   // call
-  argBase.nameToFlag() => string actual;
+  argBase.toFlag() => string actual;
 
   // assert
   Assert.assert(expected, actual, testName, msg);

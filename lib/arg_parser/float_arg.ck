@@ -11,6 +11,3 @@ public class FloatArg extends ArgBase {
     return arg;
   }
 }
-
-/* FloatArg.make("argFloat", 20.01) @=> FloatArg arg; */ 
-/* <<< arg.name, arg.nameToFlag(), arg.type, arg.fltVal >>>; */

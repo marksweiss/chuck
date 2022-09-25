@@ -16,7 +16,11 @@ public class ArgBase {
   /**
    * Converts a camelcase arg name to a *nix-style flag syntax
    */
-  fun string nameToFlag() {
+  fun string toFlag() {
+    return toFlag(this.name);
+  }
+
+  fun static string toFlag(string name) {
     if (name.length() == 0) {
       <<< "name must not be empty string" >>>;
       me.exit(); 
