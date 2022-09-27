@@ -1,8 +1,9 @@
 // cli: $> chuck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck \
 //               lib/arg_parser/float_arg.ck lib/arg_parser/float_arg.ck lib/arg_parser/time_arg.ck \
-//               lib/arg_parser/string_arg.ck lib/arg_parser/arg_parser.ck lib/comp/scale.ck lib/comp/note.ck \
-//               lib/comp/chord.ck lib/comp/sequence.ck lib/comp/sequenceick lib/comp/instrument/instrument_base.ck \
-//               lib/comp/clock.ck test/assert.ck lib/comp/instrument/sinosc2.ck comps/sinosc_2.ck
+//               lib/arg_parser/string_arg.ck lib/arg_parser/arg_parser.ck lib/comp/scale.ck lib/comp/scale_const.ck \
+//               lib/comp/note.ck lib/comp/chord.ck lib/comp/sequence.ck lib/comp/sequenceick \
+//               lib/comp/instrument/instrument_base.ck lib/comp/clock.ck test/assert.ck \
+//               lib/comp/instrument/sinosc2.ck comps/sinosc_2.ck
 
 // For client to spork, which requires a free function as entry point
 public void playClock(Clock clock) {
@@ -17,7 +18,7 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   ArgParser conf;
   conf.addDurationArg("adsrAttack", attack);
   conf.addDurationArg("adsrDecay", decay);
-  conf.addFloatArg("adsrSustain", 0.8);
+  conf.addFloatArg("adsrSustain", 0.9);
   conf.addDurationArg("adsrRelease", release);
   conf.addFloatArg("chorusModFreq", 200.0);
   conf.addFloatArg("chorusModDepth", 0.2);
@@ -26,9 +27,9 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   conf.addFloatArg("modulateVibratoGain", 0.05);
   conf.addFloatArg("modulateRandomGain", 0.1);
   conf.addDurationArg("delayDelay", 50::ms);
-  /* conf.addDurationArg("delayMax", 50::ms); */
+  conf.addDurationArg("delayMax", 50::ms);
   conf.addDurationArg("echoDelay", 55::ms);
-  /* conf.addDurationArg("echoMax", 100::ms); */
+  conf.addDurationArg("echoMax", 100::ms);
   conf.addFloatArg("echoMix", 0.3);
   conf.addFloatArg("reverbMix", 4.1);
   conf.addFloatArg("panPan", 0.0);
@@ -49,29 +50,30 @@ fun void main () {
   Event stepEvent; 
   Clock clock;
   clock.init(BPM, startEvent, stepEvent);
-  clock.D(0.25) => dur QRTR;
-  clock.D(0.5) => dur HLF;
-  clock.D(1.0) => dur WHL;
 
   Chord c;
+  ScaleConst sc;
   Scale s;
-  Chord chords[4];
-  c.make(s.triad(OCTAVE, s.C, s.M), GAIN * 0.8, HLF) @=> Chord CMaj;
-  c.make(s.triad(OCTAVE, s.F, s.M), GAIN, QRTR) @=> Chord FMaj;
-  c.make(s.triad(OCTAVE, s.G, s.M), GAIN * 0.8, QRTR) @=> Chord GMaj;
+  Chord chords1[4];
+  Chord chords2[4];
+  c.make(s.triad(OCTAVE, sc.C, sc.M), GAIN * 0.8, HLF) @=> Chord CMaj;
+  c.make(s.triad(OCTAVE, sc.F, sc.M), GAIN, QRTR) @=> Chord FMaj;
+  c.make(s.triad(OCTAVE, sc.G, sc.M), GAIN * 0.8, QRTR) @=> Chord GMaj;
   c.rest(WHL) @=> Chord rest;
-  CMaj @=> chords[0];
-  FMaj @=> chords[1];
-  GMaj @=> chords[2];
-  rest @=> chords[3];
+  CMaj @=> chords1[0];
+  FMaj @=> chords1[1];
+  GMaj @=> chords1[2];
+  rest @=> chords1[3];
+  FMaj @=> chords2[0];
+  CMaj @=> chords2[1];
+  rest @=> chords2[2];
+  GMaj @=> chords2[3];
 
   true => int isLooping;
   Sequence seq1;
   seq1.init(isLooping);
   Sequence seq2;
   seq2.init(isLooping);
-  seq1.add(chords);
-  seq2.add(chords);
   Sequences seqs1;
   seqs1.init(isLooping);
   seqs1.add(seq1);
@@ -79,8 +81,11 @@ fun void main () {
   seqs2.init(isLooping);
   seqs2.add(seq2);
 
-  getConf(100, 70::ms, 120::ms, 90::ms) @=> ArgParser conf1;
-  getConf(250, 10::ms, 120::ms, 90::ms) @=> ArgParser conf2;
+  seq1.add(chords1);
+  seq2.add(chords2);
+
+  getConf(100, 60::ms, 120::ms, 90::ms) @=> ArgParser conf1;
+  getConf(250, 10::ms, 110::ms, 80::ms) @=> ArgParser conf2;
   InstrSinOsc2 instr1;
   InstrSinOsc2 instr2; 
   instr1.init(conf1, seqs1, startEvent, stepEvent, clock.stepDur); 

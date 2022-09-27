@@ -14,6 +14,14 @@ public class Clock {
   44100.0 => static float SAMPLING_RATE_PER_SEC;
   1::minute / 60 => dur SAMPLES_PER_SEC;
 
+  dur SXTYFRTH;
+  dur THRTYSCND;
+  dur SIXTNTH;
+  dur EITH;
+  dur QRTR;
+  dur HLF;
+  dur WHL;
+
   dur stepDur;
   dur beatDur;
 
@@ -41,6 +49,14 @@ public class Clock {
 
     startEvent @=> this.startEvent; 
     stepEvent @=> this.stepEvent;
+
+    D(0.015625) => dur SXTYFRTH;
+    D(0.03125) => dur THRTYSCND;
+    D(0.0625) => dur SXTNTH;
+    D(0.125) => dur EITH;
+    D(0.25) => dur QRTR;
+    D(0.5) => dur HLF;
+    D(1.0) => dur WHL;
   }
 
   fun void play() {
@@ -99,7 +115,6 @@ public class Clock {
     return (this.beatDur * 4) * noteDur;
   }
 
-  // TODO PRIVATE? TODO DO WE NEED THIS?
   /**
    * Sync to a beat duration
    */
@@ -107,27 +122,10 @@ public class Clock {
     stepDur - (now % stepDur) => now;
   }
 
-  // TODO PRIVATE?
   /**
    * Sync to the configured beat duration
    */
   fun void sync() {
     sync(this.stepDur);
   }
-
-  // TODO DOES IT MAKE SENSE TO MANAGE GROUPS OF NOTES HERE?
-  /* dur measureDur; */
-  /* int numBeats; */
-  /* int numMeasures; */
-
-  // TODO ARE WE USING THIS?
-  /* fun void init(int bpm, int numBeats, int numMeasures) { */
-  /*   // 1 minute / */
-  /*   // beats per minute / */
-  /*   // ratio of num beats per measure to quarter note (4 per measure) */
-  /*   1::minute / bpm / (numBeats / QUARTER_NOTE_NUM_BEATS) => this.beatDur; */
-  /*   numBeats => this.numBeats; */
-  /*   numMeasures => this.numMeasures; */
-  /*   this.beatDur * this.numBeats => measureDur; */
-  /* } */
 }
