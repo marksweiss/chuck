@@ -16,8 +16,8 @@ public class Clock {
 
   dur SXTYFRTH;
   dur THRTYSCND;
-  dur SIXTNTH;
-  dur EITH;
+  dur SXTNTH;
+  dur ETH;
   dur QRTR;
   dur HLF;
   dur WHL;
@@ -31,35 +31,40 @@ public class Clock {
   // bpm - beats per minute, number of quarter notes per minute
   // i.e. 60 bpm means a quarter note is 1 second
   fun void init(float bpm, Event startEvent, Event stepEvent) {
-    <<< "BEAT_STEP", BEAT_STEP >>>;
-    <<< "SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
+    <<< "Clock: BEAT_STEP", BEAT_STEP >>>;
+    <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>;
+    <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
 
     bpm / 60.0 => float beatsPerSec;
 
-    <<< "bpm", bpm, "beatsPerSec", beatsPerSec >>>;
+    <<< "Clock: bpm", bpm, "beatsPerSec", beatsPerSec >>>;
 
     SAMPLES_PER_SEC / beatsPerSec =>  dur samplesPerBeat;
 
-    <<< "SAMPLES PER BEAT", samplesPerBeat >>>;
+    <<< "Clock: samplesPerBeat", samplesPerBeat >>>;
 
     samplesPerBeat => beatDur;
     samplesPerBeat / BEAT_STEP => stepDur;
 
-    <<< "stepDur", stepDur >>>;
+    <<< "Clock: beatDur", beatDur >>>;
+    <<< "Clock: stepDur", stepDur >>>;
 
     startEvent @=> this.startEvent; 
     stepEvent @=> this.stepEvent;
 
-    D(0.015625) => dur SXTYFRTH;
-    D(0.03125) => dur THRTYSCND;
-    D(0.0625) => dur SXTNTH;
-    D(0.125) => dur EITH;
-    D(0.25) => dur QRTR;
-    D(0.5) => dur HLF;
-    D(1.0) => dur WHL;
+    D(0.015625) => SXTYFRTH;
+    D(0.03125) => THRTYSCND;
+    D(0.0625) => SXTNTH;
+    D(0.125) => ETH;
+    D(0.25) => QRTR;
+    D(0.5) => HLF;
+    D(1.0) => WHL;
+
+    <<< "Clock: SXTYFRTH", SXTYFRTH, "THRTYSCND", THRTYSCND, "SXTNTH", SXTNTH, "ETH", ETH, "QRTR", QRTR, "HLF", HLF, "WHL", WHL >>>;
   }
 
   fun void play() {
+    // TEMP DEBUG
     /* <<< "IN CLOCK PLAY BEFORE START, shred id:", me.id() >>>; */
 
     sync();
@@ -67,6 +72,7 @@ public class Clock {
     this.startEvent.broadcast();
     me.yield();
 
+    // TEMP DEBUG
     /* <<< "IN CLOCK START passed" >>>; */
 
     sync();
@@ -74,10 +80,12 @@ public class Clock {
       stepEvent.broadcast();
       me.yield();
 
+      // TEMP DEBUG
       /* <<< "IN CLOCK EVENT LOOP AFTER STEP BROADCAST BEFORE PITCHING", now, stepDur >>>; */
 
       stepDur => now;
 
+      // TEMP DEBUG
       /* <<< "IN CLOCK EVENT LOOP AFTER PITCHING STEP_DUR => NOW", now >>>; */
     }
   }

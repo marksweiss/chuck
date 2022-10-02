@@ -1,9 +1,8 @@
-// cli: $> chuck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck \
-//               lib/arg_parser/float_arg.ck lib/arg_parser/float_arg.ck lib/arg_parser/time_arg.ck \
-//               lib/arg_parser/string_arg.ck lib/arg_parser/arg_parser.ck lib/comp/scale.ck lib/comp/scale_const.ck \
-//               lib/comp/note.ck lib/comp/chord.ck lib/comp/sequence.ck lib/comp/sequenceick \
-//               lib/comp/instrument/instrument_base.ck lib/comp/clock.ck test/assert.ck \
-//               lib/comp/instrument/sinosc2.ck comps/sinosc_2.ck
+// cli: $> chuck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck lib/arg_parser/float_arg.ck \
+//               lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck lib/arg_parser/string_arg.ck \
+//               lib/arg_parser/arg_parser.ck lib/comp/scale.ck lib/comp/note.ck lib/comp/chord.ck \
+//               lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/instrument/instrument_base.ck lib/comp/clock.ck \
+//               lib/comp/scale_const.ck test/assert.ck lib/comp/instrument/sinosc2.ck comps/comp_sinosc_2.ck
 
 // For client to spork, which requires a free function as entry point
 public void playClock(Clock clock) {
@@ -42,6 +41,12 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
 fun void main () {
   <<< "--------------------------\nIN SINOSC MAIN, shred id:" >>>;
 
+  // For "static" consts
+  Chord c;
+  Scale s;
+  ScaleConst sc;
+  Clock k;
+
   240 => int BPM; 
   4 => int OCTAVE;
   0.75 => float GAIN;
@@ -49,25 +54,20 @@ fun void main () {
   Event startEvent;
   Event stepEvent; 
   Clock clock;
+  // BPM not used right now, because we are using ScaleConst default  
   clock.init(BPM, startEvent, stepEvent);
 
-  Chord c;
-  ScaleConst sc;
-  Scale s;
   Chord chords1[4];
   Chord chords2[4];
-  c.make(s.triad(OCTAVE, sc.C, sc.M), GAIN * 0.8, HLF) @=> Chord CMaj;
-  c.make(s.triad(OCTAVE, sc.F, sc.M), GAIN, QRTR) @=> Chord FMaj;
-  c.make(s.triad(OCTAVE, sc.G, sc.M), GAIN * 0.8, QRTR) @=> Chord GMaj;
-  c.rest(WHL) @=> Chord rest;
-  CMaj @=> chords1[0];
-  FMaj @=> chords1[1];
-  GMaj @=> chords1[2];
+  c.rest(k.WHL) @=> Chord rest;
+  sc.CM4 @=> chords1[0];
+  sc._FM4 @=> chords1[1];
+  sc.GM4 @=> chords1[2];
   rest @=> chords1[3];
-  FMaj @=> chords2[0];
-  CMaj @=> chords2[1];
+  sc._FM4 @=> chords2[0];
+  sc.CM4 @=> chords2[1];
   rest @=> chords2[2];
-  GMaj @=> chords2[3];
+  sc.GM4 @=> chords2[3];
 
   true => int isLooping;
   Sequence seq1;
@@ -90,7 +90,6 @@ fun void main () {
   InstrSinOsc2 instr2; 
   instr1.init(conf1, seqs1, startEvent, stepEvent, clock.stepDur); 
   instr2.init(conf2, seqs2, startEvent, stepEvent, clock.stepDur); 
-
 
   spork ~ playClock(clock);
   spork ~ playInstr(instr1);

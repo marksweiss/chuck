@@ -120,8 +120,14 @@ public class InstrSinOsc2 extends InstrumentBase {
 
   // Override
   fun void play() {
+    // TEMP DEBUG
+    /* <<< "IN INSTR PLAY BEFORE START EVENT RECEIVED, shred id:", me.id() >>>; */
+
     // block on START
     startEvent => now;
+
+    // TEMP DEBUG
+    /* <<< "IN INSTR AFTER START EVENT", now >>>; */
 
     // index of chord in sequence to play
     0 => int i;
@@ -129,6 +135,9 @@ public class InstrSinOsc2 extends InstrumentBase {
     // time to play the next one
     0::samp => dur sinceLastNote;
     while (true) {
+      // TEMP DEBUG
+      /* <<< "IN INSTR EVENT LOOP START", now >>>; */
+
       // get next sequence to play and chord to play from that sequence
 
       // TODO HANDLE seqs NEXT, RIGHT NOW JUST ONE seq in seqs so always call next()
@@ -138,9 +147,15 @@ public class InstrSinOsc2 extends InstrumentBase {
       seq.next() @=> Chord c;
       c.notes[0].duration => dur nextNoteDur;
 
+      // TEMP DEBUG
+      /* <<< "IN INSTR EVENT LOOP NEXT CHORD ROOT NOTE BEFORE STEP EVENT", c.notes[0].name >>>; */
+
       // block on event of next beat step broadcast by clock
       stepEvent => now;
       sinceLastNote + stepDur => sinceLastNote; 
+
+      // TEMP DEBUG
+      /* <<< "IN INSTR EVENT LOOP AFTER STEP EVENT, sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>; */
 
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote == nextNoteDur) {
@@ -149,6 +164,9 @@ public class InstrSinOsc2 extends InstrumentBase {
         env.releaseTime() => now;
 
         // ANY OTHER DYNAMIC PER-NOTE EFFECTS CONFIGURATION HERE
+
+        // TEMP DEBUG
+        /* <<< "IN INSTR EVENT LOOP SENDING NOTES TO UGEN" >>>; */
 
         // load the next note into the gen
         for (0 => int j; j < c.notes.size(); j++) {
@@ -167,8 +185,15 @@ public class InstrSinOsc2 extends InstrumentBase {
 
         // trigger envelope start
         env.keyOn();
+
+        // TEMP DEBUG
+        /* <<< "IN INSTR EVENT LOOP AFTER ENV KEY ON" >>>; */
+
         // note emitted, yield to clock
         me.yield();
+
+        // TEMP DEBUG
+        /* <<< "IN INSTR EVENT LOOP AFTER YIELD" >>>; */
       }
     }
   }
@@ -183,5 +208,4 @@ public class InstrSinOsc2 extends InstrumentBase {
   fun void instrHelp() {
     <<< "Args:" >>>;
   }
-
 }

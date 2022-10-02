@@ -248,7 +248,14 @@ public class ScaleConst {
 
   Chord c;
   Scale s;
+  
+  // Init Clock so that duration of notes are set 
   Clock k;
+  120 => int BPM;
+  // Events not used but needed to init the Clock
+  Event startEvent;
+  Event stepEvent; 
+  k.init(BPM, startEvent, stepEvent);  
 
   // Major
   // 0-based offsets
@@ -602,7 +609,7 @@ public class ScaleConst {
   c.make(s.triad(0, Ef, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Efaug;
   c.make(s.triad(0, E, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Eaug;
   c.make(s.triad(0, F, aug), DEFAULT_GAIN, k.QRTR) @=> Chord _Faug;
-  c.make(s.triad(0, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm;
+  c.make(s.triad(0, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsaug;
   c.make(s.triad(0, Gf, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gfaug;
   c.make(s.triad(0, G, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gaug;
   c.make(s.triad(0, Gs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gsaug;
@@ -619,7 +626,7 @@ public class ScaleConst {
   c.make(s.triad(1, Ef, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Efaug0;
   c.make(s.triad(1, E, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Eaug0;
   c.make(s.triad(1, F, aug), DEFAULT_GAIN, k.QRTR) @=> Chord _Faug0;
-  c.make(s.triad(1, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm0;
+  c.make(s.triad(1, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsaug0;
   c.make(s.triad(1, Gf, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gfaug0;
   c.make(s.triad(1, G, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gaug0;
   c.make(s.triad(1, Gs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gsaug0;
@@ -636,7 +643,7 @@ public class ScaleConst {
   c.make(s.triad(2, Ef, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Efaug1;
   c.make(s.triad(2, E, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Eaug1;
   c.make(s.triad(2, F, aug), DEFAULT_GAIN, k.QRTR) @=> Chord _Faug1;
-  c.make(s.triad(2, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm1;
+  c.make(s.triad(2, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsaug1;
   c.make(s.triad(2, Gf, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gfaug1;
   c.make(s.triad(2, G, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gaug1;
   c.make(s.triad(2, Gs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gsaug1;
@@ -653,7 +660,7 @@ public class ScaleConst {
   c.make(s.triad(3, Ef, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Efaug2;
   c.make(s.triad(3, E, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Eaug2;
   c.make(s.triad(3, F, aug), DEFAULT_GAIN, k.QRTR) @=> Chord _Faug2;
-  c.make(s.triad(3, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm2;
+  c.make(s.triad(3, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsaug2;
   c.make(s.triad(3, Gf, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gfaug2;
   c.make(s.triad(3, G, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gaug2;
   c.make(s.triad(3, Gs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gsaug2;
@@ -670,7 +677,7 @@ public class ScaleConst {
   c.make(s.triad(4, Ef, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Efaug3;
   c.make(s.triad(4, E, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Eaug3;
   c.make(s.triad(4, F, aug), DEFAULT_GAIN, k.QRTR) @=> Chord _Faug3;
-  c.make(s.triad(4, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm3;
+  c.make(s.triad(4, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsaug3;
   c.make(s.triad(4, Gf, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gfaug3;
   c.make(s.triad(4, G, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gaug3;
   c.make(s.triad(4, Gs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gsaug3;
@@ -687,7 +694,7 @@ public class ScaleConst {
   c.make(s.triad(5, Ef, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Efaug4;
   c.make(s.triad(5, E, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Eaug4;
   c.make(s.triad(5, F, aug), DEFAULT_GAIN, k.QRTR) @=> Chord _Faug4;
-  c.make(s.triad(5, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm4;
+  c.make(s.triad(5, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsaug4;
   c.make(s.triad(5, Gf, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gfaug4;
   c.make(s.triad(5, G, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gaug4;
   c.make(s.triad(5, Gs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gsaug4;
@@ -704,7 +711,7 @@ public class ScaleConst {
   c.make(s.triad(6, Ef, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Efaug5;
   c.make(s.triad(6, E, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Eaug5;
   c.make(s.triad(6, F, aug), DEFAULT_GAIN, k.QRTR) @=> Chord _Faug5;
-  c.make(s.triad(6, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm5;
+  c.make(s.triad(6, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsaug5;
   c.make(s.triad(6, Gf, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gfaug5;
   c.make(s.triad(6, G, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gaug5;
   c.make(s.triad(6, Gs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gsaug5;
@@ -721,7 +728,7 @@ public class ScaleConst {
   c.make(s.triad(7, Ef, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Efaug6;
   c.make(s.triad(7, E, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Eaug6;
   c.make(s.triad(7, F, aug), DEFAULT_GAIN, k.QRTR) @=> Chord _Faug6;
-  c.make(s.triad(7, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm6;
+  c.make(s.triad(7, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsaug6;
   c.make(s.triad(7, Gf, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gfaug6;
   c.make(s.triad(7, G, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gaug6;
   c.make(s.triad(7, Gs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gsaug6;
@@ -738,7 +745,7 @@ public class ScaleConst {
   c.make(s.triad(8, Ef, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Efaug7;
   c.make(s.triad(8, E, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Eaug7;
   c.make(s.triad(8, F, aug), DEFAULT_GAIN, k.QRTR) @=> Chord _Faug7;
-  c.make(s.triad(8, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm7;
+  c.make(s.triad(8, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsaug7;
   c.make(s.triad(8, Gf, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gfaug7;
   c.make(s.triad(8, G, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gaug7;
   c.make(s.triad(8, Gs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gsaug7;
@@ -755,7 +762,7 @@ public class ScaleConst {
   c.make(s.triad(9, Ef, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Efaug8;
   c.make(s.triad(9, E, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Eaug8;
   c.make(s.triad(9, F, aug), DEFAULT_GAIN, k.QRTR) @=> Chord _Faug8;
-  c.make(s.triad(9, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm8;
+  c.make(s.triad(9, Fs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Fsaug8;
   c.make(s.triad(9, Gf, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gfaug8;
   c.make(s.triad(9, G, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gaug8;
   c.make(s.triad(9, Gs, aug), DEFAULT_GAIN, k.QRTR) @=> Chord Gsaug8;
@@ -773,7 +780,7 @@ public class ScaleConst {
   c.make(s.triad(0, Ef, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Efdim;
   c.make(s.triad(0, E, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Edim;
   c.make(s.triad(0, F, dim), DEFAULT_GAIN, k.QRTR) @=> Chord _Fdim;
-  c.make(s.triad(0, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm;
+  c.make(s.triad(0, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsdim;
   c.make(s.triad(0, Gf, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gfdim;
   c.make(s.triad(0, G, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gdim;
   c.make(s.triad(0, Gs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gsdim;
@@ -790,7 +797,7 @@ public class ScaleConst {
   c.make(s.triad(1, Ef, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Efdim0;
   c.make(s.triad(1, E, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Edim0;
   c.make(s.triad(1, F, dim), DEFAULT_GAIN, k.QRTR) @=> Chord _Fdim0;
-  c.make(s.triad(1, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm0;
+  c.make(s.triad(1, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsdim0;
   c.make(s.triad(1, Gf, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gfdim0;
   c.make(s.triad(1, G, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gdim0;
   c.make(s.triad(1, Gs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gsdim0;
@@ -807,7 +814,7 @@ public class ScaleConst {
   c.make(s.triad(2, Ef, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Efdim1;
   c.make(s.triad(2, E, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Edim1;
   c.make(s.triad(2, F, dim), DEFAULT_GAIN, k.QRTR) @=> Chord _Fdim1;
-  c.make(s.triad(2, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm1;
+  c.make(s.triad(2, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsdim1;
   c.make(s.triad(2, Gf, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gfdim1;
   c.make(s.triad(2, G, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gdim1;
   c.make(s.triad(2, Gs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gsdim1;
@@ -824,7 +831,7 @@ public class ScaleConst {
   c.make(s.triad(3, Ef, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Efdim2;
   c.make(s.triad(3, E, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Edim2;
   c.make(s.triad(3, F, dim), DEFAULT_GAIN, k.QRTR) @=> Chord _Fdim2;
-  c.make(s.triad(3, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm2;
+  c.make(s.triad(3, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsdim2;
   c.make(s.triad(3, Gf, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gfdim2;
   c.make(s.triad(3, G, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gdim2;
   c.make(s.triad(3, Gs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gsdim2;
@@ -841,7 +848,7 @@ public class ScaleConst {
   c.make(s.triad(4, Ef, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Efdim3;
   c.make(s.triad(4, E, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Edim3;
   c.make(s.triad(4, F, dim), DEFAULT_GAIN, k.QRTR) @=> Chord _Fdim3;
-  c.make(s.triad(4, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm3;
+  c.make(s.triad(4, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsdim3;
   c.make(s.triad(4, Gf, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gfdim3;
   c.make(s.triad(4, G, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gdim3;
   c.make(s.triad(4, Gs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gsdim3;
@@ -858,7 +865,7 @@ public class ScaleConst {
   c.make(s.triad(5, Ef, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Efdim4;
   c.make(s.triad(5, E, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Edim4;
   c.make(s.triad(5, F, dim), DEFAULT_GAIN, k.QRTR) @=> Chord _Fdim4;
-  c.make(s.triad(5, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm4;
+  c.make(s.triad(5, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsdim4;
   c.make(s.triad(5, Gf, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gfdim4;
   c.make(s.triad(5, G, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gdim4;
   c.make(s.triad(5, Gs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gsdim4;
@@ -875,7 +882,7 @@ public class ScaleConst {
   c.make(s.triad(6, Ef, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Efdim5;
   c.make(s.triad(6, E, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Edim5;
   c.make(s.triad(6, F, dim), DEFAULT_GAIN, k.QRTR) @=> Chord _Fdim5;
-  c.make(s.triad(6, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm5;
+  c.make(s.triad(6, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsdim5;
   c.make(s.triad(6, Gf, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gfdim5;
   c.make(s.triad(6, G, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gdim5;
   c.make(s.triad(6, Gs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gsdim5;
@@ -892,7 +899,7 @@ public class ScaleConst {
   c.make(s.triad(7, Ef, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Efdim6;
   c.make(s.triad(7, E, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Edim6;
   c.make(s.triad(7, F, dim), DEFAULT_GAIN, k.QRTR) @=> Chord _Fdim6;
-  c.make(s.triad(7, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm6;
+  c.make(s.triad(7, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsdim6;
   c.make(s.triad(7, Gf, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gfdim6;
   c.make(s.triad(7, G, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gdim6;
   c.make(s.triad(7, Gs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gsdim6;
@@ -909,7 +916,7 @@ public class ScaleConst {
   c.make(s.triad(8, Ef, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Efdim7;
   c.make(s.triad(8, E, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Edim7;
   c.make(s.triad(8, F, dim), DEFAULT_GAIN, k.QRTR) @=> Chord _Fdim7;
-  c.make(s.triad(8, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm7;
+  c.make(s.triad(8, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsdim7;
   c.make(s.triad(8, Gf, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gfdim7;
   c.make(s.triad(8, G, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gdim7;
   c.make(s.triad(8, Gs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gsdim7;
@@ -926,7 +933,7 @@ public class ScaleConst {
   c.make(s.triad(9, Ef, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Efdim8;
   c.make(s.triad(9, E, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Edim8;
   c.make(s.triad(9, F, dim), DEFAULT_GAIN, k.QRTR) @=> Chord _Fdim8;
-  c.make(s.triad(9, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsm8;
+  c.make(s.triad(9, Fs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Fsdim8;
   c.make(s.triad(9, Gf, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gfdim8;
   c.make(s.triad(9, G, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gdim8;
   c.make(s.triad(9, Gs, dim), DEFAULT_GAIN, k.QRTR) @=> Chord Gsdim8;
