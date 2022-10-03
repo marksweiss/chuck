@@ -48,9 +48,6 @@ fun void main () {
   Clock k;
 
   240 => int BPM; 
-  4 => int OCTAVE;
-  0.75 => float GAIN;
-
   Event startEvent;
   Event stepEvent; 
   Clock clock;
@@ -59,15 +56,14 @@ fun void main () {
 
   Chord chords1[4];
   Chord chords2[4];
-  c.rest(k.WHL) @=> Chord rest;
-  sc.CM4 @=> chords1[0];
-  sc._FM4 @=> chords1[1];
-  sc.GM4 @=> chords1[2];
-  rest @=> chords1[3];
-  sc._FM4 @=> chords2[0];
-  sc.CM4 @=> chords2[1];
-  rest @=> chords2[2];
-  sc.GM4 @=> chords2[3];
+  sc.CM4_4 @=> chords1[0];
+  sc._FM4_4 @=> chords1[1];
+  sc.GM4_4 @=> chords1[2];
+  sc.REST_1 @=> chords1[3];
+  sc._FM4_4 @=> chords2[0];
+  sc.CM4_4 @=> chords2[1];
+  sc.REST_1 @=> chords2[2];
+  sc.GM4_4 @=> chords2[3];
 
   true => int isLooping;
   Sequence seq1;
