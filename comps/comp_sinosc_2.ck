@@ -77,7 +77,7 @@ fun void main () {
   addPhrase([S.REST_4, S.REST_4, S.REST_4, S.REST_8,
              S.CM4_8, S.CM4_8, S.CM4_8,
              S.REST_8, S.REST_4, S.REST_4, S.REST_4], seqs);
-  addPhrase([L.dottedC(S.GM4_1), S.FM4_1, S.FM4_1], seqs);
+  addPhrase([L.dotC(S.GM4_1), S.FM4_1, S.FM4_1], seqs);
   addPhrase([S.BM4_16, S.GM4_16, S.REST_8, S.REST_4, S.REST_4, S.REST_4], seqs);
   addPhrase([S.BM4_16, S.GM4_16], seqs);
 

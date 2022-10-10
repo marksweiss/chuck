@@ -155,19 +155,19 @@ public class Scale {
   }
 
   // TODO TEST
-  fun static dur dottedD(dur duration) {
+  fun static dur dotD(dur duration) {
     return duration * 1.5;
   }
 
   // TODO TEST
-  fun static Note dottedN(Note note) {
+  fun static Note dotN(Note note) {
     Note.make(note) @=> Note ret;
     ret.duration * 1.5 @=> ret.duration;
     return ret;
   }
 
   // TODO TEST
-  fun static Chord dottedC(Chord chord) {
+  fun static Chord dotC(Chord chord) {
     Chord.make(chord) @=> Chord ret;
     for (0 => int i; i < chord.size(); i++) {
       ret.notes[i].duration * 1.5 @=> ret.notes[i].duration;
