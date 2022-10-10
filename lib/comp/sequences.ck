@@ -33,12 +33,16 @@ public class Sequences {
 
   // *** Iterator interface
   fun Sequence next() {
-    if (!hasNext()) {
+    if (!this.isLooping && !hasNext()) {
       Sequence s;
       return s;
     }
-    seqs[idx] @=> Sequence ret;
-    idx++;
+    if (this.isLooping && this.idx + 1 == seqs.size()) {
+      0 => this.idx;
+    } else {
+      this.idx++;
+    }
+    seqs[this.idx] @=> Sequence ret;
     return ret; 
   }
 
@@ -48,12 +52,12 @@ public class Sequences {
   }
 
   fun int hasNext() {
-    if (this.idx == seqs.size()) {
+    if (this.idx >= seqs.size() - 1) {
       if (this.isLooping) {
         0 => this.idx;
         return true;
       }
-      <<< "WARN: next() called for position greater than size:", seqs.size() >>>;
+      /* <<< "WARN: Sequences#hasNext() called for position greater than size:", seqs.size() >>>; */
       return false;
     }
     return true;

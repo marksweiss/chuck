@@ -38,12 +38,10 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   return conf;
 }
 
-
-
-fun void addPhrase(Chord phrase[], Sequences seqs[], int isLooping) {
+fun void addPhrase(Chord phrase[], Sequences seqs[]) {
   for (0 => int i; i < seqs.size(); ++i) {
     Sequence seq;
-    seq.init(Std.itoa(i), isLooping);
+    seq.init(Std.itoa(i), false);  // not looping phrases 
     seq.add(phrase);
     seqs[i].add(seq);
   } 
@@ -69,17 +67,13 @@ fun void main () {
 
   // declare chords / notes for each sequence
   ScaleConst S;
- 
-  // TEMP DEBUG
-  /* <<< "S.CM4_8 size", S.CM4_8.size(), "S.CM4_8 first note pitch", S.CM4_8.notes[0].pitch, "duration", S.CM4_8.notes[0].duration >>>; */
   
   false => isLooping;
-  addPhrase([S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4], seqs, isLooping);
-  addPhrase([S.CM4_8, S.EM4_8, S.FM4_8, S.EM4_4], seqs, isLooping);
+  addPhrase([S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4],seqs);
+  addPhrase([S.CM4_8, S.EM4_8, S.FM4_8, S.EM4_4], seqs);
 
   // TEMP DEBUG
-  <<< "seqs1.size", seqs1.size(), "seqs1.seqs[0].chords[0].size()", seqs1.seqs[0].chords[0].size(), "seqs1.seqs[0].chords[0].notes[0].duration", seqs1.seqs[0].chords[0].notes[0].duration >>>;
-  me.exit(); 
+  <<< "seqs1 phrase size 0 and 1", seqs1.seqs[0].size(), seqs1.seqs[1].size() >>>;
 
   // configure instruments, pass clock, Events and sequences of phrases to them
   getConf(100, 60::ms, 120::ms, 90::ms) @=> ArgParser conf1;

@@ -126,34 +126,20 @@ public class InstrSinOsc2 extends InstrumentBase {
     // block on START
     startEvent => now;
 
-    // TEMP DEBUG
-    /* <<< "IN INSTR AFTER START EVENT", now >>>; */
-
     // index of chord in sequence to play
     0 => int i;
     // state triggering time elapsed is == to the duration of previous note played,
     // time to play the next one
     0::samp => dur sinceLastNote;
-    this.seqs.next() @=> Sequence seq;
-    seq.init(false); // no looping, manually managing advance through chords in sequences
+    this.seqs.current() @=> Sequence seq;
     while (true) {
-      // TEMP DEBUG
-      /* <<< "IN INSTR EVENT LOOP START seq", seq.name >>>; */
-
       seq.current() @=> Chord c;
       // NOTE: assumes all notes in current chord are same duration
       c.notes[0].duration => dur nextNoteDur;
 
-      // TEMP DEBUG
-      <<< "IN INSTR EVENT LOOP sequence name", seq.name, "size", seq.size() >>>;
-      <<< "IN INSTR EVENT LOOP NEXT CHORD NEXT NOTE DUR", c.notes[0].duration, "pitch", c.notes[0].pitch >>>;
-
       // block on event of next beat step broadcast by clock
       stepEvent => now;
       sinceLastNote + stepDur => sinceLastNote; 
-
-      // TEMP DEBUG
-      /* <<< "IN INSTR EVENT LOOP AFTER STEP EVENT, sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>; */
 
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote == nextNoteDur) {
@@ -161,49 +147,48 @@ public class InstrSinOsc2 extends InstrumentBase {
         env.keyOff();
         env.releaseTime() => now;
 
-        // ANY OTHER DYNAMIC PER-NOTE EFFECTS CONFIGURATION HERE
-
-        // TEMP DEBUG
-        /* <<< "IN INSTR EVENT LOOP SENDING NOTES TO UGEN" >>>; */
-
         // load the next chord into the gen
         for (0 => int j; j < c.notes.size(); j++) {
           c.notes[j] @=> Note n;
           so.freq(Std.mtof(n.pitch)); 
           n.gain => so.gain;
+        }
+
+        // Advance sequence iterator to next chord in sequence 
+        // Sequences are in isLooping mode so we just keep rolling over each sequence
+        // but using hasNext iterator API for each sequence, so either we can move to its
+        // next note or we have to advance to the next sequence in sequences
+        if (!seq.hasNext()) {
 
           // TEMP DEBUG
-          <<< "IN CHORD LOOP SENT NOTE pitch:", n.pitch, "gain:", n.gain >>>;
-        }
+          <<< "BEFORE next() seqs name, size, idex", seqs.name, seqs.size(), seqs.idx >>>;          
+          /* <<< "BEFORE next() seq name, size, idx", seq.name, seq.size(), seq.idx >>>; */          
 
-        // advance sequenc iterator to next chord in sequence 
-        // if we reached the last chord in the sequence and rolled over to 0, the also
-        // advance sequences to next sequence
-        if (!seq.hasNext()) {
-          // calling seq.next() if no more notes in seq, advance to next sequence in sequences
+          // current sequence has no more notes, so advance to next sequence in sequences
+          /* this.seqs.next() @=> seq; */
           this.seqs.next() @=> seq;
+          // this sequence was used before, because we are looping over sequences, so reset it
           seq.reset();
-        } else {
-          seq.next();
-        }
 
-        // TEMP DEBUG
-        <<< "IN INSTR EVENT LOOP AFTER ADVANCE sequences name", seqs.name >>>;
-        <<< "IN INSTR EVENT LOOP AFTER ADVANCE sequence name", seq.name >>>;
+          // TEMP DEBUG
+          <<< "AFTER SEQS next(), seqs name, size, idex", seqs.name, seqs.size(), seqs.idx >>>;          
+          /* <<< "AFTER NEW seq name, size, idx", seq.name, seq.size(), seq.idx >>>; */          
+      
+        } else {
+          // otherwise advance to next note in current sequence
+          seq.next();
+
+          // TEMP DEBUG
+          /* <<< "AFTER CALLING SEQ next(), name, idx, size", seq.name, seq.idx, seq.size() >>>; */          
+        }
 
         // reset note triggering state
         0::samp => sinceLastNote;
         // trigger envelope start
         env.keyOn();
 
-        // TEMP DEBUG
-        /* <<< "IN INSTR EVENT LOOP AFTER ENV KEY ON" >>>; */
-
         // note emitted, yield to clock
         me.yield();
-
-        // TEMP DEBUG
-        /* <<< "IN INSTR EVENT LOOP AFTER YIELD" >>>; */
       }
     }
   }

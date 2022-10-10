@@ -61,12 +61,16 @@ public class Sequence {
     // If iterator has no more items return "empty" Chord. API is for user to
     // loop on a poll of hasNext(). Chuck has no exceptions / signals so the only
     // other choice here is me.exit() which halts the process
-    if (!hasNext()) {
+    if (!this.isLooping && !hasNext()) {
       Chord c;
       return c;
     }
-    chords[idx] @=> Chord ret;
-    idx++;
+    if (this.isLooping && this.idx + 1 == chords.size()) {
+      0 => this.idx;
+    } else {
+      this.idx++;
+    }
+    chords[this.idx] @=> Chord ret;
     return ret; 
   }
 
@@ -76,12 +80,12 @@ public class Sequence {
   }
 
   fun int hasNext() {
-    if (this.idx == chords.size()) {
+    if (this.idx >= chords.size() - 1) {
       if (this.isLooping) {
         0 => this.idx;
         return true;
       }
-      <<< "WARN: next() called for position greater than size:", chords.size() >>>;
+      /* <<< "WARN: Sequence#hasNext() called for position greater than size:", chords.size() >>>; */
       return false;
     }
     return true;
