@@ -67,13 +67,8 @@ fun void main () {
 
   // declare chords / notes for each sequence
   ScaleConst S;
-  
-  false => isLooping;
   addPhrase([S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4],seqs);
   addPhrase([S.CM4_8, S.EM4_8, S.FM4_8, S.EM4_4], seqs);
-
-  // TEMP DEBUG
-  <<< "seqs1 phrase size 0 and 1", seqs1.seqs[0].size(), seqs1.seqs[1].size() >>>;
 
   // configure instruments, pass clock, Events and sequences of phrases to them
   getConf(100, 60::ms, 120::ms, 90::ms) @=> ArgParser conf1;

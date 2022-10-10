@@ -159,27 +159,13 @@ public class InstrSinOsc2 extends InstrumentBase {
         // but using hasNext iterator API for each sequence, so either we can move to its
         // next note or we have to advance to the next sequence in sequences
         if (!seq.hasNext()) {
-
-          // TEMP DEBUG
-          <<< "BEFORE next() seqs name, size, idex", seqs.name, seqs.size(), seqs.idx >>>;          
-          /* <<< "BEFORE next() seq name, size, idx", seq.name, seq.size(), seq.idx >>>; */          
-
           // current sequence has no more notes, so advance to next sequence in sequences
-          /* this.seqs.next() @=> seq; */
           this.seqs.next() @=> seq;
           // this sequence was used before, because we are looping over sequences, so reset it
           seq.reset();
-
-          // TEMP DEBUG
-          <<< "AFTER SEQS next(), seqs name, size, idex", seqs.name, seqs.size(), seqs.idx >>>;          
-          /* <<< "AFTER NEW seq name, size, idx", seq.name, seq.size(), seq.idx >>>; */          
-      
         } else {
           // otherwise advance to next note in current sequence
           seq.next();
-
-          // TEMP DEBUG
-          /* <<< "AFTER CALLING SEQ next(), name, idx, size", seq.name, seq.idx, seq.size() >>>; */          
         }
 
         // reset note triggering state

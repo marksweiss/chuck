@@ -85,7 +85,6 @@ public class Sequence {
         0 => this.idx;
         return true;
       }
-      /* <<< "WARN: Sequence#hasNext() called for position greater than size:", chords.size() >>>; */
       return false;
     }
     return true;
