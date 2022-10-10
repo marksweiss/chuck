@@ -3,14 +3,23 @@
 
 // TODO TEST
 public class Sequence {
+  string name;
   Chord chords[0];
   0 => int idx;
   false => int isLooping;
 
   fun void init(int isLooping) {
+    Std.itoa(me.id()) => this.name;
     isLooping => this.isLooping;
   }
 
+  fun void init(string name, int isLooping) {
+    name => this.name;
+    isLooping => this.isLooping;
+  }
+  
+  // ***
+  // Container interface
   fun void add(Chord chord) {
     // dynamically resize with << operator, per here:
     // https://chuck.stanford.edu/doc/examples/array/array_dynamic.ck
@@ -45,10 +54,13 @@ public class Sequence {
   fun int size() {
     return chords.size();
   }
+  // ***
 
+  // *** Iterator interface
   fun Chord next() {
     // If iterator has no more items return "empty" Chord. API is for user to
-    // loop on a poll of hasNext()
+    // loop on a poll of hasNext(). Chuck has no exceptions / signals so the only
+    // other choice here is me.exit() which halts the process
     if (!hasNext()) {
       Chord c;
       return c;
@@ -56,6 +68,11 @@ public class Sequence {
     chords[idx] @=> Chord ret;
     idx++;
     return ret; 
+  }
+
+  fun Chord current() {
+    chords[idx] @=> Chord ret;
+    return ret;
   }
 
   fun int hasNext() {
@@ -69,4 +86,9 @@ public class Sequence {
     }
     return true;
   }
+
+  fun void reset() {
+    0 => this.idx;
+  }
+  // ***
 }

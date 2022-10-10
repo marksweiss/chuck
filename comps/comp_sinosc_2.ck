@@ -38,48 +38,50 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   return conf;
 }
 
+
+
+fun void addPhrase(Chord phrase[], Sequences seqs[], int isLooping) {
+  for (0 => int i; i < seqs.size(); ++i) {
+    Sequence seq;
+    seq.init(Std.itoa(i), isLooping);
+    seq.add(phrase);
+    seqs[i].add(seq);
+  } 
+}
+
 fun void main () {
   <<< "--------------------------\nIN SINOSC MAIN, shred id:" >>>;
 
-  // For "static" consts
-  Chord c;
-  Scale s;
-  ScaleConst sc;
-  Clock k;
-
+  // init clock, tempo and time advance Events
   240 => int BPM; 
   Event startEvent;
   Event stepEvent; 
   Clock clock;
-  // BPM not used right now, because we are using ScaleConst default  
   clock.init(BPM, startEvent, stepEvent);
 
-  Chord chords1[4];
-  Chord chords2[4];
-  sc.CM4_4 @=> chords1[0];
-  sc._FM4_4 @=> chords1[1];
-  sc.GM4_4 @=> chords1[2];
-  sc.REST_1 @=> chords1[3];
-  sc._FM4_4 @=> chords2[0];
-  sc.CM4_4 @=> chords2[1];
-  sc.REST_1 @=> chords2[2];
-  sc.GM4_4 @=> chords2[3];
-
+  // declare sequence containers
   true => int isLooping;
-  Sequence seq1;
-  seq1.init(isLooping);
-  Sequence seq2;
-  seq2.init(isLooping);
   Sequences seqs1;
-  seqs1.init(isLooping);
-  seqs1.add(seq1);
+  seqs1.init("seqs1", isLooping);
   Sequences seqs2;
-  seqs2.init(isLooping);
-  seqs2.add(seq2);
+  seqs2.init("seqs2", isLooping);
+  [seqs1, seqs2] @=> Sequences seqs[];
 
-  seq1.add(chords1);
-  seq2.add(chords2);
+  // declare chords / notes for each sequence
+  ScaleConst S;
+ 
+  // TEMP DEBUG
+  /* <<< "S.CM4_8 size", S.CM4_8.size(), "S.CM4_8 first note pitch", S.CM4_8.notes[0].pitch, "duration", S.CM4_8.notes[0].duration >>>; */
+  
+  false => isLooping;
+  addPhrase([S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4], seqs, isLooping);
+  addPhrase([S.CM4_8, S.EM4_8, S.FM4_8, S.EM4_4], seqs, isLooping);
 
+  // TEMP DEBUG
+  <<< "seqs1.size", seqs1.size(), "seqs1.seqs[0].chords[0].size()", seqs1.seqs[0].chords[0].size(), "seqs1.seqs[0].chords[0].notes[0].duration", seqs1.seqs[0].chords[0].notes[0].duration >>>;
+  me.exit(); 
+
+  // configure instruments, pass clock, Events and sequences of phrases to them
   getConf(100, 60::ms, 120::ms, 90::ms) @=> ArgParser conf1;
   getConf(250, 10::ms, 110::ms, 80::ms) @=> ArgParser conf2;
   InstrSinOsc2 instr1;
@@ -87,10 +89,12 @@ fun void main () {
   instr1.init(conf1, seqs1, startEvent, stepEvent, clock.stepDur); 
   instr2.init(conf2, seqs2, startEvent, stepEvent, clock.stepDur); 
 
+  // start clock thread and instrument play threads
   spork ~ playClock(clock);
   spork ~ playInstr(instr1);
   spork ~ playInstr(instr2);
 
+  // boilerplate to make event loop work
   me.yield();  // yield to Clock and Instrument event loops 
   while (true) {1::second => now;}  // block process exit to force child threads to run
 }

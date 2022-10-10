@@ -72,4 +72,8 @@ public class Chord {
     }
     return pitches;
   }
+
+  fun int size() {
+    return notes.size();
+  }
 }

@@ -43,7 +43,7 @@ public class InstrSinOsc2 extends InstrumentBase {
     stepEvent @=> this.stepEvent;    
     stepDur => this.stepDur;
 
-    // init all ugens to passthu initially, only set ugens with conf arguments to be default sum inputs
+    // init all ugens to passthu initially, only set ugens with conf arguments to be sum inputs
     env.op(OP_PASSTHRU);
     chorus.op(OP_PASSTHRU);
     modulate.op(OP_PASSTHRU);
@@ -134,21 +134,19 @@ public class InstrSinOsc2 extends InstrumentBase {
     // state triggering time elapsed is == to the duration of previous note played,
     // time to play the next one
     0::samp => dur sinceLastNote;
+    this.seqs.next() @=> Sequence seq;
+    seq.init(false); // no looping, manually managing advance through chords in sequences
     while (true) {
       // TEMP DEBUG
-      /* <<< "IN INSTR EVENT LOOP START", now >>>; */
+      /* <<< "IN INSTR EVENT LOOP START seq", seq.name >>>; */
 
-      // get next sequence to play and chord to play from that sequence
-
-      // TODO HANDLE seqs NEXT, RIGHT NOW JUST ONE seq in seqs so always call next()
-      /* this.seqs.next() @=> seq; */
-      this.seqs.next() @=> Sequence seq;
-
-      seq.next() @=> Chord c;
+      seq.current() @=> Chord c;
+      // NOTE: assumes all notes in current chord are same duration
       c.notes[0].duration => dur nextNoteDur;
 
       // TEMP DEBUG
-      /* <<< "IN INSTR EVENT LOOP NEXT CHORD ROOT NOTE BEFORE STEP EVENT", c.notes[0].name >>>; */
+      <<< "IN INSTR EVENT LOOP sequence name", seq.name, "size", seq.size() >>>;
+      <<< "IN INSTR EVENT LOOP NEXT CHORD NEXT NOTE DUR", c.notes[0].duration, "pitch", c.notes[0].pitch >>>;
 
       // block on event of next beat step broadcast by clock
       stepEvent => now;
@@ -168,21 +166,33 @@ public class InstrSinOsc2 extends InstrumentBase {
         // TEMP DEBUG
         /* <<< "IN INSTR EVENT LOOP SENDING NOTES TO UGEN" >>>; */
 
-        // load the next note into the gen
+        // load the next chord into the gen
         for (0 => int j; j < c.notes.size(); j++) {
           c.notes[j] @=> Note n;
           so.freq(Std.mtof(n.pitch)); 
           n.gain => so.gain;
+
+          // TEMP DEBUG
+          <<< "IN CHORD LOOP SENT NOTE pitch:", n.pitch, "gain:", n.gain >>>;
         }
+
+        // advance sequenc iterator to next chord in sequence 
+        // if we reached the last chord in the sequence and rolled over to 0, the also
+        // advance sequences to next sequence
+        if (!seq.hasNext()) {
+          // calling seq.next() if no more notes in seq, advance to next sequence in sequences
+          this.seqs.next() @=> seq;
+          seq.reset();
+        } else {
+          seq.next();
+        }
+
+        // TEMP DEBUG
+        <<< "IN INSTR EVENT LOOP AFTER ADVANCE sequences name", seqs.name >>>;
+        <<< "IN INSTR EVENT LOOP AFTER ADVANCE sequence name", seq.name >>>;
 
         // reset note triggering state
         0::samp => sinceLastNote;
-
-        // TODO HANDLE seqs increment and NEXT
-
-        // increment counter of which chord in sequence
-        (i + 1) % seq.size() => i;
-
         // trigger envelope start
         env.keyOn();
 
