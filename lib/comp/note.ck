@@ -40,6 +40,11 @@ public class Note {
     return n;
   }
 
+  // TODO TEST
+  fun static Note make(Note note) {
+    return make(note.pitch, note.gain, note.duration);
+  }
+
   fun static Note make(int pitch_) {
     return make(pitch_, DEFAULT_GAIN, DEFAULT_DUR);
   }

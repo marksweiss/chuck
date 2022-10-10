@@ -45,6 +45,12 @@ public class Chord {
     return make(chordNotes);
   }
 
+  fun static Chord make(Chord chord) {
+    Chord ret;
+    ret.init(chord.notes);
+    return ret;
+  }  
+
   fun static Chord make(int pitches[]) {
     return make(pitches, DEFAULT_GAIN, DEFAULT_DUR);
   }

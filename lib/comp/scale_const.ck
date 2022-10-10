@@ -205,19 +205,6 @@ public class ScaleConst {
   130 => static int Bf9;
   131 => static int B9;
 
-  string PITCH_STR_MAP[12];
-  "C" @=> PITCH_STR_MAP[0];
-  "C_shp" @=> PITCH_STR_MAP[1];
-  "D" @=> PITCH_STR_MAP[2];
-  "E_flt" @=> PITCH_STR_MAP[3];
-  "F" @=> PITCH_STR_MAP[5];
-  "F_shp" @=> PITCH_STR_MAP[6];
-  "G" @=> PITCH_STR_MAP[7];
-  "A_flt" @=> PITCH_STR_MAP[8];
-  "A" @=> PITCH_STR_MAP[9]; 
-  "B_flt" @=> PITCH_STR_MAP[10]; 
-  "B" @=> PITCH_STR_MAP[11]; 
-
   // Scale Intervals - Intervals also called Degrees
   // minor scales
   [0, 2, 3, 5, 7, 8, 10] @=> static int MINOR[]; // minor mode

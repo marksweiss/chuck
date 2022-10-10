@@ -1,6 +1,6 @@
 // cli: $> chuck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck lib/arg_parser/float_arg.ck \
 //               lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck lib/arg_parser/string_arg.ck \
-//               lib/arg_parser/arg_parser.ck lib/comp/scale.ck lib/comp/note.ck lib/comp/chord.ck \
+//               lib/arg_parser/arg_parser.ck lib/comp/note.ck lib/comp/chord.ck lib/comp/scale.ck \
 //               lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/instrument/instrument_base.ck lib/comp/clock.ck \
 //               lib/comp/scale_const.ck test/assert.ck lib/comp/instrument/sinosc2.ck comps/comp_sinosc_2.ck
 
@@ -66,9 +66,20 @@ fun void main () {
   [seqs1, seqs2] @=> Sequences seqs[];
 
   // declare chords / notes for each sequence
+  Scale L;
   ScaleConst S;
-  addPhrase([S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4],seqs);
+  addPhrase([S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4], seqs);
   addPhrase([S.CM4_8, S.EM4_8, S.FM4_8, S.EM4_4], seqs);
+  addPhrase([S.REST_8, S.EM4_8, S.FM4_8, S.EM4_8], seqs);
+  addPhrase([S.REST_8, S.EM4_8, S.FM4_8, S.GM4_8], seqs);
+  addPhrase([S.EM4_8, S.FM4_8, S.GM4_8, S.REST_8], seqs);
+  addPhrase([S.CM5_1, S.CM5_1], seqs);
+  addPhrase([S.REST_4, S.REST_4, S.REST_4, S.REST_8,
+             S.CM4_8, S.CM4_8, S.CM4_8,
+             S.REST_8, S.REST_4, S.REST_4, S.REST_4], seqs);
+  addPhrase([L.dottedC(S.GM4_1), S.FM4_1, S.FM4_1], seqs);
+  addPhrase([S.BM4_16, S.GM4_16, S.REST_8, S.REST_4, S.REST_4, S.REST_4], seqs);
+  addPhrase([S.BM4_16, S.GM4_16], seqs);
 
   // configure instruments, pass clock, Events and sequences of phrases to them
   getConf(100, 60::ms, 120::ms, 90::ms) @=> ArgParser conf1;
