@@ -87,16 +87,20 @@ fun void main () {
 
   // configure instruments, pass clock, Events, sequences of phrases and conductor to them 
   getConf(100, 60::ms, 120::ms, 90::ms) @=> ArgParser conf1;
-  getConf(250, 10::ms, 110::ms, 80::ms) @=> ArgParser conf2;
+  getConf(102.5, 10::ms, 110::ms, 80::ms) @=> ArgParser conf2;
+  getConf(105, 35::ms, 115::ms, 85::ms) @=> ArgParser conf3;
   InstrSinOsc2 instr1;
   InstrSinOsc2 instr2; 
+  InstrSinOsc2 instr3; 
   instr1.init("instr1", conf1, seqs1, startEvent, stepEvent, clock.stepDur, conductor); 
   instr2.init("instr2", conf2, seqs2, startEvent, stepEvent, clock.stepDur, conductor); 
+  instr2.init("instr3", conf3, seqs2, startEvent, stepEvent, clock.stepDur, conductor); 
 
   // start clock thread and instrument play threads
-  spork ~ playClock(clock) @=> Shred clockShred;
-  spork ~ playInstr(instr1) @=> Shred instr1Shred;
-  spork ~ playInstr(instr2) @=> Shred instr2Shred;
+  spork ~ playClock(clock);
+  spork ~ playInstr(instr1);
+  spork ~ playInstr(instr2);
+  spork ~ playInstr(instr3);
 
   // boilerplate to make event loop work
   me.yield();  // yield to Clock and Instrument event loops 
