@@ -1,3 +1,4 @@
+// Machine.add("lib/comp/conductor.ck");
 // Machine.add("lib/comp/scale.ck");
 // Machine.add("lib/comp/note.ck");
 // Machine.add("lib/comp/chord.ck");
@@ -12,7 +13,6 @@
  * configurable from CLI args or programmatic call to init()
  */ 
 public class InstrSinOsc2 extends InstrumentBase {
-  Sequences seqs;
 
   // generator
   SinOsc so;
@@ -31,19 +31,28 @@ public class InstrSinOsc2 extends InstrumentBase {
   Pan2 pan;  // -1 to 1 // .pan
   Mix2 mix;  // stereo to mono mixdown  // .pan
 
+  string name;
+  Sequences seqs;
   // events, boilerplate but must be assigned by reference per instance because they are bound
   // to a particular spork and possibly spawned by one or another parent event loop
   Event startEvent;
   Event stepEvent;
   dur stepDur;
+  Conductor conductor;
 
-  fun void init(ArgParser conf, Sequences seqs, Event startEvent, Event stepEvent, dur stepDur) {
+  fun void init(string name, ArgParser conf, Sequences seqs, Event startEvent, Event stepEvent, dur stepDur,
+                Conductor conductor) {
+    name => this.name;
     seqs @=> this.seqs;
     startEvent @=> this.startEvent;    
     stepEvent @=> this.stepEvent;    
     stepDur => this.stepDur;
 
-    // init all ugens to passthu initially, only set ugens with conf arguments to be sum inputs
+    conductor @=> this.conductor;
+    // register this instrument by name (which therefore must be unique) with global state manager
+    conductor.mapToBool(this.name);
+
+    // init all ugens to passthru initially, only set ugens with conf arguments to be sum inputs
     env.op(OP_PASSTHRU);
     chorus.op(OP_PASSTHRU);
     modulate.op(OP_PASSTHRU);
@@ -160,8 +169,12 @@ public class InstrSinOsc2 extends InstrumentBase {
         // next note or we have to advance to the next sequence in sequences
         if (!seq.hasNext()) {
           // current sequence has no more notes, so advance to next sequence in sequences
-          this.seqs.next() @=> seq;
-          // this sequence was used before, because we are looping over sequences, so reset it
+          // if the Conductor state for this shred is to advance, otherwise stay on this phrase
+          if (conductor.getBool(this.name)) {
+            this.seqs.next() @=> seq;
+          }
+          // either we advanced and if it is after the first iteration this sequence was used before
+          // so reset it, or we stayed on the same sequence and just got to the end so reset it
           seq.reset();
         } else {
           // otherwise advance to next note in current sequence

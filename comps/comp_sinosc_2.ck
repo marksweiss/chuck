@@ -1,8 +1,8 @@
-// cli: $> chuck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck lib/arg_parser/float_arg.ck \
+// cli: $> chuck test/assert.ck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck lib/arg_parser/float_arg.ck \
 //               lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck lib/arg_parser/string_arg.ck \
-//               lib/arg_parser/arg_parser.ck lib/comp/note.ck lib/comp/chord.ck lib/comp/scale.ck \
+//               lib/arg_parser/arg_parser.ck lib/comp/conductor.ck lib/comp/note.ck lib/comp/chord.ck lib/comp/scale.ck \
 //               lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/instrument/instrument_base.ck lib/comp/clock.ck \
-//               lib/comp/scale_const.ck test/assert.ck lib/comp/instrument/sinosc2.ck comps/comp_sinosc_2.ck
+//               lib/comp/scale_const.ck lib/comp/instrument/sinosc2.ck comps/comp_sinosc_2.ck
 
 // For client to spork, which requires a free function as entry point
 public void playClock(Clock clock) {
@@ -50,12 +50,16 @@ fun void addPhrase(Chord phrase[], Sequences seqs[]) {
 fun void main () {
   <<< "--------------------------\nIN SINOSC MAIN, shred id:" >>>;
 
+  // global coordinator of interprocess state governing composition behavior, such
+  // as in this case whether instruments move to the next phrase or stay on the current one
+  Conductor conductor;
+
   // init clock, tempo and time advance Events
   240 => int BPM; 
   Event startEvent;
   Event stepEvent; 
   Clock clock;
-  clock.init(BPM, startEvent, stepEvent);
+  clock.init(BPM, startEvent, stepEvent, conductor);
 
   // declare sequence containers
   true => int isLooping;
@@ -81,18 +85,18 @@ fun void main () {
   addPhrase([S.BM4_16, S.GM4_16, S.REST_8, S.REST_4, S.REST_4, S.REST_4], seqs);
   addPhrase([S.BM4_16, S.GM4_16], seqs);
 
-  // configure instruments, pass clock, Events and sequences of phrases to them
+  // configure instruments, pass clock, Events, sequences of phrases and conductor to them 
   getConf(100, 60::ms, 120::ms, 90::ms) @=> ArgParser conf1;
   getConf(250, 10::ms, 110::ms, 80::ms) @=> ArgParser conf2;
   InstrSinOsc2 instr1;
   InstrSinOsc2 instr2; 
-  instr1.init(conf1, seqs1, startEvent, stepEvent, clock.stepDur); 
-  instr2.init(conf2, seqs2, startEvent, stepEvent, clock.stepDur); 
+  instr1.init("instr1", conf1, seqs1, startEvent, stepEvent, clock.stepDur, conductor); 
+  instr2.init("instr2", conf2, seqs2, startEvent, stepEvent, clock.stepDur, conductor); 
 
   // start clock thread and instrument play threads
-  spork ~ playClock(clock);
-  spork ~ playInstr(instr1);
-  spork ~ playInstr(instr2);
+  spork ~ playClock(clock) @=> Shred clockShred;
+  spork ~ playInstr(instr1) @=> Shred instr1Shred;
+  spork ~ playInstr(instr2) @=> Shred instr2Shred;
 
   // boilerplate to make event loop work
   me.yield();  // yield to Clock and Instrument event loops 

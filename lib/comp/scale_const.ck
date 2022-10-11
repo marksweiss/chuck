@@ -1,3 +1,4 @@
+// Machine.add("lib/comp/condustor.ck")
 // Machine.add("lib/comp/chord.ck")
 // Machine.add("lib/comp/scale.ck")
 // Machine.add("lib/comp/clock.ck")
@@ -239,11 +240,12 @@ public class ScaleConst {
   Scale s;
   // Init Clock so that duration of notes are set 
   // Events not used but needed to init the Clock
+  Conductor conductor;
   Clock k;
   120 => int BPM;
   Event startEvent;
   Event stepEvent; 
-  k.init(BPM, startEvent, stepEvent);  
+  k.init(BPM, startEvent, stepEvent, conductor);  
 
   // Rest Constants
   0.0 => float NO_GAIN;

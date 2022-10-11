@@ -134,12 +134,14 @@ public class Assert {
 
   // TODO TEST
   fun /*private*/ static int assertFloatLessThan(float left, float right) {
-    return ((Math.remainder(left, right) * 100000) $ int) < 0;
+    /* return ((Math.remainder(left, right) * 100000) $ int) < 0; */
+    return assertFloatEqual(Math.max(left, right), right);
   }
 
   // TODO TEST
   fun /*private*/ static int assertFloatGreaterThan(float left, float right) {
-    return ((Math.remainder(left, right) * 100000) $ int) > 0;
+    /* return ((Math.remainder(left, right) * 100000) $ int) > 0; */
+    return assertFloatEqual(Math.max(left, right), left);
   }
 
   fun /*private*/ static void printFailMsg(string msg) {

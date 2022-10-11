@@ -1,4 +1,5 @@
 // Machine.add("lib/comp/instrument.ck")
+// Machine.add("lib/comp/conductor.ck")
 
 // Based on https://chuck.stanford.edu/doc/learn/notes/tg.ck
 // name: tg.ck
@@ -27,10 +28,13 @@ public class Clock {
 
   Event startEvent;
   Event stepEvent;
+  Conductor conductor;
 
   // bpm - beats per minute, number of quarter notes per minute
   // i.e. 60 bpm means a quarter note is 1 second
-  fun void init(float bpm, Event startEvent, Event stepEvent) {
+  fun void init(float bpm, Event startEvent, Event stepEvent, Conductor conductor) {
+    conductor @=> this.conductor;
+
     <<< "Clock: BEAT_STEP", BEAT_STEP >>>;
     <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>;
     <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
@@ -64,29 +68,19 @@ public class Clock {
   }
 
   fun void play() {
-    // TEMP DEBUG
-    /* <<< "IN CLOCK PLAY BEFORE START, shred id:", me.id() >>>; */
-
     sync();
 
     this.startEvent.broadcast();
     me.yield();
 
-    // TEMP DEBUG
-    /* <<< "IN CLOCK START passed" >>>; */
-
     sync();
     while (true) {
-      stepEvent.broadcast();
+      // call the conductor to calculate new global state for all instrument player threads
+      this.conductor.nextStateBool();
+      this.stepEvent.broadcast();
       me.yield();
 
-      // TEMP DEBUG
-      /* <<< "IN CLOCK EVENT LOOP AFTER STEP BROADCAST BEFORE PITCHING", now, stepDur >>>; */
-
-      stepDur => now;
-
-      // TEMP DEBUG
-      /* <<< "IN CLOCK EVENT LOOP AFTER PITCHING STEP_DUR => NOW", now >>>; */
+      this.stepDur => now;
     }
   }
 
