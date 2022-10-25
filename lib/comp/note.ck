@@ -1,7 +1,7 @@
 // Machine.add("lib/comp/scale.ck")
 
 public class Note {
-  0.5 => static float DEFAULT_GAIN; 
+  0.1 => static float DEFAULT_GAIN; 
   1.0::second => static dur DEFAULT_DUR;
 
   string name; 
@@ -41,6 +41,11 @@ public class Note {
   }
 
   // TODO TEST
+  fun static Note make(int octave, int pitch_, float gain_, dur duration_) {
+    return make(octave + pitch_, gain_, duration_); 
+  }
+
+  // TODO TEST
   fun static Note make(Note note) {
     return make(note.pitch, note.gain, note.duration);
   }
@@ -57,5 +62,17 @@ public class Note {
 
   fun static Note make(float freq_) {
     return make(freq_, DEFAULT_GAIN, DEFAULT_DUR);
+  }
+
+  // TODO TEST
+  fun static Note dotN(Note note) {
+    Note.make(note) @=> Note ret;
+    ret.duration * 1.5 @=> ret.duration;
+    return ret;
+  }
+
+  // TODO TEST
+  fun static dur dotD(dur duration) {
+    return duration * 1.5;
   }
 }

@@ -17,28 +17,28 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   ArgParser conf;
   conf.addDurationArg("adsrAttack", attack);
   conf.addDurationArg("adsrDecay", decay);
-  conf.addFloatArg("adsrSustain", 0.9);
+  conf.addFloatArg("adsrSustain", 0.5);
   conf.addDurationArg("adsrRelease", release);
-  conf.addFloatArg("chorusModFreq", 200.0);
-  conf.addFloatArg("chorusModDepth", 0.2);
-  conf.addFloatArg("chorusMix", 0.4);
-  conf.addFloatArg("modulateVibratoRate", modulateVibratoRate);
-  conf.addFloatArg("modulateVibratoGain", 0.05);
-  conf.addFloatArg("modulateRandomGain", 0.1);
-  conf.addDurationArg("delayDelay", 50::ms);
-  conf.addDurationArg("delayMax", 50::ms);
+  /* conf.addFloatArg("chorusModFreq", 200.0); */
+  /* conf.addFloatArg("chorusModDepth", 0.2); */
+  /* conf.addFloatArg("chorusMix", 0.4); */
+  /* conf.addFloatArg("modulateVibratoRate", modulateVibratoRate); */
+  /* conf.addFloatArg("modulateVibratoGain", 0.05); */
+  /* conf.addFloatArg("modulateRandomGain", 0.1); */
+  conf.addDurationArg("delayDelay", 10::ms);
+  conf.addDurationArg("delayMax", 20::ms);
   conf.addDurationArg("echoDelay", 55::ms);
-  conf.addDurationArg("echoMax", 100::ms);
-  conf.addFloatArg("echoMix", 0.3);
-  conf.addFloatArg("reverbMix", 4.1);
-  conf.addFloatArg("panPan", 0.0);
-  conf.addFloatArg("mixPan", 1.0);
+  /* conf.addDurationArg("echoMax", 100::ms); */
+  /* conf.addFloatArg("echoMix", 0.3); */
+  /* conf.addFloatArg("reverbMix", 0.05); */
+  /* conf.addFloatArg("panPan", 0.0); */
+  /* conf.addFloatArg("mixPan", 1.0); */
   conf.loadArgs();
 
   return conf;
 }
 
-fun void addPhrase(Chord phrase[], Sequences seqs[]) {
+fun void addPhrase(Note phrase[], Sequences seqs[]) {
   for (0 => int i; i < seqs.size(); ++i) {
     Sequence seq;
     seq.init(Std.itoa(i), false);  // not looping phrases 
@@ -48,6 +48,38 @@ fun void addPhrase(Chord phrase[], Sequences seqs[]) {
 }
 
 fun void main () {
+  // TODO
+  // - DONE Add NoteConst like ScaleConst
+  // - DONE Change this composition to use NoteConst, Riley score is individual notes
+  // - DONE Change Sequence and Instrument to have overloads which play Notes instead of Chords
+  // - DONE Change instruments to define multiple generators, up to 5, take an argument for polyphony in init()
+  //   and, if playing Chords, sound one note of the chord to each generator; generators all wired to the
+  //   same signal chain
+  // - DONE Map class
+  //   - wrap Assoc Array
+  //   - additional field - Array of file names
+  //   - this thus supports keys() method, values() method is iterating over underlying array for
+  //     each key in key names array
+  //   - get(key) obviously supported, error if key not found
+  //   - put(key, val) supported, adds key to array it new, adds/updates value for key in assoc array
+  // - DONE Conductor design
+  //   - Base class
+  //     - takes an array of assoc array in init(), one for each instrument
+  //     - updateState(), updateState(instrumentId)
+  //     - getState(), getState(instrumentId)
+  //     - *state() methods all operate on assoc array to read/persist state
+  //     - One global conductor per composition, with one config per instrument, so update() methods
+  //       can look at that instrument's state as well as global state when computing updates -- for In C
+  //     - Calle from same place in event loop as nowd
+  //   - DONE Derive class 
+  // - Look at other UGens, work on better timbres for composition
+  // - Experiment with micro-detune, (see detune example in book)
+  // - Dynamic signal processing example from Chuck book, Chapter 8
+  // - Cleanup
+  //   - move In C stuff into it's own directory
+  //   - consistent use of 'this', use as little as possible only to avoid name clashes
+  // - Add missing test coverage
+
   <<< "--------------------------\nIN SINOSC MAIN, shred id:" >>>;
 
   // global coordinator of interprocess state governing composition behavior, such
@@ -70,31 +102,31 @@ fun void main () {
   [seqs1, seqs2] @=> Sequences seqs[];
 
   // declare chords / notes for each sequence
-  Scale L;
+  Note N;
   ScaleConst S;
-  addPhrase([S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4, S.CM4_8, S.EM4_4], seqs);
-  addPhrase([S.CM4_8, S.EM4_8, S.FM4_8, S.EM4_4], seqs);
-  addPhrase([S.REST_8, S.EM4_8, S.FM4_8, S.EM4_8], seqs);
-  addPhrase([S.REST_8, S.EM4_8, S.FM4_8, S.GM4_8], seqs);
-  addPhrase([S.EM4_8, S.FM4_8, S.GM4_8, S.REST_8], seqs);
-  addPhrase([S.CM5_1, S.CM5_1], seqs);
-  addPhrase([S.REST_4, S.REST_4, S.REST_4, S.REST_8,
-             S.CM4_8, S.CM4_8, S.CM4_8,
-             S.REST_8, S.REST_4, S.REST_4, S.REST_4], seqs);
-  addPhrase([L.dotC(S.GM4_1), S.FM4_1, S.FM4_1], seqs);
-  addPhrase([S.BM4_16, S.GM4_16, S.REST_8, S.REST_4, S.REST_4, S.REST_4], seqs);
-  addPhrase([S.BM4_16, S.GM4_16], seqs);
+  addPhrase([N.C4_8, N.E4_4, N.C4_8, N.E4_4, N.C4_8, N.E4_4], seqs);
+  addPhrase([N.C4_8, N.E4_8, N.F4_8, N.E4_4], seqs);
+  addPhrase([N.REST_8, N.E4_8, N.F4_8, N.E4_8], seqs);
+  addPhrase([N.REST_8, N.E4_8, N.F4_8, N.G4_8], seqs);
+  addPhrase([N.EM4_8, N.F4_8, N.G4_8, N.REST_8], seqs);
+  addPhrase([N.C5_1, N.C5_1], seqs);
+  addPhrase([N.REST_4, N.REST_4, N.REST_4, N.REST_8,
+             N.C4_8, N.C4_8, N.C4_8,
+             N.REST_8, N.REST_4, N.REST_4, N.REST_4], seqs);
+  addPhrase([N.dotC(N.G4_1), N.F4_1, N.F4_1], seqs);
+  addPhrase([N.B4_16, N.G4_16, N.REST_8, N.REST_4, N.REST_4, N.REST_4], seqs);
+  addPhrase([N.B4_16, N.G4_16], seqs);
 
   // configure instruments, pass clock, Events, sequences of phrases and conductor to them 
-  getConf(100, 60::ms, 120::ms, 90::ms) @=> ArgParser conf1;
-  getConf(102.5, 10::ms, 110::ms, 80::ms) @=> ArgParser conf2;
-  getConf(105, 35::ms, 115::ms, 85::ms) @=> ArgParser conf3;
+  getConf(100, 40::ms, 30::ms, 30::ms) @=> ArgParser conf1;
+  getConf(102.5, 25::ms, 40::ms, 50::ms) @=> ArgParser conf2;
+  getConf(105, 35::ms, 35::ms, 70::ms) @=> ArgParser conf3;
   InstrSinOsc2 instr1;
   InstrSinOsc2 instr2; 
   InstrSinOsc2 instr3; 
   instr1.init("instr1", conf1, seqs1, startEvent, stepEvent, clock.stepDur, conductor); 
   instr2.init("instr2", conf2, seqs2, startEvent, stepEvent, clock.stepDur, conductor); 
-  instr2.init("instr3", conf3, seqs2, startEvent, stepEvent, clock.stepDur, conductor); 
+  instr3.init("instr3", conf3, seqs2, startEvent, stepEvent, clock.stepDur, conductor); 
 
   // start clock thread and instrument play threads
   spork ~ playClock(clock);
@@ -103,7 +135,7 @@ fun void main () {
   spork ~ playInstr(instr3);
 
   // boilerplate to make event loop work
-  me.yield();  // yield to Clock and Instrument event loops 
+  /* me.yield();  // yield to Clock and Instrument event loops */ 
   while (true) {1::second => now;}  // block process exit to force child threads to run
 }
 

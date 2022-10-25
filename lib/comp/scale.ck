@@ -153,25 +153,4 @@ public class Scale {
     pitch(octave, rootPitchPosition, scale, numNotesInOctave) => int pitch;
     return [pitch, pitch + chord[1], pitch + chord[2]];
   }
-
-  // TODO TEST
-  fun static dur dotD(dur duration) {
-    return duration * 1.5;
-  }
-
-  // TODO TEST
-  fun static Note dotN(Note note) {
-    Note.make(note) @=> Note ret;
-    ret.duration * 1.5 @=> ret.duration;
-    return ret;
-  }
-
-  // TODO TEST
-  fun static Chord dotC(Chord chord) {
-    Chord.make(chord) @=> Chord ret;
-    for (0 => int i; i < chord.size(); i++) {
-      ret.notes[i].duration * 1.5 @=> ret.notes[i].duration;
-    }
-    return ret;
-  }
 }

@@ -82,4 +82,13 @@ public class Chord {
   fun int size() {
     return notes.size();
   }
+
+  // TODO TEST
+  fun static Chord dotC(Chord chord) {
+    Chord.make(chord) @=> Chord ret;
+    for (0 => int i; i < chord.size(); i++) {
+      ret.notes[i].duration * 1.5 @=> ret.notes[i].duration;
+    }
+    return ret;
+  }
 }

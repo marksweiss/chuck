@@ -6,12 +6,22 @@ public class ArgBase {
   3 => static int ARG_DURATION;
   4 => static int ARG_TIME;
 
+  "DUMMY_NAME" => string DUMMY_NAME;
+  -1 => int DUMMY_VALUE;
+
   string name;
   int intVal;
   float fltVal;
   string strVal;
   dur durVal;
   time timeVal;
+
+  fun static ArgBase makeEmpty() {
+    ArgBase ret;
+    DUMMY_NAME => ret.name; 
+    DUMMY_VALUE => intVal;
+    return ret;
+  }
 
   /**
    * Converts a camelcase arg name to a *nix-style flag syntax

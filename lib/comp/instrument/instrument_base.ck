@@ -21,11 +21,6 @@ public class InstrumentBase {
   // Override
   fun void play() {}
 
-  // Override
-  // Instruemnts generally chain multiple ugens together; they should implement this to set
-  // op on the "primary" ugen, such as the SinOsc ugen in a SinOsc wrapper instrument with effects etc.
-  fun void setOp() {}
-
   // Override - each instrument should at a minimum call the built-in help on its UGen.
   // Better implementations provide pruned and specific information about arguments taken to
   // configure and the behavior of the instrument.

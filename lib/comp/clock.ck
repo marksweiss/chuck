@@ -77,6 +77,7 @@ public class Clock {
     while (true) {
       // call the conductor to calculate new global state for all instrument player threads
       this.conductor.nextStateBool();
+
       this.stepEvent.broadcast();
       me.yield();
 

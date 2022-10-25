@@ -10,12 +10,21 @@
 
 /**
  * SinOsc wrapper, with envelope, adjustable global gain and multiple effects,
- * configurable from CLI args or programmatic call to init()
+ * configurable from CLI args or programmatic call to init(). Supports up to 5
+ * polyphonic gens, and so can play chords of up to 5 notes.
  */ 
 public class InstrSinOsc2 extends InstrumentBase {
+  5 => static int MAX_NUM_VOICES;
 
-  // generator
-  SinOsc so;
+  // TODO - DO WE NEED THIS?
+  Gain g;
+  // generators
+  SinOsc so1;
+  SinOsc so2;
+  SinOsc so3;
+  SinOsc so4;
+  SinOsc so5;
+  [so1, so2, so3, so4, so5] @=> SinOsc gens[MAX_NUM_VOICES];
   // envelope
   ADSR env;
   // effects
@@ -40,8 +49,8 @@ public class InstrSinOsc2 extends InstrumentBase {
   dur stepDur;
   Conductor conductor;
 
-  fun void init(string name, ArgParser conf, Sequences seqs, Event startEvent, Event stepEvent, dur stepDur,
-                Conductor conductor) {
+  fun void init(string name, ArgParser conf, Sequences seqs,
+                Event startEvent, Event stepEvent, dur stepDur, Conductor conductor) {
     name => this.name;
     seqs @=> this.seqs;
     startEvent @=> this.startEvent;    
@@ -49,8 +58,6 @@ public class InstrSinOsc2 extends InstrumentBase {
     stepDur => this.stepDur;
 
     conductor @=> this.conductor;
-    // register this instrument by name (which therefore must be unique) with global state manager
-    conductor.mapToBool(this.name);
 
     // init all ugens to passthru initially, only set ugens with conf arguments to be sum inputs
     env.op(OP_PASSTHRU);
@@ -124,13 +131,23 @@ public class InstrSinOsc2 extends InstrumentBase {
     }
     
     // create patch chain
-    so => env => echo => chorus => modulate => delay => rev => env => pan => dac;
+    // always precede dac with Gain, because Gain goes out of scope when code stops running,
+    // breaking Ugen connection to dac output, but dac does not without explicit use of =< operator.
+    // See: https://learning.oreilly.com/library/view/programming-for-musicians/9781617291708/OEBPS/Text/kindle_split_018.html 
+    /* so => env => echo => chorus => modulate => delay => rev => env => pan => dac; */
+    0.05 => g.gain;
+    delay => rev => pan => env => g => dac;
+    so1 => delay;
+    so2 => delay;
+    so3 => delay;
+    so4 => delay;
+    so5 => delay;
   }
 
   // Override
   fun void play() {
     // TEMP DEBUG
-    /* <<< "IN INSTR PLAY BEFORE START EVENT RECEIVED, shred id:", me.id() >>>; */
+    <<< "IN INSTR PLAY BEFORE START EVENT RECEIVED, shred id:", me.id() >>>;
 
     // block on START
     startEvent => now;
@@ -148,7 +165,10 @@ public class InstrSinOsc2 extends InstrumentBase {
 
       // block on event of next beat step broadcast by clock
       stepEvent => now;
+      stepDur => now;
       sinceLastNote + stepDur => sinceLastNote; 
+
+      /* <<< "name", this.name, "sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>; */
 
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote == nextNoteDur) {
@@ -159,8 +179,11 @@ public class InstrSinOsc2 extends InstrumentBase {
         // load the next chord into the gen
         for (0 => int j; j < c.notes.size(); j++) {
           c.notes[j] @=> Note n;
-          so.freq(Std.mtof(n.pitch)); 
-          n.gain => so.gain;
+          gens[i].freq(Std.mtof(n.pitch)); 
+
+          /* <<< "INSTR name", this.name, "pitch", n.pitch >>>; */
+
+          /* n.gain => so.gain; */
         }
 
         // Advance sequence iterator to next chord in sequence 
@@ -168,9 +191,17 @@ public class InstrSinOsc2 extends InstrumentBase {
         // but using hasNext iterator API for each sequence, so either we can move to its
         // next note or we have to advance to the next sequence in sequences
         if (!seq.hasNext()) {
-          // current sequence has no more notes, so advance to next sequence in sequences
           // if the Conductor state for this shred is to advance, otherwise stay on this phrase
-          if (conductor.getBool(this.name)) {
+          conductor.update(me.id());
+          
+
+          // TODO THIS DESIGN IS BROKEN
+          // WE NEED TO PASS CONDUcTOR HERE POLYMORPHICALLY BY BASE CLASS REF
+          // BUT WE ALSO NEED TO EITHER KNOW THE KEY NAME OR WRAP THAT IN A DERIVED CLASS GETTER
+          // OR WE CAN INHERIT ALL THE INSTRUMENT SETUP BUT DERIVE AGAIN SO THE play() IS SPECIFIC
+          // TO EACH COPMOSITION AND SO KNOWS ABOUT DERIVED CONDUCTOR
+
+          if (conductor.getIsAdvancing(me.id())) {
             this.seqs.next() @=> seq;
           }
           // either we advanced and if it is after the first iteration this sequence was used before
@@ -185,16 +216,10 @@ public class InstrSinOsc2 extends InstrumentBase {
         0::samp => sinceLastNote;
         // trigger envelope start
         env.keyOn();
-
-        // note emitted, yield to clock
-        me.yield();
       }
-    }
-  }
 
-  // Override
-  fun void setOp(int op) {
-    so.op(op);
+      me.yield();
+    }
   }
 
   // Override

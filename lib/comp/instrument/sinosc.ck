@@ -5,7 +5,7 @@
 // Machine.add("lib/comp/instrument/instrument_base.ck");
 
 /**
- * Basic SinOsc wrapper, adding only default ADSR to avoid clipping
+ * Basic SinOsc wrapper, adding only default ADSR to avoid clipping, supports only single gen
  */ 
 public class InstrSinOsc extends InstrumentBase {
   // generator
@@ -84,10 +84,5 @@ public class InstrSinOsc extends InstrumentBase {
         me.yield();
       }
     }
-  }
-
-  // Override
-  fun void setOp(int op) {
-    so.op(op);
   }
 }
