@@ -5,8 +5,8 @@
 
 fun void testOrderedArgMapPutGet() {
   // setup
-  "testPut" => string testName;
-  "put() adds argument key and value to the map" => string msg;
+  "testOrderedArgMapPutGet" => string testName;
+  "put() adds argument key and ArgBase value to the map" => string msg;
 
   // call
   "key" => string key;
@@ -26,10 +26,34 @@ fun void testOrderedArgMapPutGet() {
   Assert.assert(expectedArg.intVal, actualArg.intVal, testName, msg);
 }
 
+// nearly identical to testOrderedArgMapPutGet() but this type stores values as Object
+fun void testOrderedObjectMapPutGet() {
+  // setup
+  "testOrderedObjectMapPutGet" => string testName;
+  "put() adds argument key and Object value to the map" => string msg;
+
+  // call
+  "key" => string key;
+  "arg" => string argName; 
+  100 => int argVal;
+  IntArg I;
+  I.make(argName, argVal) @=> IntArg arg;
+
+  OrderedObjectMap m;
+  m.put(key, arg);
+  m.get(key) $ IntArg @=> IntArg actualArg;
+
+  // assert
+  Assert.assert(m.size(), 1, testName, msg);
+  I.make(argName, argVal) @=> IntArg expectedArg;
+  Assert.assert(expectedArg.name, actualArg.name, testName, msg);
+  Assert.assert(expectedArg.intVal, actualArg.intVal, testName, msg);
+}
 
 fun void test() {
   <<< "\nRunning Test Suite:", TEST_SUITE >>>;
   testOrderedArgMapPutGet();
+  testOrderedObjectMapPutGet();
 }
 
 test();
