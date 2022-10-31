@@ -7,7 +7,7 @@ public class ArgBase {
   4 => static int ARG_TIME;
 
   "DUMMY_NAME" => string DUMMY_NAME;
-  -1 => int DUMMY_VALUE;
+  -1 => static int DUMMY_VALUE;
 
   string name;
   int intVal;
@@ -16,7 +16,8 @@ public class ArgBase {
   dur durVal;
   time timeVal;
 
-  fun static ArgBase makeEmpty() {
+  // non-static because string DUMMY_NAME cannot be static in Chuck
+  fun /*static*/ ArgBase makeEmpty() {
     ArgBase ret;
     DUMMY_NAME => ret.name; 
     DUMMY_VALUE => intVal;

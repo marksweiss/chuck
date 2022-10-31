@@ -16,6 +16,7 @@
 public class InstrSinOsc2 extends InstrumentBase {
   5 => static int MAX_NUM_VOICES;
 
+  string name;
   // TODO - DO WE NEED THIS?
   Gain g;
   // generators
@@ -39,15 +40,6 @@ public class InstrSinOsc2 extends InstrumentBase {
   // mix
   Pan2 pan;  // -1 to 1 // .pan
   Mix2 mix;  // stereo to mono mixdown  // .pan
-
-  string name;
-  Sequences seqs;
-  // events, boilerplate but must be assigned by reference per instance because they are bound
-  // to a particular spork and possibly spawned by one or another parent event loop
-  Event startEvent;
-  Event stepEvent;
-  dur stepDur;
-  Conductor conductor;
 
   fun void init(string name, ArgParser conf, Sequences seqs,
                 Event startEvent, Event stepEvent, dur stepDur, Conductor conductor) {
@@ -142,84 +134,6 @@ public class InstrSinOsc2 extends InstrumentBase {
     so3 => delay;
     so4 => delay;
     so5 => delay;
-  }
-
-  // Override
-  fun void play() {
-    // TEMP DEBUG
-    <<< "IN INSTR PLAY BEFORE START EVENT RECEIVED, shred id:", me.id() >>>;
-
-    // block on START
-    startEvent => now;
-
-    // index of chord in sequence to play
-    0 => int i;
-    // state triggering time elapsed is == to the duration of previous note played,
-    // time to play the next one
-    0::samp => dur sinceLastNote;
-    this.seqs.current() @=> Sequence seq;
-    while (true) {
-      seq.current() @=> Chord c;
-      // NOTE: assumes all notes in current chord are same duration
-      c.notes[0].duration => dur nextNoteDur;
-
-      // block on event of next beat step broadcast by clock
-      stepEvent => now;
-      stepDur => now;
-      sinceLastNote + stepDur => sinceLastNote; 
-
-      /* <<< "name", this.name, "sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>; */
-
-      // if enough time has passed, emit the next note, silence the previous note
-      if (sinceLastNote == nextNoteDur) {
-        // previous note ending, trigger release
-        env.keyOff();
-        env.releaseTime() => now;
-
-        // load the next chord into the gen
-        for (0 => int j; j < c.notes.size(); j++) {
-          c.notes[j] @=> Note n;
-          gens[i].freq(Std.mtof(n.pitch)); 
-
-          /* <<< "INSTR name", this.name, "pitch", n.pitch >>>; */
-
-          /* n.gain => so.gain; */
-        }
-
-        // Advance sequence iterator to next chord in sequence 
-        // Sequences are in isLooping mode so we just keep rolling over each sequence
-        // but using hasNext iterator API for each sequence, so either we can move to its
-        // next note or we have to advance to the next sequence in sequences
-        if (!seq.hasNext()) {
-          // if the Conductor state for this shred is to advance, otherwise stay on this phrase
-          conductor.update(me.id());
-          
-
-          // TODO THIS DESIGN IS BROKEN
-          // WE NEED TO PASS CONDUcTOR HERE POLYMORPHICALLY BY BASE CLASS REF
-          // BUT WE ALSO NEED TO EITHER KNOW THE KEY NAME OR WRAP THAT IN A DERIVED CLASS GETTER
-          // OR WE CAN INHERIT ALL THE INSTRUMENT SETUP BUT DERIVE AGAIN SO THE play() IS SPECIFIC
-          // TO EACH COPMOSITION AND SO KNOWS ABOUT DERIVED CONDUCTOR
-
-          if (conductor.getIsAdvancing(me.id())) {
-            this.seqs.next() @=> seq;
-          }
-          // either we advanced and if it is after the first iteration this sequence was used before
-          // so reset it, or we stayed on the same sequence and just got to the end so reset it
-          seq.reset();
-        } else {
-          // otherwise advance to next note in current sequence
-          seq.next();
-        }
-
-        // reset note triggering state
-        0::samp => sinceLastNote;
-        // trigger envelope start
-        env.keyOn();
-      }
-
-      me.yield();
-    }
   }
 
   // Override

@@ -12,10 +12,10 @@
  * associated value is replaced.
  */
 // TODO TEST
-public class OrderedMap {
+public class OrderedArgMap {
   128 => int MAX_NUM_KEYS;
   string keys[MAX_NUM_KEYS];
-  int map[1];
+  ArgBase  map[1];
   0 => int count;
 
   // iterator support
@@ -34,7 +34,7 @@ public class OrderedMap {
       count++;
     }
     // set value for key
-    map[key] @=> val;
+    val @=> map[key];
   }
 
   fun ArgBase get(string key) {
@@ -46,7 +46,7 @@ public class OrderedMap {
   }
 
   fun void delete(string key) {
-    map.clear(key);
+    map.erase(key);
   }
 
   fun void reset() {
@@ -55,12 +55,12 @@ public class OrderedMap {
     map.reset();
   }
 
-  fun string[] keys() {
+  fun string[] getKeys() {
     return keys;
   }
 
-  fun ArgBase[] values() {
-    ret ArgBase[count];
+  fun ArgBase[] getValues() {
+    ArgBase ret[count];
     for (0 => int i; i < count; i++) {
       map[keys[i]] @=> ret[i]; 
     }
@@ -71,11 +71,16 @@ public class OrderedMap {
     return count;
   }
 
+  /**
+   * Returns the next value in the ordered sequence of values(), or null if the iterator
+   * index has gone past the index of the last value, i.e. is equal to count + 1.
+   * If this point is reached, nextIdx is reset to 0 before null is returned.
+   */
   fun ArgBase next() {
     // if we reach the end, reset iterator state and return sentinel
     if (nextIdx == count - 1) {
       0 => nextIdx;
-      return END;
+      return null;
     }
     // else return value at current position and advance position
     return map[keys[nextIdx]];

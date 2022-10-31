@@ -2,15 +2,16 @@
 //               lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck lib/arg_parser/string_arg.ck \
 //               lib/arg_parser/arg_parser.ck lib/comp/conductor.ck lib/comp/note.ck lib/comp/chord.ck lib/comp/scale.ck \
 //               lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/instrument/instrument_base.ck lib/comp/clock.ck \
-//               lib/comp/scale_const.ck lib/comp/instrument/sinosc2.ck comps/comp_sinosc_2.ck
+//               lib/comp/scale_const.ck lib/comp/instrument/sinosc2.ck 
+//               lib/comp/player_base.ck lib/comp/in_c_player.ck comps/comp_sinosc_2.ck
 
 // For client to spork, which requires a free function as entry point
-public void playClock(Clock clock) {
+public void runClock(Clock clock) {
   clock.play();
 }
 
-public void playInstr(InstrSinOsc2 instr) {
-  instr.play();
+public void runPlayer(InstrumentBase player) {
+  player.play();
 }
 
 fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur release) {
@@ -84,7 +85,7 @@ fun void main () {
 
   // global coordinator of interprocess state governing composition behavior, such
   // as in this case whether instruments move to the next phrase or stay on the current one
-  Conductor conductor;
+  InCConductor conductor;
 
   // init clock, tempo and time advance Events
   240 => int BPM; 
@@ -124,15 +125,25 @@ fun void main () {
   InstrSinOsc2 instr1;
   InstrSinOsc2 instr2; 
   InstrSinOsc2 instr3; 
-  instr1.init("instr1", conf1, seqs1, startEvent, stepEvent, clock.stepDur, conductor); 
-  instr2.init("instr2", conf2, seqs2, startEvent, stepEvent, clock.stepDur, conductor); 
-  instr3.init("instr3", conf3, seqs2, startEvent, stepEvent, clock.stepDur, conductor); 
+  instr1.init("instr1", conf1) 
+  instr2.init("instr2", conf2);
+  instr3.init("instr3", conf3);
+
+  // declare the Players whose behavior governed by calling the Conductor to
+  // to check their state changes, performing the notes of the Sequences using the
+  // Instruments to play the notes
+  InCPlayer player1;
+  player1.init("player1", seqs1, startEvent, stepEvent, clock.stepDur, conductor);
+  InCPlayer player2;
+  player1.init("player2", seqs2, startEvent, stepEvent, clock.stepDur, conductor);
+  InCPlayer player3;
+  player1.init("player3", seqs3, startEvent, stepEvent, clock.stepDur, conductor);
 
   // start clock thread and instrument play threads
-  spork ~ playClock(clock);
-  spork ~ playInstr(instr1);
-  spork ~ playInstr(instr2);
-  spork ~ playInstr(instr3);
+  spork ~ runClock(clock);
+  spork ~ runPlayer(instr1);
+  spork ~ runPlayer(instr2);
+  spork ~ runPlayer(instr3);
 
   // boilerplate to make event loop work
   /* me.yield();  // yield to Clock and Instrument event loops */ 
