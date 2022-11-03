@@ -19,12 +19,11 @@ public class OrderedObjectMap {
 
   fun void put(string key, Object val) {
     // if key already present, clear value for key, don't add key to keys
-    if (keys.find(key) == 1) {
+    if (map.find(key) == 1) {
       map.erase(key);
     // else new key, add key to keys
     } else {
-      keys[count] @=> key;
-      count++;
+      key => keys[count++];
     }
     // set value for key
     val @=> map[key];
@@ -35,7 +34,7 @@ public class OrderedObjectMap {
   }
 
   fun int hasKey(string key) {
-    return keys.find(key) == 1;
+    return map.find(key) == 1;
   }
 
   fun void delete(string key) {
@@ -45,7 +44,7 @@ public class OrderedObjectMap {
   fun void reset() {
     // clear() instead of reset() because reset() resizes storage to 8 elements
     keys.clear();
-    map.reset();
+    map.clear();
   }
 
   fun string[] getKeys() {

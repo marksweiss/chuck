@@ -15,7 +15,7 @@
 public class OrderedArgMap {
   128 => int MAX_NUM_KEYS;
   string keys[MAX_NUM_KEYS];
-  ArgBase  map[1];
+  ArgBase  map[0];
   0 => int count;
 
   // iterator support
@@ -26,13 +26,13 @@ public class OrderedArgMap {
 
   fun void put(string key, ArgBase val) {
     // if key already present, clear value for key, don't add key to keys
-    if (keys.find(key) == 1) {
+    if (map.find(key) == 1) {
       map.erase(key);
     // else new key, add key to keys
     } else {
-      keys[count] @=> key;
-      count++;
+      key => keys[count++];
     }
+
     // set value for key
     val @=> map[key];
   }
@@ -42,17 +42,45 @@ public class OrderedArgMap {
   }
 
   fun int hasKey(string key) {
-    return keys.find(key) == 1;
+    return map.find(key) == 1;
   }
 
   fun void delete(string key) {
     map.erase(key);
+    
+    // manueally rebuild keys, skipping key being erased, because clear() and reset() don't remove
+    // non-associative elements from arrays
+    string tempKeys[MAX_NUM_KEYS];
+    0 => int j;
+    // copy the old keys, skipping the key being erased
+    for (0 => int i; i < count; i++) {
+      if (keys[i] != key) {
+        keys[i] => tempKeys[j];
+        j++;
+      }
+    }
+    // blank out all keys in the instance member
+    for (0 => int i; i < count; i++) {
+      "" => keys[i];
+    }
+    // copy the new keys from temp back to the instance member
+    for (0 => int i; i < tempKeys.size(); i++) {
+      tempKeys[i] => keys[i];
+    }
+
+    count--;
   }
 
   fun void reset() {
     // clear() instead of reset() because reset() resizes storage to 8 elements
     keys.clear();
-    map.reset();
+    // clear() and reset() don't remove associative array keys, and erase only removes the value for a key
+    // so we have to reallocate.  NOTE: This is probably a memory leak
+    null => map;
+    ArgBase newMap[0];
+    newMap @=> map;
+
+    0 => count;
   }
 
   fun string[] getKeys() {
