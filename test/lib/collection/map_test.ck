@@ -230,12 +230,15 @@ fun void testOrderedArgMapKeysValues() {
   OrderedArgMap m;
   m.put(key, arg);
   m.put(key2, arg2);
-  /* m.keys() @=> string keys[]; */
-  /* m.values @=> int vals[]; */
+  m.getKeys() @=> string keys[];
+  m.getValues() @=> ArgBase values[];
 
   /* // assert */
-  /* Assert.assert(2, keys.size(), testName, msg); */
-  /* Assert.assert(2, values.size(), testName, msg); */
+  Assert.assert("key", keys[0], testName, msg);
+  Assert.assert("key2", keys[1], testName, msg);
+  Assert.assert(2, values.size(), testName, msg);
+  Assert.assert(arg.intVal, values[0].intVal, testName, msg);
+  Assert.assert(arg2.intVal, values[1].intVal, testName, msg);
 }
 
 fun void test() {
@@ -248,6 +251,7 @@ fun void test() {
   /* testOrderedObjectMapDelete(); */
   testOrderedArgMapReset();
   /* testOrderedObjectMapReset(); */
+  testOrderedArgMapKeysValues();
 }
 
 
