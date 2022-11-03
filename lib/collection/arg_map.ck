@@ -106,13 +106,12 @@ public class OrderedArgMap {
    */
   fun ArgBase next() {
     // if we reach the end, reset iterator state and return sentinel
-    if (nextIdx == count - 1) {
+    if (nextIdx == count) {
       0 => nextIdx;
       return null;
     }
     // else return value at current position and advance position
-    return map[keys[nextIdx]];
-    nextIdx++;
+    return map[keys[nextIdx++]];
   }
 
   fun void resetNext() {

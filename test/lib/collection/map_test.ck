@@ -8,13 +8,13 @@ fun void testOrderedArgMapPutGetSize() {
   "testOrderedArgMapPutGet" => string testName;
   "put() adds argument key and ArgBase value to the map" => string msg;
 
-  // call
   "key" => string key;
   "arg" => string argName; 
   100 => int argVal;
   IntArg I;
   I.make(argName, argVal) @=> IntArg arg;
 
+  // call
   OrderedArgMap m;
   m.put(key, arg);
   m.get(key) $ IntArg @=> IntArg actualArg;
@@ -32,13 +32,13 @@ fun void testOrderedObjectMapPutGetSize() {
   "testOrderedObjectMapPutGet" => string testName;
   "put() adds argument key and Object value to the map" => string msg;
 
-  // call
   "key" => string key;
   "arg" => string argName; 
   100 => int argVal;
   IntArg I;
   I.make(argName, argVal) @=> IntArg arg;
 
+  // call
   OrderedObjectMap m;
   m.put(key, arg);
   m.get(key) $ IntArg @=> IntArg actualArg;
@@ -55,7 +55,6 @@ fun void testOrderedArgMapHasKey() {
   "testOrderedArgMapHasKey" => string testName;
   "hasKey() returns true if key is present, false if it is not" => string msg;
 
-  // call
   "key" => string key;
   "arg" => string argName; 
   100 => int argVal;
@@ -64,6 +63,8 @@ fun void testOrderedArgMapHasKey() {
 
   OrderedArgMap m;
   m.put(key, arg);
+
+  // call
   m.hasKey(key) => int hasKey;
   m.hasKey("thisKeyNotAdded") => int hasAnotherKey;
 
@@ -77,7 +78,6 @@ fun void testOrderedObjectMapHasKey() {
   "testOrderedObjectMapHasKey" => string testName;
   "hasKey() returns true if key is present, false if it is not" => string msg;
 
-  // call
   "key" => string key;
   "arg" => string argName; 
   100 => int argVal;
@@ -86,6 +86,8 @@ fun void testOrderedObjectMapHasKey() {
 
   OrderedObjectMap m;
   m.put(key, arg);
+
+  // call
   m.hasKey(key) => int actual;
   m.hasKey("thisKeyNotAdded") => int hasAnotherKey;
 
@@ -99,7 +101,6 @@ fun void testOrderedArgMapDelete() {
   "testOrderedArgMapDelete" => string testName;
   "delete() removes key from map" => string msg;
 
-  // call
   "key" => string key;
   "arg" => string argName; 
   100 => int argVal;
@@ -109,6 +110,8 @@ fun void testOrderedArgMapDelete() {
   OrderedArgMap m;
   m.put(key, arg);
   m.hasKey(key) => int hasKeyBeforeDelete;
+
+  // call
   m.delete(key);
   m.hasKey(key) => int hasKeyAfterDelete;
 
@@ -122,7 +125,6 @@ fun void testOrderedObjectMapDelete() {
   "testOrderedObjectMapDelete" => string testName;
   "delete() remvoes key from map" => string msg;
 
-  // call
   "key" => string key;
   "arg" => string argName; 
   100 => int argVal;
@@ -132,6 +134,8 @@ fun void testOrderedObjectMapDelete() {
   OrderedObjectMap m;
   m.put(key, arg);
   m.hasKey(key) => int hasKeyBeforeDelete;
+  
+  // call
   m.delete(key);
   m.hasKey(key) => int hasKeyAfterDelete;
 
@@ -145,7 +149,6 @@ fun void testOrderedArgMapReset() {
   "testOrderedArgMapReset" => string testName;
   "reset() removes all keys from map" => string msg;
 
-  // call
   IntArg I;
   "key" => string key;
   "arg" => string argName; 
@@ -167,7 +170,7 @@ fun void testOrderedArgMapReset() {
   Assert.assert(100, m.get(key).intVal, testName, msg);
   Assert.assert(101, m.get(key2).intVal, testName, msg);
 
-  // clear
+  // call
   m.reset(); 
 
   // assert keys, values gone after reset 
@@ -215,7 +218,6 @@ fun void testOrderedArgMapKeysValues() {
   "testOrderedArgMapKeysValues" => string testName;
   "keys() returns all keys in map as array in order, values() returns all values in map as array in order" => string msg;
 
-  // call
   IntArg I;
   "key" => string key;
   "arg" => string argName; 
@@ -230,6 +232,8 @@ fun void testOrderedArgMapKeysValues() {
   OrderedArgMap m;
   m.put(key, arg);
   m.put(key2, arg2);
+
+  // call
   m.getKeys() @=> string keys[];
   m.getValues() @=> ArgBase values[];
 
@@ -241,6 +245,73 @@ fun void testOrderedArgMapKeysValues() {
   Assert.assert(arg2.intVal, values[1].intVal, testName, msg);
 }
 
+/* fun void testOrderedObjectMapKeysValues() { */
+/*   // setup */
+/*   "testOrderedArgMapKeysValues" => string testName; */
+/*   "keys() returns all keys in map as array in order, values() returns all values in map as array in order" => string msg; */
+
+/*   IntArg I; */
+/*   "key" => string key; */
+/*   "arg" => string argName; */ 
+/*   100 => int argVal; */
+/*   I.make(argName, argVal) @=> IntArg arg; */
+
+/*   "key2" => string key2; */
+/*   "arg2" => string argName2; */ 
+/*   101 => int argVal2; */
+/*   I.make(argName2, argVal2) @=> IntArg arg2; */
+
+/*   OrderedObjectMap m; */
+/*   m.put(key, arg); */
+/*   m.put(key2, arg2); */
+  
+/*   // call */
+/*   m.getKeys() @=> string keys[]; */
+/*   m.getValues() @=> ArgBase values[]; */
+
+/*   // assert */
+/*   Assert.assert("key", keys[0], testName, msg); */
+/*   Assert.assert("key2", keys[1], testName, msg); */
+/*   Assert.assert(2, values.size(), testName, msg); */
+/*   Assert.assert(arg.intVal, values[0].intVal, testName, msg); */
+/*   Assert.assert(arg2.intVal, values[1].intVal, testName, msg); */
+/* } */
+
+fun void testOrderedArgMapNextResetNext() {
+  // setup
+  "testOrderedArgMapNextResetNext" => string testName;
+  "next() advances to next key and value, resetNext() resets index" => string msg;
+
+  IntArg I;
+  "key" => string key;
+  "arg" => string argName; 
+  100 => int argVal;
+  I.make(argName, argVal) @=> IntArg arg;
+
+  "key2" => string key2;
+  "arg2" => string argName2; 
+  101 => int argVal2;
+  I.make(argName2, argVal2) @=> IntArg arg2;
+
+  OrderedArgMap m;
+  m.put(key, arg);
+  m.put(key2, arg2);
+
+  // call
+  m.next() @=> ArgBase n0;
+  m.next() @=> ArgBase n1;
+  m.next() @=> ArgBase n2;
+  m.resetNext();
+  m.next() @=> ArgBase n0AfterReset;
+  
+  // assert
+  Assert.assert(100, n0.intVal, testName, msg);
+  Assert.assert(101, n1.intVal, testName, msg);
+  Assert.assert(true, n2 == null, testName, msg);
+  Assert.assert(100, n0AfterReset.intVal, testName, msg);
+}
+
+// TODO REFACTOR ALL OF THESE INTO HELPERS TAKING THE MAP, THAT IS THE ONLY THING THAT'S DIFFERENT
 fun void test() {
   <<< "\nRunning Test Suite:", TEST_SUITE >>>;
   testOrderedArgMapPutGetSize();
@@ -252,6 +323,8 @@ fun void test() {
   testOrderedArgMapReset();
   /* testOrderedObjectMapReset(); */
   testOrderedArgMapKeysValues();
+  /* testOrderedObjectMapKeysValues(); */
+  testOrderedArgMapNextResetNext();
 }
 
 
