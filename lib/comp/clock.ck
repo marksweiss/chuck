@@ -6,6 +6,7 @@
 // desc: TimeGrid class; basic timing operations abbreviated
 // author: Graham Coleman 
 
+// TODO TEST
 public class Clock {
   4 => static float QUARTER_NOTE; 
   64 => static float BEAT_STEP_NOTE;
@@ -76,7 +77,7 @@ public class Clock {
     sync();
     while (true) {
       // call the conductor to calculate new global state for all instrument player threads
-      this.conductor.nextStateBool();
+      this.conductor.updateAll();
 
       this.stepEvent.broadcast();
       me.yield();

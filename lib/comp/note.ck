@@ -1,3 +1,4 @@
+// Machine.add("test/assert.ck")
 // Machine.add("lib/comp/scale.ck")
 
 public class Note {
@@ -74,5 +75,11 @@ public class Note {
   // TODO TEST
   fun static dur dotD(dur duration) {
     return duration * 1.5;
+  }
+
+  fun int equals(Note other) {
+    return Assert.assertFloatEqual(freq, other.freq) && 
+      Assert.assertFloatEqual(gain, other.gain) &&
+      duration == other.duration;
   }
 }

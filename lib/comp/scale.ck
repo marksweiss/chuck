@@ -7,30 +7,6 @@ public class Scale {
   // default to Western 12-note "piano" scale
   12 => static int NUM_NOTES_IN_OCTAVE;
 
-  string PITCH_STR_MAP[12];
-  "C" @=> PITCH_STR_MAP[0];
-  "C_shp" @=> PITCH_STR_MAP[1];
-  "D" @=> PITCH_STR_MAP[2];
-  "E_flt" @=> PITCH_STR_MAP[3];
-  "F" @=> PITCH_STR_MAP[5];
-  "F_shp" @=> PITCH_STR_MAP[6];
-  "G" @=> PITCH_STR_MAP[7];
-  "A_flt" @=> PITCH_STR_MAP[8];
-  "A" @=> PITCH_STR_MAP[9]; 
-  "B_flt" @=> PITCH_STR_MAP[10]; 
-  "B" @=> PITCH_STR_MAP[11]; 
-
-  // SCALE API
-  // Should be static but uses array, which can't be static
-  fun string pitchName(int pitchPosition) {
-    return pitchName(pitchPosition, NUM_NOTES_IN_OCTAVE);
-  } 
-
-  // Should be static but uses array, which can't be static
-  fun string pitchName(int pitchPosition, int numNotesInOctave) {
-    return PITCH_STR_MAP[pitchPosition % numNotesInOctave];
-  } 
-
   // TODO TESTS FOR THESE FOUR METHODS AND THE REST OF THIS CLASS
   fun static int pitch(int octave, int pitchName) {
     return pitch(octave, pitchName, NUM_NOTES_IN_OCTAVE);

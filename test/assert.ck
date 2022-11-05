@@ -126,7 +126,7 @@ public class Assert {
     }
   }
 
-  fun /*private*/ static int assertFloatEqual(float expected, float actual) {
+  fun static int assertFloatEqual(float expected, float actual) {
     // hacky but the return value from remainder, at least as printed in the VM process,
     // has six digits of precision, and all logical comparisons with floats fail
     return ((Math.fabs(Math.remainder(expected, actual)) * 100000) $ int) == 0;

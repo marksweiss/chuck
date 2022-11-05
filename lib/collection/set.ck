@@ -1,10 +1,10 @@
-// TODO TEST
+// Machine.add("lib/collection/object_map.ck")
+
 public class OrderedStringSet {
-  map OrderedMap;
-  -1 => static int DUMMY_VALUE;
+  map OrderedObjectMap;
 
   fun void put(string key) {
-    map.put(key, DUMMY_VALUE);
+    map.put(key, null);
   }
 
   fun int hasKey(string key) {
@@ -24,14 +24,7 @@ public class OrderedStringSet {
   }
 
   fun ArgBase next() {
-    // if we reach the end, reset iterator state and return sentinel
-    if (nextIdx == count - 1) {
-      0 => nextIdx;
-      return END;
-    }
-    // else return key at current position and advance position
-    return map.keys[nextIdx];
-    nextIdx++;
+    return map.next();
   }
 
   fun void resetNext() {

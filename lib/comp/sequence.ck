@@ -1,7 +1,6 @@
 // cli: $> chuck lib/comp/note.ck lib/comp/chord.ck \
 //               lib/comp/sequence.ck
 
-// TODO TEST
 public class Sequence {
   string name;
   Chord chords[0];
@@ -58,40 +57,21 @@ public class Sequence {
 
   // *** Iterator interface
   fun Chord next() {
-    // If iterator has no more items return "empty" Chord. API is for user to
-    // loop on a poll of hasNext(). Chuck has no exceptions / signals so the only
-    // other choice here is me.exit() which halts the process
-    if (!this.isLooping && !hasNext()) {
-      Chord c;
-      return c;
+    if (idx == chords.size()) {
+      if (!isLooping) {
+        return null;
+      } else {
+        reset(); 
+      }
     }
-    if (this.isLooping && this.idx + 1 == chords.size()) {
-      0 => this.idx;
-    } else {
-      this.idx++;
-    }
-    chords[this.idx] @=> Chord ret;
-    return ret; 
+    return chords[idx++];
   }
 
   fun Chord current() {
-    chords[idx] @=> Chord ret;
-    return ret;
-  }
-
-  fun int hasNext() {
-    if (this.idx >= chords.size() - 1) {
-      if (this.isLooping) {
-        0 => this.idx;
-        return true;
-      }
-      return false;
-    }
-    return true;
+    return chords[idx];
   }
 
   fun void reset() {
-    0 => this.idx;
+    0 => idx;
   }
-  // ***
 }

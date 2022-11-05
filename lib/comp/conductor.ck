@@ -6,6 +6,7 @@
 // Machine.add("lib/collection/map.ck"); 
 
 
+// TODO TEST
 /**
  * Class intended to be used to record global state between shreds. Any shred
  * can write to the shared state and any can read it, at any time. State is mapped
@@ -15,15 +16,15 @@
  */
 public class Conductor {
   // state is an associate array of OrderedMaps, keyed by shredId
-  OrderedMap state[1];
+  OrderedArgMap state[1];
   0 => int count;
 
   128 => int MAX_NUM_KEYS;
-  keys string[MAX_NUM_KEYS];
+  string keys[MAX_NUM_KEYS];
   0 => int keyCount;  
 
   128 => int MAX_NUM_SHREDS;
-  shredIds int[MAX_NUM_SHREDS];
+  int shredIds[MAX_NUM_SHREDS];
   0 => int shredIdCount;  
 
   // objects to call static make() ctors
@@ -61,9 +62,12 @@ public class Conductor {
 
   fun ArgBase get(int shredId, string key) {
     Std.itoa(shredId) => string shredKey;
-    if (!state.hasKey(shredKey) {
-      state[shredKey] @=> OrderedMap shredStateMap;
-      return shredStateMap.get(key);
+    if (state.find(shredKey) > 1) {
+      <<< "ERROR: ILLEGAL STATE. shredKey should have 0 or 1 entries in Conductor" >>>;
+      me.exit();
+    }
+    if (state.find(shredKey) == 1) {
+      state[shredKey].get(key);
     } else {
       return A.makeEmpty();
     }
@@ -71,14 +75,17 @@ public class Conductor {
 
   fun void putHelper(int shredId, string key, ArgBase val) {
     Std.itoa(shredId) => string shredKey;
-    if (!state.hasKey(shredKey) {
-      OrderedMap shredStateMap;
+    if (state.find(shredKey) > 1) {
+      <<< "ERROR: ILLEGAL STATE. shredKey should have 0 or 1 entries in Conductor" >>>;
+      me.exit();
+    }
+    if (state.find(shredKey) == 0) {
+      OrderedArgMap shredStateMap;
       shredStateMap @=> state[shredKey];
       count++;
-
       shredId @=> shredIds[shredIdCount++];
     }
-    state[shredKey] @=> OrderedMap shredStateMap;
+    state[shredKey] @=> OrderedArgMap shredStateMap;
 
     if (!keys.find(key)) {
       key @=> keys[keyCount++]; 
@@ -90,11 +97,11 @@ public class Conductor {
     return count;
   }
 
-  fun string[] keys() {
+  fun string[] getKeys() {
     return keys;
   }
 
-  fun int keyCount() {
+  fun int keySize() {
     return keyCount;
   }
 

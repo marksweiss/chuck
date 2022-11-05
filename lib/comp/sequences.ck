@@ -1,6 +1,6 @@
-// cli: $> chuck lib/comp/sequence.ck
+// Machine.add("lib/comp/sequence")
+// cli: $> chuck lib/comp/sequence lib/comp/sequences.ck
 
-// TODO TEST
 public class Sequences {
   string name;
   // dynamically resize in add()
@@ -11,8 +11,8 @@ public class Sequences {
   false => int isLooping;
 
   fun void init(int isLooping) {
-    Std.itoa(me.id()) => this.name;
-    isLooping => this.isLooping;
+    Std.itoa(me.id()) => name;
+    isLooping => isLooping;
   }
 
   fun void init(string name, int isLooping) {
@@ -20,47 +20,27 @@ public class Sequences {
     isLooping => this.isLooping;
   }
 
-  // *** Container interface
   fun void add(Sequence seq) {
-    this.seqs << seq;
-    ++this.count;
+    seqs << seq;
+    count++;
   }
 
   fun int size() {
-    return this.count;
+    return count;
   }
-  // ***
 
-  // *** Iterator interface
   fun Sequence next() {
-    if (!this.isLooping && !hasNext()) {
-      Sequence s;
-      return s;
+    if (idx == chords.size()) {
+      if (!isLooping) {
+        return null;
+      } else {
+        reset(); 
+      }
     }
-    if (this.isLooping && this.idx + 1 == seqs.size()) {
-      0 => this.idx;
-    } else {
-      this.idx++;
-    }
-    seqs[this.idx] @=> Sequence ret;
-    return ret; 
+    return seqs[idx++];
   }
 
   fun Sequence current() {
-    seqs[idx] @=> Sequence ret;
-    return ret;
+    return seqs[idx];
   }
-
-  fun int hasNext() {
-    if (this.idx >= seqs.size() - 1) {
-      if (this.isLooping) {
-        0 => this.idx;
-        return true;
-      }
-      /* <<< "WARN: Sequences#hasNext() called for position greater than size:", seqs.size() >>>; */
-      return false;
-    }
-    return true;
-  }
-  // *** 
 }

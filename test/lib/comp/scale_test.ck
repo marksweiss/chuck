@@ -1,4 +1,11 @@
-// cli: chuck test/assert.ck lib/comp/scale.ck test/lib/comp/scale_test.ck
+// chuck test/assert.ck
+//      lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck lib/arg_parser/float_arg.ck lib/arg_parser/string_arg.ck
+//        lib/arg_parser/duration_arg.ck lib/arg_parser/time_arg.ck
+//      lib/collection/arg_map.ck
+//      lib/comp/note.ck lib/comp/chord.ck lib/comp/scale.ck
+//        lib/comp/conductor.ck lib/comp/clock.ck
+//        lib/comp/note_const.ck lib/comp/scale_const.ck
+//      test/lib/comp/scale_test.ck
 
 "Test Scale" => string TEST_SUITE;
 
@@ -8,11 +15,11 @@ fun void testPitchName() {
   "pitchName() returns expected string pitch name for pitch enum" => string msg;
 
   // call
-  Scale s;
-  s.pitchName(s.C_shp) => string actual;
+  NoteConst nc;
+  nc.pitchName(NoteConst.Cs) => string actual;
 
   // assert
-  "C_shp" => string expected;
+  "Cs" => string expected;
   Assert.assert(expected, actual, testName, msg);
 }
 
@@ -24,10 +31,10 @@ fun void testPitch() {
   // call
   Scale s;
   2 => int octave;
-  s.pitch(octave, s.C_shp) => int actual;
+  s.pitch(octave, NoteConst.Cs) => int actual;
 
   // assert
-  s.C_shp + (octave * s.NUM_NOTES_IN_OCTAVE) => int expected;
+  NoteConst.Cs + (octave * Scale.NUM_NOTES_IN_OCTAVE) => int expected;
   Assert.assert(expected, actual, testName, msg);
 }
 
@@ -38,9 +45,11 @@ fun void testPitchFromScale() {
 
   // call
   Scale s;
+  // access MAJOR with instance var because it's an array
+  ScaleConst SC;
   5 => int octave;
   5 => int degree;
-  s.pitch(octave, degree, Scale.MAJOR) => int actual;
+  s.pitch(octave, degree, SC.MAJOR) => int actual;
 
   // assert
   69 => int expected;
@@ -56,7 +65,7 @@ fun void testFreq() {
   Scale s;
   // A4 is 440Hz, not sure why that is octave == 5 in Chuck
   5 => int octave;
-  s.freq(octave, s.A) => float actual;
+  s.freq(octave, NoteConst.A) => float actual;
 
   // assert
   // A4 is 440Hz
@@ -71,9 +80,11 @@ fun void testFreqFromScale() {
 
   // call
   Scale s;
+  // access MAJOR with instance var because it's an array
+  ScaleConst SC;
   5 => int octave;
   5 => int degree;
-  s.freq(octave, degree, Scale.MAJOR) => float actual;
+  s.freq(octave, degree, SC.MAJOR) => float actual;
 
   // assert
   440.0 => float expected;
@@ -87,8 +98,10 @@ fun void testTriad() {
 
   // call
   Scale s;
+  // access MAJOR with instance var because it's an array
+  ScaleConst SC;
   5 => int octave;
-  s.triad(octave, Scale.C, Scale.MAJOR, Scale.MAJOR_TRIAD) @=> int actual[];
+  s.triad(octave, NoteConst.C, SC.MAJOR, SC.MAJOR_TRIAD) @=> int actual[];
 
   // assert
   [60, 64, 67] @=> int expected[];

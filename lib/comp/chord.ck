@@ -2,6 +2,8 @@
 /* Machine.add("lib/comp/scale.ck"); */
 /* Machine.add("lib/comp/note.ck"); */
 
+// TODO CHANGE ALL STATIC CALLS TO USE CLASS? Assert WORKS!
+
 public class Chord {
   0.5 => static float DEFAULT_GAIN; 
   1.0::second => static dur DEFAULT_DUR;
@@ -81,6 +83,15 @@ public class Chord {
 
   fun int size() {
     return notes.size();
+  }
+
+  fun int equals(Chord other) {
+    for (0 => int i; i < notes.size(); i++) {
+      if (! notes[i].equals(other.notes[i])) {
+        return false;
+      }
+    }
+    return true;
   }
 
   // TODO TEST
