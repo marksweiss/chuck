@@ -30,7 +30,7 @@ fun void testAddSize() {
 fun void testNext() {
   // setup
   "testNext" => string testName;
-  "next returns next chord in sequence, null if not looping and at end of sequence, 0th element if looping and at end of sequence" => string msg;
+  "next returns next chord in sequence, null if not looping and at end of sequence" => string msg;
   100.0 => float freq;
   1.0 => float gain; 
   1::second => dur duration;
@@ -60,8 +60,8 @@ fun void testNext() {
 
 fun void testIsLooping() {
   // setup
-  "testNext" => string testName;
-  "next returns next chord in sequence, null if not looping and at end of sequence, 0th element if looping and at end of sequence" => string msg;
+  "testIsLooping" => string testName;
+  "next returns next chord in sequence, 0th element if looping and at end of sequence" => string msg;
   100.0 => float freq;
   1.0 => float gain; 
   1::second => dur duration;

@@ -12,7 +12,7 @@ public class Sequences {
 
   fun void init(int isLooping) {
     Std.itoa(me.id()) => name;
-    isLooping => isLooping;
+    isLooping => this.isLooping;
   }
 
   fun void init(string name, int isLooping) {
@@ -30,7 +30,7 @@ public class Sequences {
   }
 
   fun Sequence next() {
-    if (idx == chords.size()) {
+    if (idx == seqs.size()) {
       if (!isLooping) {
         return null;
       } else {
@@ -42,5 +42,9 @@ public class Sequences {
 
   fun Sequence current() {
     return seqs[idx];
+  }
+
+  fun void reset() {
+    0 => idx;
   }
 }
