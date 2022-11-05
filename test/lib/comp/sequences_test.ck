@@ -64,7 +64,7 @@ fun void testNext() {
 fun void testIsLooping() {
   // setup
   "testIsLooping" => string testName;
-  "next returns next sequence in sequences, 0the element if looping and at end of sequence" => string msg;
+  "next returns next sequence in sequences, 0th element if looping and at end of sequence" => string msg;
   false => int isLooping;
   100.0 => float freq;
   1.0 => float gain; 
