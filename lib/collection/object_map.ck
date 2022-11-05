@@ -8,7 +8,7 @@
 public class OrderedObjectMap {
   128 => int MAX_NUM_KEYS;
   string keys[MAX_NUM_KEYS];
-  Object  map[1];
+  Object  map[0];
   0 => int count;
 
   // iterator support
@@ -25,6 +25,7 @@ public class OrderedObjectMap {
     } else {
       key => keys[count++];
     }
+
     // set value for key
     val @=> map[key];
   }
@@ -39,12 +40,40 @@ public class OrderedObjectMap {
 
   fun void delete(string key) {
     map.erase(key);
+    
+    // manually rebuild keys, skipping key being erased, because clear() and reset() don't remove
+    // non-associative elements from arrays
+    string tempKeys[MAX_NUM_KEYS];
+    0 => int j;
+    // copy the old keys, skipping the key being erased
+    for (0 => int i; i < count; i++) {
+      if (keys[i] != key) {
+        keys[i] => tempKeys[j];
+        j++;
+      }
+    }
+    // blank out all keys in the instance member
+    for (0 => int i; i < count; i++) {
+      "" => keys[i];
+    }
+    // copy the new keys from temp back to the instance member
+    for (0 => int i; i < tempKeys.size(); i++) {
+      tempKeys[i] => keys[i];
+    }
+
+    count--;
   }
 
   fun void reset() {
     // clear() instead of reset() because reset() resizes storage to 8 elements
     keys.clear();
-    map.clear();
+    // clear() and reset() don't remove associative array keys, and erase only removes the value for a key
+    // so we have to reallocate.  NOTE: This is probably a memory leak
+    null => map;
+    Object newMap[0];
+    newMap @=> map;
+
+    0 => count;
   }
 
   fun string[] getKeys() {
@@ -70,17 +99,15 @@ public class OrderedObjectMap {
    */
   fun Object next() {
     // if we reach the end, reset iterator state and return sentinel
-    if (nextIdx == count - 1) {
+    if (nextIdx == count) {
       0 => nextIdx;
       return null;
     }
     // else return value at current position and advance position
-    return map[keys[nextIdx]];
-    nextIdx++;
+    return map[keys[nextIdx++]];
   }
 
   fun void resetNext() {
     0 => nextIdx;
   }
 }
-

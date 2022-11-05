@@ -48,7 +48,7 @@ public class OrderedArgMap {
   fun void delete(string key) {
     map.erase(key);
     
-    // manueally rebuild keys, skipping key being erased, because clear() and reset() don't remove
+    // manually rebuild keys, skipping key being erased, because clear() and reset() don't remove
     // non-associative elements from arrays
     string tempKeys[MAX_NUM_KEYS];
     0 => int j;
