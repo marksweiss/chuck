@@ -6,12 +6,11 @@
 // desc: TimeGrid class; basic timing operations abbreviated
 // author: Graham Coleman 
 
-// TODO TEST
 public class Clock {
   4 => static float QUARTER_NOTE; 
   64 => static float BEAT_STEP_NOTE;
   // the resolution in note duration (not actual time duration) of each beat step,
-  // i.e.. each advance of time (each addition to 'now')
+  // i.e. each advance of time (each addition to 'now')
   BEAT_STEP_NOTE / QUARTER_NOTE => static float BEAT_STEP;
   44100.0 => static float SAMPLING_RATE_PER_SEC;
   1::minute / 60 => dur SAMPLES_PER_SEC;
@@ -29,6 +28,7 @@ public class Clock {
 
   Event startEvent;
   Event stepEvent;
+  // TODO MOVE TO PLAYER
   Conductor conductor;
 
   // bpm - beats per minute, number of quarter notes per minute
@@ -68,6 +68,7 @@ public class Clock {
     <<< "Clock: SXTYFRTH", SXTYFRTH, "THRTYSCND", THRTYSCND, "SXTNTH", SXTNTH, "ETH", ETH, "QRTR", QRTR, "HLF", HLF, "WHL", WHL >>>;
   }
 
+  // TODO MOVE TO PLAYER
   fun void play() {
     sync();
 
