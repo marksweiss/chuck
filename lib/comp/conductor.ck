@@ -66,10 +66,11 @@ public class Conductor {
       <<< "ERROR: ILLEGAL STATE. shredKey should have 0 or 1 entries in Conductor" >>>;
       me.exit();
     }
+
     if (state.find(shredKey) == 1) {
-      state[shredKey].get(key);
+      return state[shredKey].get(key);
     } else {
-      return A.makeEmpty();
+      return null;
     }
   }
 
@@ -79,6 +80,7 @@ public class Conductor {
       <<< "ERROR: ILLEGAL STATE. shredKey should have 0 or 1 entries in Conductor" >>>;
       me.exit();
     }
+
     if (state.find(shredKey) == 0) {
       OrderedArgMap shredStateMap;
       shredStateMap @=> state[shredKey];

@@ -20,7 +20,7 @@ public class InCConductor extends Conductor {
 
   fun /*private*/ void isAdvancing(int shredId) {
     // initial policy is just randomly put each shred's next state to true/false
-    if (Math.random2(0, 100) > 50) {
+    if (Math.random2(0, 100) > 15) {
       this.put(shredId, KEY_IS_ADVANCING, true); 
     } else {
       this.put(shredId, KEY_IS_ADVANCING, false); 
