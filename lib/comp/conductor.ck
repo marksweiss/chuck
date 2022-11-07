@@ -100,7 +100,11 @@ public class Conductor {
   }
 
   fun string[] getKeys() {
-    return keys;
+    string retKeys[keyCount];
+    for (0 => int i; i < keyCount; i++) {
+      keys[i] => retKeys[i];
+    }
+    return retKeys;
   }
 
   fun int keySize() {
