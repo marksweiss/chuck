@@ -99,6 +99,10 @@ public class Conductor {
     return count;
   }
 
+  fun int shredSize() {
+    return shredIdCount;
+  }
+
   fun string[] getKeys() {
     string retKeys[keyCount];
     for (0 => int i; i < keyCount; i++) {

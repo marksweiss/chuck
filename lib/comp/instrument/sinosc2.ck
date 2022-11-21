@@ -47,7 +47,7 @@ public class InstrSinOsc2 extends InstrumentBase {
 
   fun void init(string name, ArgParser conf) {
     name => this.name;
-    NUM_GENS => numGens;
+    NUM_GENS => genCount;
     conf @=> this.conf;
 
     // init all ugens to passthru initially, only set ugens with conf arguments to be sum inputs
@@ -148,7 +148,7 @@ public class InstrSinOsc2 extends InstrumentBase {
 
   // Override
   fun void setGain(float gainVal) {
-    for (0 => int i; i < numGens; i++) {
+    for (0 => int i; i < genCount; i++) {
       setGain(i, gainVal);
     } 
   }

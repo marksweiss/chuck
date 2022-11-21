@@ -39,16 +39,29 @@ public class InCPlayer extends PlayerBase {
     0::samp => dur sinceLastNote;
     this.seqs.current() @=> Sequence seq;
     while (true) {
+      <<< "IN INSTR WHILE LOOP" >>>;
+
       seq.current() @=> Chord c;
       // NOTE: assumes all notes in current chord are same duration
+
+      <<< "IN INSTR WHILE LOOP BEFORE c.notes[0]" >>>;
+
       c.notes[0].duration => dur nextNoteDur;
+
+      <<< "IN INSTR WHILE LOOP AFTER c.notes[0]" >>>;
 
       // block on event of next beat step broadcast by clock
       stepEvent => now;
+
+      <<< "AFTER STOP_EVENT" >>>;
+
       stepDur => now;
+
+      <<< "AFTER STEP_DUR" >>>;
+
       sinceLastNote + stepDur => sinceLastNote; 
 
-      <<< "name", this.name, "sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>;
+      <<< "name", name, "sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>;
 
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote == nextNoteDur) {

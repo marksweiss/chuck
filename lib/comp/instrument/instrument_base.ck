@@ -19,11 +19,11 @@ public class InstrumentBase {
   4 => static int OP_DIVIDE;
 
   128 => static int MAX_NUM_GENS;
-  0 => int numGens;
+  0 => int genCount;
 
   128 => static int MAX_NUM_ATTRS;
   string attrNames[MAX_NUM_ATTRS];
-  0 => int numAttrs;
+  0 => int attrCount;
 
   // Override
   fun void play() {}
@@ -72,12 +72,12 @@ public class InstrumentBase {
   fun void setAttr(string attrName, dur attrVal) {}
   fun void setAttr(string attrName, string attrVal) {}
 
-  fun int genCount() {
-    return numGens;
+  fun int genSize() {
+    return genCount;
   }
 
-  fun int attributeCount() {
-    return numAttrs;
+  fun int attributeSize() {
+    return attrCount;
   }
 
   fun string[] attributeNames() {
