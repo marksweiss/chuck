@@ -21,11 +21,12 @@ public class InCPlayer extends PlayerBase {
     stepDur => this.stepDur;
     conductor @=> this.conductor;
     instr @=> this.instr;
+
+    <<< "PLAYER INIT DONE" >>>;
   }
 
   // override
   fun void play() {
-    // TEMP DEBUG
     <<< "IN INSTR PLAY BEFORE START EVENT RECEIVED, shred id:", me.id() >>>;
 
     // block on START

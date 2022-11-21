@@ -70,20 +70,42 @@ public class Clock {
 
   // TODO MOVE TO PLAYER
   fun void play() {
+    <<< "CLOCK LOOP 1" >>>;
+
     sync();
+
+    <<< "CLOCK LOOP 2" >>>;
 
     this.startEvent.broadcast();
+
+    <<< "CLOCK LOOP 3" >>>;
+
     me.yield();
 
+    <<< "CLOCK LOOP 4" >>>;
+
     sync();
+
+    <<< "CLOCK LOOP 5" >>>;
+
     while (true) {
       // call the conductor to calculate new global state for all instrument player threads
       this.conductor.updateAll();
 
+      <<< "CLOCK LOOP 6" >>>;
+
       this.stepEvent.broadcast();
+
+      <<< "CLOCK LOOP 7" >>>;
+
       me.yield();
 
+      <<< "CLOCK LOOP 8" >>>;
+
       this.stepDur => now;
+
+      <<< "CLOCK LOOP 9" >>>;
+
     }
   }
 

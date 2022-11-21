@@ -104,7 +104,7 @@ fun void main () {
   seqs2.init("seqs2", isLooping);
   Sequences seqs3;
   seqs3.init("seqs3", isLooping);
-  [seqs1, seqs2, seqs3] @=> Sequences seqs[3];
+  [seqs1, seqs2, seqs3] @=> Sequences seqs[];
 
   // declare chords / notes for each sequence
   NoteConst N;

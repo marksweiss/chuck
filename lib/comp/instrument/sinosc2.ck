@@ -29,7 +29,7 @@ public class InstrSinOsc2 extends InstrumentBase {
   SinOsc so3;
   SinOsc so4;
   SinOsc so5;
-  [so1, so2, so3, so4, so5] @=> SinOsc gens[NUM_GENS];
+  [so1, so2, so3, so4, so5] @=> SinOsc gens[];
   // envelope
   ADSR env;
   // effects
