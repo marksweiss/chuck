@@ -14,10 +14,14 @@
  * polyphonic gens, and so can play chords of up to 5 notes.
  */ 
 public class InstrSinOsc2 extends InstrumentBase {
-  5 => static int MAX_NUM_VOICES;
-
   string name;
+  5 => int NUM_GENS;
   // TODO - DO WE NEED THIS?
+
+  // Store conf because this also defines the attrs we can modify
+  // TODO these should probably be independent, so we could define a separate ArgParser
+  ArgParser conf;
+
   Gain g;
   // generators
   SinOsc so1;
@@ -25,7 +29,7 @@ public class InstrSinOsc2 extends InstrumentBase {
   SinOsc so3;
   SinOsc so4;
   SinOsc so5;
-  [so1, so2, so3, so4, so5] @=> SinOsc gens[MAX_NUM_VOICES];
+  [so1, so2, so3, so4, so5] @=> SinOsc gens[NUM_GENS];
   // envelope
   ADSR env;
   // effects
@@ -41,15 +45,10 @@ public class InstrSinOsc2 extends InstrumentBase {
   Pan2 pan;  // -1 to 1 // .pan
   Mix2 mix;  // stereo to mono mixdown  // .pan
 
-  fun void init(string name, ArgParser conf, Sequences seqs,
-                Event startEvent, Event stepEvent, dur stepDur, Conductor conductor) {
+  fun void init(string name, ArgParser conf) {
     name => this.name;
-    seqs @=> this.seqs;
-    startEvent @=> this.startEvent;    
-    stepEvent @=> this.stepEvent;    
-    stepDur => this.stepDur;
-
-    conductor @=> this.conductor;
+    NUM_GENS => numGens;
+    conf @=> this.conf;
 
     // init all ugens to passthru initially, only set ugens with conf arguments to be sum inputs
     env.op(OP_PASSTHRU);
@@ -135,6 +134,66 @@ public class InstrSinOsc2 extends InstrumentBase {
     so4 => delay;
     so5 => delay;
   }
+
+  // Override
+  // global gain 
+  fun Gain getGain() {
+    return g;
+  }
+
+  // Override
+  fun void setGain(int genIdx, float gainVal) {
+    gainVal => gens[genIdx].gain;
+  }
+
+  // Override
+  fun void setGain(float gainVal) {
+    for (0 => int i; i < numGens; i++) {
+      setGain(i, gainVal);
+    } 
+  }
+
+  // Override
+  // global envelope
+  fun ADSR getEnv() {
+    return env;
+  }
+
+  // Override
+  fun UGen getGen(int genIdx) {
+    return gens[genIdx];
+  }
+
+  // Override
+  fun UGen[] getGens() {
+    return gens;
+  }
+
+  // Override
+  // global attribute applied to or set up when patches are wired to apply to all gens
+  fun void setAttr(string attrName, float attrVal) {
+    if (attrName  == "freq") {
+      for (0 => int i; i < NUM_GENS; i++) {
+        attrVal => gens[i].freq; 
+      }
+    }
+    if (attrName  == "reverbMix") {
+      attrVal => rev.mix;
+    }
+    if (attrName  == "mixPan") {
+      attrVal => mix.pan;
+    }
+  } 
+
+  // Override
+  fun void setAttr(string attrName, dur attrVal) {
+    if (attrName  == "delayDelay") {
+      attrVal => delay.delay;
+    }
+    if (attrName  == "delayMax") {
+      attrVal => delay.max;
+    }
+  } 
 
   // Override
   // TODO

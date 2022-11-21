@@ -9,16 +9,18 @@ public class InCPlayer extends PlayerBase {
   Event startEvent;
   Event stepEvent;
   dur stepDur;
-  Conductor conductor;
+  InCConductor conductor;
+  InstrumentBase instr;
 
   fun void init(string name, Sequences seqs, Event startEvent, Event stepEvent, dur stepDur,
-                Conductor conductor) {
+                InCConductor conductor, InstrumentBase instr) {
     name => this.name;
     seqs @=> this.seqs;
     startEvent @=> this.startEvent;    
     stepEvent @=> this.stepEvent;    
     stepDur => this.stepDur;
     conductor @=> this.conductor;
+    instr @=> this.instr;
   }
 
   // override
@@ -45,52 +47,40 @@ public class InCPlayer extends PlayerBase {
       stepDur => now;
       sinceLastNote + stepDur => sinceLastNote; 
 
-      /* <<< "name", this.name, "sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>; */
+      <<< "name", this.name, "sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>;
 
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote == nextNoteDur) {
         // previous note ending, trigger release
-        env.keyOff();
-        env.releaseTime() => now;
+        instr.getEnv().keyOff();
+        instr.getEnv().releaseTime() => now;
 
-        // load the next chord into the gen
+        // load the next chord into all the gens in the instrument
         for (0 => int j; j < c.notes.size(); j++) {
           c.notes[j] @=> Note n;
-          gens[i].freq(Std.mtof(n.pitch)); 
+          instr.setAttr("freq", Std.mtof(n.pitch));
 
-          /* <<< "INSTR name", this.name, "pitch", n.pitch >>>; */
+          <<< "INSTR name", this.name, "pitch", n.pitch >>>;
 
-          // TODO UPDATE comp_sinosc_2.ck to use this class
-        
-          // TODO HOW TO SUPPORT ARBITRARY INSTRUMENTS BEING CHANGED IN ARBITRARY WAYS
-          // BASED ON THE INSTRUMENT AND THE COMPOSITION
-          /* n.gain => so.gain; */
+          instr.getGain() @=> Gain g;
+          n.gain => g.gain;
         }
 
-        // Advance sequence iterator to next chord in sequence 
-        // Sequences are in isLooping mode so we just keep rolling over each sequence
-        // but using hasNext iterator API for each sequence, so either we can move to its
-        // next note or we have to advance to the next sequence in sequences
-        if (!seq.hasNext()) {
-          // if the Conductor state for this shred is to advance, otherwise stay on this phrase
-          conductor.update(me.id());
+        if (seq.next() == null) {
+          // reset this sequence to its 0th position for next usage as we loop through sequences
+          seq.reset();
 
-          // composition-specific conductor state update calls
-          if (conductor.getIsAdvancing(me.id())) {
+          // check Conductor state to determine whether to advance or stay on this phrase
+          conductor.update(me.id());
+          if (conductor.getBoolBehavior(me.id(), conductor.KEY_IS_ADVANCING)) {
             this.seqs.next() @=> seq;
           }
-          // either we advanced and if it is after the first iteration this sequence was used before
-          // so reset it, or we stayed on the same sequence and just got to the end so reset it
-          seq.reset();
-        } else {
-          // otherwise advance to next note in current sequence
-          seq.next();
         }
 
         // reset note triggering state
         0::samp => sinceLastNote;
         // trigger envelope start
-        env.keyOn();
+        instr.getEnv().keyOn();
       }
 
       me.yield();

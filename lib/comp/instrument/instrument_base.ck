@@ -10,7 +10,7 @@
  * to the UGen from chords, as well as advance the global clock using Note duration values.
  */
 public class InstrumentBase {
-  // ugen constants
+  // UGen constants
   -1 => static int OP_PASSTHRU;
   0 => static int OP_STOP;
   1 => static int OP_SUM;
@@ -18,8 +18,71 @@ public class InstrumentBase {
   3 => static int OP_MULTIPLY;
   4 => static int OP_DIVIDE;
 
+  128 => static int MAX_NUM_GENS;
+  0 => int numGens;
+
+  128 => static int MAX_NUM_ATTRS;
+  string attrNames[MAX_NUM_ATTRS];
+  0 => int numAttrs;
+
   // Override
   fun void play() {}
+
+  // Override
+  // get a reference to the global env member
+  fun ADSR getEnv() {}
+
+  // Override
+  // get a reference to a global gain member
+  fun Gain getGain() {}
+
+  // Override
+  // get a reference to a gen gain member
+  fun Gain getGain(int genIdx) {}
+
+  // Override
+  // set gain for one gen
+  fun void setGain(int genIdx, float gainVal) {}
+
+  // Override
+  // set gain for all gens
+  fun void setGain(float gainVal) {}
+
+  // Override
+  // get reference to a gen
+  fun UGen getGen(int genIdx) {}
+
+  // Override
+  // ger array of references to all gens
+  fun UGen[] getGens() {}
+
+  // Override
+  // set an attribute by name for a single gen 
+  fun void setAttr(int genIdx, string attrName, float attrVal) {}
+  fun void setAttr(int genIdx, string attrName, int attrVal) {}
+  fun void setAttr(int genIdx, string attrName, time attrVal) {}
+  fun void setAttr(int genIdx, string attrName, dur attrVal) {}
+  fun void setAttr(int genIdx, string attrName, string attrVal) {}
+
+  // Override
+  // set an attribute by name for all gens 
+  fun void setAttr(string attrName, float attrVal) {}
+  fun void setAttr(string attrName, int attrVal) {}
+  fun void setAttr(string attrName, time attrVal) {}
+  fun void setAttr(string attrName, dur attrVal) {}
+  fun void setAttr(string attrName, string attrVal) {}
+
+  fun int genCount() {
+    return numGens;
+  }
+
+  fun int attributeCount() {
+    return numAttrs;
+  }
+
+  fun string[] attributeNames() {
+    return attrNames;
+  }
 
   // Override - each instrument should at a minimum call the built-in help on its UGen.
   // Better implementations provide pruned and specific information about arguments taken to

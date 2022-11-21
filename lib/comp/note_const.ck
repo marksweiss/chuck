@@ -60,6 +60,16 @@ public class NoteConst {
     return PITCH_STR_MAP[pitchPosition % numNotesInOctave];
   } 
 
+  // Rest Constants
+  0.0 => float NO_GAIN;
+  n.make(0, C, NO_GAIN, k.SXTYFRTH) @=> Note REST_64;
+  n.make(0, C, NO_GAIN, k.THRTYSCND) @=> Note REST_32;
+  n.make(0, C, NO_GAIN, k.SXTNTH) @=> Note REST_16;
+  n.make(0, C, NO_GAIN, k.ETH) @=> Note REST_8;
+  n.make(0, C, NO_GAIN, k.QRTR) @=> Note REST_4;
+  n.make(0, C, NO_GAIN, k.HLF) @=> Note REST_2;
+  n.make(0, C, NO_GAIN, k.WHL) @=> Note REST_1;
+
   // predefined constants for typically used Western/piano octaves
   n.make(12, C, DEFAULT_GAIN, k.WHL) @=> Note C0_1;
   n.make(12, Cs, DEFAULT_GAIN, k.WHL) @=> Note Cs0_1;

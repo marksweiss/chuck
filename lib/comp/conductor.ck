@@ -111,10 +111,18 @@ public class Conductor {
     return keyCount;
   }
 
+  // TODO THIS IS THE COMPOSITION API USED BY PLAYERS
   // Override
   fun void update(int shredId) {}
 
-  // TODO THIS IS THE ACTUAL API
   // Override
   fun void updateAll() {}
+
+  // Override
+  fun int getIntBehavior(int shredId, string behaviorKey) {} 
+  fun int getBoolBehavior(int shredId, string behaviorKey) {} 
+  fun float getFloatBehavior(int shredId, string behaviorKey) {} 
+  fun string getStringBehavior(int shredId, string behaviorKey) {} 
+  fun dur getDurationBehavior(int shredId, string behaviorKey) {} 
+  fun time getTimeBehavior(int shredId, string behaviorKey) {} 
 }

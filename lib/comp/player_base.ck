@@ -16,6 +16,6 @@ public class PlayerBase {
   }
 
   fun InstrumentBase getInstrument(string key) {
-    return instruments.get(key);
+    return instruments.get(key) $ InstrumentBase;
   }
 }
