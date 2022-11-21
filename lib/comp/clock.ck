@@ -92,20 +92,19 @@ public class Clock {
       // call the conductor to calculate new global state for all instrument player threads
       this.conductor.updateAll();
 
-      /* <<< "CLOCK LOOP 6" >>>; */
+      <<< "CLOCK LOOP 6" >>>;
 
       this.stepEvent.broadcast();
 
-      /* <<< "CLOCK LOOP 7" >>>; */
+      <<< "CLOCK LOOP 7" >>>;
 
       me.yield();
 
-      /* <<< "CLOCK LOOP 8" >>>; */
+      <<< "CLOCK LOOP 8" >>>;
 
       this.stepDur => now;
 
-      /* <<< "CLOCK LOOP 9" >>>; */
-
+      <<< "CLOCK LOOP 9" >>>;
     }
   }
 

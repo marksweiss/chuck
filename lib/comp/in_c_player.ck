@@ -38,30 +38,28 @@ public class InCPlayer extends PlayerBase {
     // time to play the next one
     0::samp => dur sinceLastNote;
     this.seqs.current() @=> Sequence seq;
+    seq.current() @=> Chord c;
     while (true) {
-      <<< "IN INSTR WHILE LOOP" >>>;
-
-      seq.current() @=> Chord c;
       // NOTE: assumes all notes in current chord are same duration
 
-      <<< "IN INSTR WHILE LOOP BEFORE c.notes[0]" >>>;
+      /* <<< "IN INSTR WHILE LOOP BEFORE c.notes[0]", c.notes, " c.notes.size()", c.notes.size() >>>; */
 
       c.notes[0].duration => dur nextNoteDur;
 
-      <<< "IN INSTR WHILE LOOP AFTER c.notes[0]" >>>;
+      /* <<< "IN INSTR WHILE LOOP AFTER c.notes[0]" >>>; */
 
       // block on event of next beat step broadcast by clock
       stepEvent => now;
 
-      <<< "AFTER STOP_EVENT" >>>;
+      /* <<< "AFTER STOP_EVENT" >>>; */
 
       stepDur => now;
 
-      <<< "AFTER STEP_DUR" >>>;
+      /* <<< "AFTER STEP_DUR" >>>; */
 
       sinceLastNote + stepDur => sinceLastNote; 
 
-      <<< "name", name, "sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>;
+      /* <<< "name", name, "sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>; */
 
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote == nextNoteDur) {
@@ -74,13 +72,17 @@ public class InCPlayer extends PlayerBase {
           c.notes[j] @=> Note n;
           instr.setAttr("freq", Std.mtof(n.pitch));
 
-          <<< "INSTR name", this.name, "pitch", n.pitch >>>;
+          /* <<< "INSTR name", this.name, "pitch", n.pitch >>>; */
 
           instr.getGain() @=> Gain g;
           n.gain => g.gain;
         }
 
-        if (seq.next() == null) {
+        seq.next() @=> c;
+        if (c == null) {
+
+          <<< "IN INSTR WHILE LOOP AFTER SEQ.NEXT() == NULL" >>>;
+
           // reset this sequence to its 0th position for next usage as we loop through sequences
           seq.reset();
 
@@ -89,6 +91,8 @@ public class InCPlayer extends PlayerBase {
           if (conductor.getBoolBehavior(me.id(), conductor.KEY_IS_ADVANCING)) {
             this.seqs.next() @=> seq;
           }
+
+          seq.next() @=> c;
         }
 
         // reset note triggering state

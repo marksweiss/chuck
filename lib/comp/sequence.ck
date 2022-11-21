@@ -57,6 +57,8 @@ public class Sequence {
 
   // *** Iterator interface
   fun Chord next() {
+    <<< "IN SEQUENCE.next() TOP, idx:", idx, " chords.size()", chords.size() >>>;
+
     if (idx == chords.size()) {
       if (!isLooping) {
         return null;
@@ -68,6 +70,8 @@ public class Sequence {
   }
 
   fun Chord current() {
+    <<< "IN SEQUENCE.current(), idx:", idx, " chords.size()", chords.size() >>>;
+
     return chords[idx];
   }
 

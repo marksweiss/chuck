@@ -12,8 +12,7 @@ public class InCConductor extends Conductor {
   // Override
   fun void updateAll() {
     for (0 => int i; i < this.shredSize(); i++) {
-
-      <<< "shredSize()", shredSize() >>>;      
+      <<< "i", i, "shredIds.size()", shredIds.size(), "shredSize", shredSize(), "this.shredIds[i]", this.shredIds[i] >>>;
 
       isAdvancing(this.shredIds[i]);
     }

@@ -1,7 +1,7 @@
 // Machine.add("lib/collection/object_map.ck")
 
 public class OrderedStringSet {
-  map OrderedObjectMap;
+  OrderedObjectMap map;
 
   fun void put(string key) {
     map.put(key, null);
@@ -15,15 +15,15 @@ public class OrderedStringSet {
     map.delete(key);
   }
 
-  fun string[] keys() {
-    return map.keys();
+  fun string[] getKeys() {
+    return map.getKeys();
   }
 
   fun int size() {
     return map.size();
   }
 
-  fun ArgBase next() {
+  fun Object next() {
     return map.next();
   }
 
