@@ -77,12 +77,15 @@ public class Conductor {
   fun void putHelper(int shredId, string key, ArgBase val) {
 
     // TEMP DEBUG
-    <<< "TOP OF SHRED STATE MAP putHelper()" >>>;
+    /* <<< "IN CONDUCTOR PUTHELPER key", key, "shred", me.id() >>>; */
+
+    // TEMP DEBUG
+    /* <<< "TOP OF SHRED STATE MAP putHelper()" >>>; */
 
     Std.itoa(shredId) => string shredKey;
 
     // TEMP DEBUG
-    <<< "SHRED STATE MAP shredKey", shredKey >>>;
+    /* <<< "SHRED STATE MAP shredKey", shredKey >>>; */
 
     if (state.find(shredKey) > 1) {
       <<< "ERROR: ILLEGAL STATE. shredKey should have 0 or 1 entries in Conductor" >>>;
@@ -90,7 +93,7 @@ public class Conductor {
     }
 
     // TEMP DEBUG
-    <<< "SHRED STATE MAP after find()" >>>;
+    /* <<< "SHRED STATE MAP after find()" >>>; */
 
     if (state.find(shredKey) == 0) {
       OrderedArgMap shredStateMap;
@@ -101,7 +104,7 @@ public class Conductor {
     state[shredKey] @=> OrderedArgMap shredStateMap;
 
     // TEMP DEBUG
-    <<< "SHRED STATE MAP after new thread check, shredStateMap", shredStateMap >>>;
+    /* <<< "SHRED STATE MAP after new thread check, shredStateMap", shredStateMap >>>; */
 
     // TEMP DEBUG
     /* <<< "SHRED STATE MAP BEFORE key assignment, keys.size()", keys.size(), "keyCount", keyCount, "key", key, "keys[0]", keys[0], "keys.find(key)", keys.find(key) >>>; */
@@ -114,7 +117,7 @@ public class Conductor {
     /* <<< "SHRED STATE MAP after new thread check, key=keys[keyCount - 1]", keys[keyCount - 1], "val", val >>>; */
 
     // TEMP DEBUG
-    <<< "BOTTOM OF SHRED STATE MAP putHelper()" >>>;
+    /* <<< "BOTTOM OF SHRED STATE MAP putHelper()" >>>; */
 
     shredStateMap.put(key, val);
   }

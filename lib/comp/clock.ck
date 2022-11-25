@@ -68,43 +68,28 @@ public class Clock {
     <<< "Clock: SXTYFRTH", SXTYFRTH, "THRTYSCND", THRTYSCND, "SXTNTH", SXTNTH, "ETH", ETH, "QRTR", QRTR, "HLF", HLF, "WHL", WHL >>>;
   }
 
-  // TODO MOVE TO PLAYER
   fun void play() {
-    /* <<< "CLOCK LOOP 1" >>>; */
-
     sync();
-
-    /* <<< "CLOCK LOOP 2" >>>; */
-
     this.startEvent.broadcast();
-
-    /* <<< "CLOCK LOOP 3" >>>; */
-
-    me.yield();
-
-    /* <<< "CLOCK LOOP 4" >>>; */
-
     sync();
-
-    /* <<< "CLOCK LOOP 5" >>>; */
 
     while (true) {
       // call the conductor to calculate new global state for all instrument player threads
       this.conductor.updateAll();
 
-      <<< "CLOCK LOOP 6" >>>;
+      /* <<< "CLOCK BEFORE BROADCAST, shredId", me.id() >>>; */
 
       this.stepEvent.broadcast();
 
-      <<< "CLOCK LOOP 7" >>>;
-
-      me.yield();
-
-      <<< "CLOCK LOOP 8" >>>;
+      // TEMP DEBUG
+      /* <<< "CLOCK AFTER BROADCAST, now", now, "shredId", me.id() >>>; */
 
       this.stepDur => now;
 
-      <<< "CLOCK LOOP 9" >>>;
+      // TEMP DEBUG
+      /* <<< "CLOCK AFTER STEP DUR, now", now, "shredId", me.id() >>>; */
+
+      me.yield();
     }
   }
 

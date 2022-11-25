@@ -12,7 +12,7 @@ public class InCConductor extends Conductor {
   // Override
   fun void updateAll() {
     for (0 => int i; i < this.shredSize(); i++) {
-      <<< "i", i, "shredIds.size()", shredIds.size(), "shredSize", shredSize(), "this.shredIds[i]", this.shredIds[i] >>>;
+      /* <<< "i", i, "shredIds.size()", shredIds.size(), "shredSize", shredSize(), "this.shredIds[i]", this.shredIds[i] >>>; */
 
       isAdvancing(this.shredIds[i]);
     }
@@ -29,6 +29,10 @@ public class InCConductor extends Conductor {
     // initial policy is just randomly put each shred's next state to true/false
     if (Math.random2(0, 100) > 15) {
       this.put(shredId, KEY_IS_ADVANCING, true); 
+
+      // TEMP DEBUG
+      /* <<< "IN CONDUCTOR IS ADVANCING, shredId", me.id() >>>; */
+
     } else {
       this.put(shredId, KEY_IS_ADVANCING, false); 
     }

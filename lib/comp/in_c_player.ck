@@ -27,7 +27,7 @@ public class InCPlayer extends PlayerBase {
 
   // override
   fun void play() {
-    <<< "IN INSTR PLAY BEFORE START EVENT RECEIVED, shred id:", me.id() >>>;
+    <<< "IN PLAYER PLAY BEFORE START EVENT RECEIVED, shred id:", me.id() >>>;
 
     // block on START
     startEvent => now;
@@ -42,7 +42,7 @@ public class InCPlayer extends PlayerBase {
     while (true) {
       // NOTE: assumes all notes in current chord are same duration
 
-      /* <<< "IN INSTR WHILE LOOP BEFORE c.notes[0]", c.notes, " c.notes.size()", c.notes.size() >>>; */
+      <<< "IN PLAYER WHILE LOOP BEFORE c.notes[0]" >>>;
 
       c.notes[0].duration => dur nextNoteDur;
 
@@ -53,7 +53,7 @@ public class InCPlayer extends PlayerBase {
 
       /* <<< "AFTER STOP_EVENT" >>>; */
 
-      stepDur => now;
+      /* stepDur => now; */
 
       /* <<< "AFTER STEP_DUR" >>>; */
 
@@ -81,7 +81,7 @@ public class InCPlayer extends PlayerBase {
         seq.next() @=> c;
         if (c == null) {
 
-          <<< "IN INSTR WHILE LOOP AFTER SEQ.NEXT() == NULL" >>>;
+          <<< "IN PLAYER WHILE LOOP AFTER SEQ.NEXT() == NULL", me.id() >>>;
 
           // reset this sequence to its 0th position for next usage as we loop through sequences
           seq.reset();
@@ -101,7 +101,13 @@ public class InCPlayer extends PlayerBase {
         instr.getEnv().keyOn();
       }
 
-      me.yield();
+      <<< "IN PLAYER BEFORE SIGNAL, id", me.id() >>>;
+
+      /* stepEvent => now; */
+      /* stepEvent.signal(); */
+      /* me.exit(); */
+
+      <<< "IN PLAYER AFTER SIGNAL, id", me.id() >>>;
     }
   }
 }

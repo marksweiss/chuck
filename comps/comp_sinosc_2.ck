@@ -137,7 +137,6 @@ fun void main () {
   // declare the Players whose behavior governed by calling the Conductor to
   // to check their state changes, performing the notes of the Sequences using the
   // Instruments to play the notes
-
   InCPlayer player1;
   player1.init("player1", seqs1, startEvent, stepEvent, clock.stepDur, conductor, instr1);
   InCPlayer player2;
@@ -152,7 +151,7 @@ fun void main () {
   spork ~ runPlayer(player3);
 
   // boilerplate to make event loop work
-  /* me.yield();  // yield to Clock and Instrument event loops */ 
+  me.yield();  // yield to Clock and Instrument event loops 
   while (true) {1::second => now;}  // block process exit to force child threads to run
 }
 
