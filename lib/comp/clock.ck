@@ -28,7 +28,6 @@ public class Clock {
 
   Event startEvent;
   Event stepEvent;
-  // TODO MOVE TO PLAYER
   Conductor conductor;
 
   // bpm - beats per minute, number of quarter notes per minute
@@ -71,15 +70,19 @@ public class Clock {
   fun void play() {
     sync();
     this.startEvent.broadcast();
+    // me.yield();  // IN OLD
     sync();
 
     while (true) {
       // call the conductor to calculate new global state for all instrument player threads
       this.conductor.updateAll();
 
-      /* <<< "CLOCK BEFORE BROADCAST, shredId", me.id() >>>; */
+      <<< "CLOCK BEFORE BROADCAST, shredId", me.id() >>>;
 
       this.stepEvent.broadcast();
+      /* me.yield();  // IN OLD */
+      // me.yield();  // NOT IN OLD
+
 
       // TEMP DEBUG
       /* <<< "CLOCK AFTER BROADCAST, now", now, "shredId", me.id() >>>; */
@@ -89,7 +92,6 @@ public class Clock {
       // TEMP DEBUG
       /* <<< "CLOCK AFTER STEP DUR, now", now, "shredId", me.id() >>>; */
 
-      me.yield();
     }
   }
 

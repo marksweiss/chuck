@@ -40,18 +40,14 @@ public class InCPlayer extends PlayerBase {
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord c;
     while (true) {
-      // NOTE: assumes all notes in current chord are same duration
-
-      <<< "IN PLAYER WHILE LOOP BEFORE c.notes[0]" >>>;
-
-      c.notes[0].duration => dur nextNoteDur;
-
-      /* <<< "IN INSTR WHILE LOOP AFTER c.notes[0]" >>>; */
-
       // block on event of next beat step broadcast by clock
       stepEvent => now;
 
-      /* <<< "AFTER STOP_EVENT" >>>; */
+      // NOTE: assumes all notes in current chord are same duration
+
+      /* <<< "IN PLAYER WHILE LOOP BEFORE c.notes[0]" >>>; */
+
+      c.notes[0].duration => dur nextNoteDur;
 
       /* stepDur => now; */
 
@@ -101,7 +97,7 @@ public class InCPlayer extends PlayerBase {
         instr.getEnv().keyOn();
       }
 
-      <<< "IN PLAYER BEFORE SIGNAL, id", me.id() >>>;
+      /* <<< "IN PLAYER BEFORE SIGNAL, id", me.id() >>>; */
 
       /* stepEvent => now; */
       /* stepEvent.signal(); */
