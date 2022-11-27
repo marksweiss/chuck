@@ -16,20 +16,25 @@ public class InCPlayer extends PlayerBase {
                 InCConductor conductor, InstrumentBase instr) {
     name => this.name;
     seqs @=> this.seqs;
-    startEvent @=> this.startEvent;    
+    startEvent @=> this.startEvent;
     stepEvent @=> this.stepEvent;    
+
+    // TEMP DEBUG
+    <<< "IN PLAYER INIT, stepEvent address =", stepEvent, "shredId", me.id() >>>;
+
     stepDur => this.stepDur;
     conductor @=> this.conductor;
     instr @=> this.instr;
 
-    <<< "PLAYER INIT DONE" >>>;
+    // TEMP DEBUG
+    /* <<< "PLAYER INIT DONE" >>>; */
   }
 
   // override
   fun void play() {
     <<< "IN PLAYER PLAY BEFORE START EVENT RECEIVED, shred id:", me.id() >>>;
 
-    // block on START
+    // block on startEvent to all sync start time on clock.sync()
     startEvent => now;
 
     // index of chord in sequence to play
@@ -40,21 +45,23 @@ public class InCPlayer extends PlayerBase {
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord c;
     while (true) {
+      // TEMP DEBUG
+      <<< "IN PLAYER BEFORE STEPEVENT BLOCK, name", this.name, "stepEvent", stepEvent, "shredId", me.id() >>>;
+
       // block on event of next beat step broadcast by clock
       stepEvent => now;
 
-      // NOTE: assumes all notes in current chord are same duration
-
+      // TEMP DEBUG
+      <<< "IN PLAYER AFTER STEPEVENT BLOCK, name", this.name, "stepEvent", stepEvent, "shredId", me.id() >>>;
+      // TEMP DEBUG
       /* <<< "IN PLAYER WHILE LOOP BEFORE c.notes[0]" >>>; */
 
+      // NOTE: assumes all notes in current chord are same duration
       c.notes[0].duration => dur nextNoteDur;
-
       /* stepDur => now; */
-
-      /* <<< "AFTER STEP_DUR" >>>; */
-
       sinceLastNote + stepDur => sinceLastNote; 
 
+      // TEMP DEBUG
       /* <<< "name", name, "sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>; */
 
       // if enough time has passed, emit the next note, silence the previous note
@@ -68,16 +75,16 @@ public class InCPlayer extends PlayerBase {
           c.notes[j] @=> Note n;
           instr.setAttr("freq", Std.mtof(n.pitch));
 
+          // TEMP DEBUG
           /* <<< "INSTR name", this.name, "pitch", n.pitch >>>; */
 
-          instr.getGain() @=> Gain g;
-          n.gain => g.gain;
+          n.gain => instr.getGain().gain;
         }
 
         seq.next() @=> c;
         if (c == null) {
 
-          <<< "IN PLAYER WHILE LOOP AFTER SEQ.NEXT() == NULL", me.id() >>>;
+          /* <<< "IN PLAYER WHILE LOOP AFTER SEQ.NEXT() == NULL", me.id() >>>; */
 
           // reset this sequence to its 0th position for next usage as we loop through sequences
           seq.reset();
@@ -89,7 +96,7 @@ public class InCPlayer extends PlayerBase {
           }
 
           seq.next() @=> c;
-        }
+        } 
 
         // reset note triggering state
         0::samp => sinceLastNote;
@@ -103,7 +110,7 @@ public class InCPlayer extends PlayerBase {
       /* stepEvent.signal(); */
       /* me.exit(); */
 
-      <<< "IN PLAYER AFTER SIGNAL, id", me.id() >>>;
+      /* <<< "IN PLAYER AFTER SIGNAL, id", me.id() >>>; */
     }
   }
 }

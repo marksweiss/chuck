@@ -35,26 +35,29 @@ public class Clock {
   fun void init(float bpm, Event startEvent, Event stepEvent, Conductor conductor) {
     conductor @=> this.conductor;
 
-    <<< "Clock: BEAT_STEP", BEAT_STEP >>>;
-    <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>;
-    <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
+    /* <<< "Clock: BEAT_STEP", BEAT_STEP >>>; */
+    /* <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>; */
+    /* <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>; */
 
     bpm / 60.0 => float beatsPerSec;
 
-    <<< "Clock: bpm", bpm, "beatsPerSec", beatsPerSec >>>;
+    /* <<< "Clock: bpm", bpm, "beatsPerSec", beatsPerSec >>>; */
 
     SAMPLES_PER_SEC / beatsPerSec =>  dur samplesPerBeat;
 
-    <<< "Clock: samplesPerBeat", samplesPerBeat >>>;
+    /* <<< "Clock: samplesPerBeat", samplesPerBeat >>>; */
 
     samplesPerBeat => beatDur;
     samplesPerBeat / BEAT_STEP => stepDur;
 
-    <<< "Clock: beatDur", beatDur >>>;
-    <<< "Clock: stepDur", stepDur >>>;
+    /* <<< "Clock: beatDur", beatDur >>>; */
+    /* <<< "Clock: stepDur", stepDur >>>; */
 
     startEvent @=> this.startEvent; 
     stepEvent @=> this.stepEvent;
+
+    // TEMP DEBUG
+    <<< "IN CLOCK INIT, stepEvent address =", stepEvent, "shredId", me.id() >>>;
 
     D(0.015625) => SXTYFRTH;
     D(0.03125) => THRTYSCND;
@@ -64,34 +67,29 @@ public class Clock {
     D(0.5) => HLF;
     D(1.0) => WHL;
 
-    <<< "Clock: SXTYFRTH", SXTYFRTH, "THRTYSCND", THRTYSCND, "SXTNTH", SXTNTH, "ETH", ETH, "QRTR", QRTR, "HLF", HLF, "WHL", WHL >>>;
+    /* <<< "Clock: SXTYFRTH", SXTYFRTH, "THRTYSCND", THRTYSCND, "SXTNTH", SXTNTH, "ETH", ETH, "QRTR", QRTR, "HLF", HLF, "WHL", WHL >>>; */
   }
 
   fun void play() {
     sync();
     this.startEvent.broadcast();
-    // me.yield();  // IN OLD
     sync();
 
     while (true) {
+      <<< "CLOCK BEFORE BROADCAST STEP EVENT, stepEvent", stepEvent, "shredId", me.id() >>>;
+
       // call the conductor to calculate new global state for all instrument player threads
       this.conductor.updateAll();
-
-      <<< "CLOCK BEFORE BROADCAST, shredId", me.id() >>>;
-
+      this.stepDur => now;
       this.stepEvent.broadcast();
-      /* me.yield();  // IN OLD */
-      // me.yield();  // NOT IN OLD
 
+      <<< "CLOCK AFTER BROADCAST ON STEPEVENT, stepEvent", stepEvent, "shredId", me.id() >>>;
 
       // TEMP DEBUG
       /* <<< "CLOCK AFTER BROADCAST, now", now, "shredId", me.id() >>>; */
 
-      this.stepDur => now;
-
       // TEMP DEBUG
       /* <<< "CLOCK AFTER STEP DUR, now", now, "shredId", me.id() >>>; */
-
     }
   }
 

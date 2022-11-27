@@ -93,6 +93,10 @@ fun void main () {
   240 => int BPM; 
   Event startEvent;
   Event stepEvent; 
+
+  // TEMP DEBUG
+  <<< "IN COMP SINOSC, stepEvent address =", stepEvent, "shredId", me.id() >>>;
+  
   Clock clock;
   clock.init(BPM, startEvent, stepEvent, conductor);
 
@@ -106,7 +110,7 @@ fun void main () {
   seqs3.init("seqs3", isLooping);
   [seqs1, seqs2, seqs3] @=> Sequences seqs[];
 
-  // declare chords / notes for each sequence
+  /* // declare chords / notes for each sequence */
   NoteConst N;
   Note T;
   ScaleConst S;
@@ -123,7 +127,7 @@ fun void main () {
   addPhrase([N.B4_16, N.G4_16, N.REST_8, N.REST_4, N.REST_4, N.REST_4], seqs);
   addPhrase([N.B4_16, N.G4_16], seqs);
 
-  // configure instruments, pass clock, Events, sequences of phrases and conductor to them 
+  /* // configure instruments, pass clock, Events, sequences of phrases and conductor to them */ 
   getConf(100, 40::ms, 30::ms, 30::ms) @=> ArgParser conf1;
   getConf(102.5, 25::ms, 40::ms, 50::ms) @=> ArgParser conf2;
   getConf(105, 35::ms, 35::ms, 70::ms) @=> ArgParser conf3;
@@ -134,15 +138,15 @@ fun void main () {
   instr2.init("instr2", conf2);
   instr3.init("instr3", conf3);
 
-  // declare the Players whose behavior governed by calling the Conductor to
-  // to check their state changes, performing the notes of the Sequences using the
-  // Instruments to play the notes
+  /* // declare the Players whose behavior governed by calling the Conductor to */
+  /* // to check their state changes, performing the notes of the Sequences using the */
+  /* // Instruments to play the notes */
   InCPlayer player1;
   player1.init("player1", seqs1, startEvent, stepEvent, clock.stepDur, conductor, instr1);
   InCPlayer player2;
-  player1.init("player2", seqs2, startEvent, stepEvent, clock.stepDur, conductor, instr2);
+  player2.init("player2", seqs2, startEvent, stepEvent, clock.stepDur, conductor, instr2);
   InCPlayer player3;
-  player1.init("player3", seqs3, startEvent, stepEvent, clock.stepDur, conductor, instr3);
+  player3.init("player3", seqs3, startEvent, stepEvent, clock.stepDur, conductor, instr3);
 
   // start clock thread and instrument play threads
   spork ~ runClock(clock);
@@ -150,8 +154,6 @@ fun void main () {
   spork ~ runPlayer(player2);
   spork ~ runPlayer(player3);
 
-  // boilerplate to make event loop work
-  me.yield();  // yield to Clock and Instrument event loops 
   while (true) {1::second => now;}  // block process exit to force child threads to run
 }
 
