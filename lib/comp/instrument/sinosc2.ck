@@ -121,6 +121,7 @@ public class InstrSinOsc2 extends InstrumentBase {
       pan.op(OP_SUM);
     }
     
+    // TODO LOOK AT CHUCK GROUPS FROM CHUCK BOOK
     // create patch chain
     // always precede dac with Gain, because Gain goes out of scope when code stops running,
     // breaking Ugen connection to dac output, but dac does not without explicit use of =< operator.

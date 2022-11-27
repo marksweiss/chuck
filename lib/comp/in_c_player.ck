@@ -18,22 +18,13 @@ public class InCPlayer extends PlayerBase {
     seqs @=> this.seqs;
     startEvent @=> this.startEvent;
     stepEvent @=> this.stepEvent;    
-
-    // TEMP DEBUG
-    <<< "IN PLAYER INIT, stepEvent address =", stepEvent, "shredId", me.id() >>>;
-
     stepDur => this.stepDur;
     conductor @=> this.conductor;
     instr @=> this.instr;
-
-    // TEMP DEBUG
-    /* <<< "PLAYER INIT DONE" >>>; */
   }
 
   // override
   fun void play() {
-    <<< "IN PLAYER PLAY BEFORE START EVENT RECEIVED, shred id:", me.id() >>>;
-
     // block on startEvent to all sync start time on clock.sync()
     startEvent => now;
 
@@ -45,24 +36,13 @@ public class InCPlayer extends PlayerBase {
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord c;
     while (true) {
-      // TEMP DEBUG
-      <<< "IN PLAYER BEFORE STEPEVENT BLOCK, name", this.name, "stepEvent", stepEvent, "shredId", me.id() >>>;
-
       // block on event of next beat step broadcast by clock
       stepEvent => now;
-
-      // TEMP DEBUG
-      <<< "IN PLAYER AFTER STEPEVENT BLOCK, name", this.name, "stepEvent", stepEvent, "shredId", me.id() >>>;
-      // TEMP DEBUG
-      /* <<< "IN PLAYER WHILE LOOP BEFORE c.notes[0]" >>>; */
 
       // NOTE: assumes all notes in current chord are same duration
       c.notes[0].duration => dur nextNoteDur;
       /* stepDur => now; */
       sinceLastNote + stepDur => sinceLastNote; 
-
-      // TEMP DEBUG
-      /* <<< "name", name, "sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>; */
 
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote == nextNoteDur) {
@@ -74,18 +54,11 @@ public class InCPlayer extends PlayerBase {
         for (0 => int j; j < c.notes.size(); j++) {
           c.notes[j] @=> Note n;
           instr.setAttr("freq", Std.mtof(n.pitch));
-
-          // TEMP DEBUG
-          /* <<< "INSTR name", this.name, "pitch", n.pitch >>>; */
-
           n.gain => instr.getGain().gain;
         }
 
         seq.next() @=> c;
         if (c == null) {
-
-          /* <<< "IN PLAYER WHILE LOOP AFTER SEQ.NEXT() == NULL", me.id() >>>; */
-
           // reset this sequence to its 0th position for next usage as we loop through sequences
           seq.reset();
 
@@ -103,14 +76,6 @@ public class InCPlayer extends PlayerBase {
         // trigger envelope start
         instr.getEnv().keyOn();
       }
-
-      /* <<< "IN PLAYER BEFORE SIGNAL, id", me.id() >>>; */
-
-      /* stepEvent => now; */
-      /* stepEvent.signal(); */
-      /* me.exit(); */
-
-      /* <<< "IN PLAYER AFTER SIGNAL, id", me.id() >>>; */
     }
   }
 }

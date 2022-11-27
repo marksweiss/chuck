@@ -52,38 +52,15 @@ fun void addPhrase(Note phrase[], Sequences seqs[]) {
 
 fun void main () {
   // TODO
-  // - DONE Add NoteConst like ScaleConst
-  // - DONE Change this composition to use NoteConst, Riley score is individual notes
-  // - DONE Change Sequence and Instrument to have overloads which play Notes instead of Chords
-  // - DONE Change instruments to define multiple generators, up to 5, take an argument for polyphony in init()
-  //   and, if playing Chords, sound one note of the chord to each generator; generators all wired to the
-  //   same signal chain
-  // - DONE Map class
-  //   - wrap Assoc Array
-  //   - additional field - Array of file names
-  //   - this thus supports keys() method, values() method is iterating over underlying array for
-  //     each key in key names array
-  //   - get(key) obviously supported, error if key not found
-  //   - put(key, val) supported, adds key to array it new, adds/updates value for key in assoc array
-  // - DONE Conductor design
-  //   - Base class
-  //     - takes an array of assoc array in init(), one for each instrument
-  //     - updateState(), updateState(instrumentId)
-  //     - getState(), getState(instrumentId)
-  //     - *state() methods all operate on assoc array to read/persist state
-  //     - One global conductor per composition, with one config per instrument, so update() methods
-  //       can look at that instrument's state as well as global state when computing updates -- for In C
-  //     - Calle from same place in event loop as nowd
-  //   - DONE Derive class 
   // - Look at other UGens, work on better timbres for composition
   // - Experiment with micro-detune, (see detune example in book)
+  // - JUST INTONATION!!!
   // - Dynamic signal processing example from Chuck book, Chapter 8
   // - Cleanup
   //   - move In C stuff into it's own directory
-  //   - consistent use of 'this', use as little as possible only to avoid name clashes
-  // - Add missing test coverage
 
-  <<< "--------------------------\nIN SINOSC MAIN, shred id:" >>>;
+  // TEMP DEBUG
+  /* <<< "--------------------------\nIN SINOSC MAIN, shred id:" >>>; */
 
   // global coordinator of interprocess state governing composition behavior, such
   // as in this case whether instruments move to the next phrase or stay on the current one
@@ -95,7 +72,7 @@ fun void main () {
   Event stepEvent; 
 
   // TEMP DEBUG
-  <<< "IN COMP SINOSC, stepEvent address =", stepEvent, "shredId", me.id() >>>;
+  /* <<< "IN COMP SINOSC, stepEvent address =", stepEvent, "shredId", me.id() >>>; */
   
   Clock clock;
   clock.init(BPM, startEvent, stepEvent, conductor);
@@ -110,7 +87,7 @@ fun void main () {
   seqs3.init("seqs3", isLooping);
   [seqs1, seqs2, seqs3] @=> Sequences seqs[];
 
-  /* // declare chords / notes for each sequence */
+  // declare chords / notes for each sequence
   NoteConst N;
   Note T;
   ScaleConst S;
@@ -127,7 +104,7 @@ fun void main () {
   addPhrase([N.B4_16, N.G4_16, N.REST_8, N.REST_4, N.REST_4, N.REST_4], seqs);
   addPhrase([N.B4_16, N.G4_16], seqs);
 
-  /* // configure instruments, pass clock, Events, sequences of phrases and conductor to them */ 
+  // configure instruments, pass clock, Events, sequences of phrases and conductor to them 
   getConf(100, 40::ms, 30::ms, 30::ms) @=> ArgParser conf1;
   getConf(102.5, 25::ms, 40::ms, 50::ms) @=> ArgParser conf2;
   getConf(105, 35::ms, 35::ms, 70::ms) @=> ArgParser conf3;
@@ -138,9 +115,9 @@ fun void main () {
   instr2.init("instr2", conf2);
   instr3.init("instr3", conf3);
 
-  /* // declare the Players whose behavior governed by calling the Conductor to */
-  /* // to check their state changes, performing the notes of the Sequences using the */
-  /* // Instruments to play the notes */
+  // declare the Players whose behavior governed by calling the Conductor to
+  // to check their state changes, performing the notes of the Sequences using the
+  // Instruments to play the notes
   InCPlayer player1;
   player1.init("player1", seqs1, startEvent, stepEvent, clock.stepDur, conductor, instr1);
   InCPlayer player2;

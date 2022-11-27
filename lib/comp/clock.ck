@@ -35,29 +35,29 @@ public class Clock {
   fun void init(float bpm, Event startEvent, Event stepEvent, Conductor conductor) {
     conductor @=> this.conductor;
 
-    /* <<< "Clock: BEAT_STEP", BEAT_STEP >>>; */
-    /* <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>; */
-    /* <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>; */
+    <<< "Clock: BEAT_STEP", BEAT_STEP >>>;
+    <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>;
+    <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
 
     bpm / 60.0 => float beatsPerSec;
 
-    /* <<< "Clock: bpm", bpm, "beatsPerSec", beatsPerSec >>>; */
+    <<< "Clock: bpm", bpm, "beatsPerSec", beatsPerSec >>>;
 
     SAMPLES_PER_SEC / beatsPerSec =>  dur samplesPerBeat;
 
-    /* <<< "Clock: samplesPerBeat", samplesPerBeat >>>; */
+    <<< "Clock: samplesPerBeat", samplesPerBeat >>>;
 
     samplesPerBeat => beatDur;
     samplesPerBeat / BEAT_STEP => stepDur;
 
-    /* <<< "Clock: beatDur", beatDur >>>; */
-    /* <<< "Clock: stepDur", stepDur >>>; */
+    <<< "Clock: beatDur", beatDur >>>;
+    <<< "Clock: stepDur", stepDur >>>;
 
     startEvent @=> this.startEvent; 
     stepEvent @=> this.stepEvent;
 
     // TEMP DEBUG
-    <<< "IN CLOCK INIT, stepEvent address =", stepEvent, "shredId", me.id() >>>;
+    /* <<< "IN CLOCK INIT, stepEvent address =", stepEvent, "shredId", me.id() >>>; */
 
     D(0.015625) => SXTYFRTH;
     D(0.03125) => THRTYSCND;
@@ -67,29 +67,37 @@ public class Clock {
     D(0.5) => HLF;
     D(1.0) => WHL;
 
-    /* <<< "Clock: SXTYFRTH", SXTYFRTH, "THRTYSCND", THRTYSCND, "SXTNTH", SXTNTH, "ETH", ETH, "QRTR", QRTR, "HLF", HLF, "WHL", WHL >>>; */
+    <<< "Clock: SXTYFRTH", SXTYFRTH, "THRTYSCND", THRTYSCND, "SXTNTH", SXTNTH, "ETH", ETH, "QRTR", QRTR, "HLF", HLF, "WHL", WHL >>>;
   }
 
   fun void play() {
+    // TODO REALLY UNDERSTAND THIS. DO WE NEED BOTH SYNCS?
+    // Sync now to closest next tempo duration unit
     sync();
+    // Block here and wake up all Players, they will advance to block together on stepEvent.
     this.startEvent.broadcast();
+    // Sync again to closest next tempo duration unit, all threads are now using synced time.
     sync();
 
     while (true) {
-      <<< "CLOCK BEFORE BROADCAST STEP EVENT, stepEvent", stepEvent, "shredId", me.id() >>>;
+      // TEMP DEBUG
+      /* <<< "CLOCK BEFORE BROADCAST STEP EVENT, stepEvent", stepEvent, "shredId", me.id() >>>; */
 
-      // call the conductor to calculate new global state for all instrument player threads
+      // Call the conductor to calculate new global state for all instrument player threads
       this.conductor.updateAll();
+      // Advance global time by smallest defined tempo duration, also shared with players.
+      // When Clock blocks on Event and Players block on Event, then this means `now` advances
+      // time globally for all shreds. (If there is no Event then each shred advances time
+      // for its shred only by chucking durations to `now`).
       this.stepDur => now;
+      // Block on the Event that another tempo duration has passed and wake up all Players.
+      // Players calculate new value for time passed vs. the duration of the current Note
+      // they are playing and stop Note, start new Note etc. if they need to, then they
+      // block again on the same Event and control comes back here.
       this.stepEvent.broadcast();
 
-      <<< "CLOCK AFTER BROADCAST ON STEPEVENT, stepEvent", stepEvent, "shredId", me.id() >>>;
-
       // TEMP DEBUG
-      /* <<< "CLOCK AFTER BROADCAST, now", now, "shredId", me.id() >>>; */
-
-      // TEMP DEBUG
-      /* <<< "CLOCK AFTER STEP DUR, now", now, "shredId", me.id() >>>; */
+      /* <<< "CLOCK AFTER BROADCAST ON STEPEVENT, stepEvent", stepEvent, "shredId", me.id() >>>; */
     }
   }
 
