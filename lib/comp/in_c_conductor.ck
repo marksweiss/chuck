@@ -1,8 +1,13 @@
-// Machine.add("lib/copm/conductor.ck"); 
+// Machine.add("lib/collection/set.ck"); 
+// Machine.add("lib/comp/conductor.ck"); 
 
 public class InCConductor extends Conductor {
+  OrderedStringSet behaviorKeys; 
+
   "IS_ADVANCING" => string KEY_IS_ADVANCING;
-  [KEY_IS_ADVANCING] @=> string behaviorKeys[]; 
+  behaviorKeys.put(KEY_IS_ADVANCING);
+  // assumes range [0, 100), i.e. this advances 15% of the time
+  85 => int IS_ADVANCING_THRESHOLD;
 
   // Override
   fun void update(int shredId) {
@@ -12,27 +17,20 @@ public class InCConductor extends Conductor {
   // Override
   fun void updateAll() {
     for (0 => int i; i < this.shredSize(); i++) {
-      /* <<< "i", i, "shredIds.size()", shredIds.size(), "shredSize", shredSize(), "this.shredIds[i]", this.shredIds[i] >>>; */
-
       isAdvancing(this.shredIds[i]);
     }
   }
 
   // Override
   fun int getBoolBehavior(int shredId, string behaviorKey) {
-    if (behaviorKeys.find(behaviorKey) == 1) {
+    if (behaviorKeys.hasKey(behaviorKey)) {
       return this.get(shredId, behaviorKey).intVal;
     }
   }
 
   fun /*private*/ void isAdvancing(int shredId) {
-    // initial policy is just randomly put each shred's next state to true/false
-    if (Math.random2(0, 100) > 15) {
+    if (exceedsThreshold(IS_ADVANCING_THRESHOLD)) {
       this.put(shredId, KEY_IS_ADVANCING, true); 
-
-      // TEMP DEBUG
-      /* <<< "IN CONDUCTOR IS ADVANCING, shredId", me.id() >>>; */
-
     } else {
       this.put(shredId, KEY_IS_ADVANCING, false); 
     }

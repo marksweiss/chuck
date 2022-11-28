@@ -157,4 +157,11 @@ public class Conductor {
   fun string getStringBehavior(int shredId, string behaviorKey) {} 
   fun dur getDurationBehavior(int shredId, string behaviorKey) {} 
   fun time getTimeBehavior(int shredId, string behaviorKey) {} 
+
+  /**
+   * Generates a random number to test against a threshold value. Assumes range of [0, 100).
+   */
+  /*private*/ fun int exceedsThreshold(int threshold) {
+    return Math.random2(0, 100) > threshold;
+  } 
 }

@@ -57,8 +57,6 @@ public class Sequence {
 
   // *** Iterator interface
   fun Chord next() {
-    <<< "IN SEQUENCE.next() TOP, idx:", idx, " chords.size()", chords.size(), "thread", me.id() >>>;
-
     if (idx == chords.size()) {
       if (!isLooping) {
         return null;
@@ -66,11 +64,16 @@ public class Sequence {
         reset(); 
       }
     }
+
+    // TEMP DEBUG
+    <<< "IN SEQUENCE.next(), idx:", idx, " chords size", chords.size(), "thread", me.id() >>>;
+
     return chords[idx++];
   }
 
   fun Chord current() {
-    <<< "IN SEQUENCE.current(), idx:", idx, " chords.size()", chords.size(), "thread", me.id() >>>;
+    // TEMP DEBUG
+    <<< "IN SEQUENCE.current(), idx:", idx, " chords size", chords.size(), "thread", me.id() >>>;
 
     return chords[idx];
   }
