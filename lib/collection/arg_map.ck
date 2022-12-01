@@ -24,6 +24,11 @@ public class OrderedArgMap {
   // Supports client syntax: while (map.next(i) != OrderedMap.END) {...}
   -1 => static int END;
 
+  // TODO TEST
+  fun void put(ArgBase val) {
+    put(val.name, val);
+  }
+
   fun void put(string key, ArgBase val) {
     // if key already present, clear value for key, don't add key to keys
     if (map.find(key) == 1) {

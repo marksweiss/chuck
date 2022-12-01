@@ -66,14 +66,14 @@ public class Sequence {
     }
 
     // TEMP DEBUG
-    <<< "IN SEQUENCE.next(), idx:", idx, " chords size", chords.size(), "thread", me.id() >>>;
+    /* <<< "IN SEQUENCE.next(), idx:", idx, " chords size", chords.size(), "thread", me.id() >>>; */
 
     return chords[idx++];
   }
 
   fun Chord current() {
     // TEMP DEBUG
-    <<< "IN SEQUENCE.current(), idx:", idx, " chords size", chords.size(), "thread", me.id() >>>;
+    /* <<< "IN SEQUENCE.current(), idx:", idx, " chords size", chords.size(), "thread", me.id() >>>; */
 
     return chords[idx];
   }

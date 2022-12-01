@@ -75,25 +75,11 @@ public class Conductor {
   }
 
   fun void putHelper(int shredId, string key, ArgBase val) {
-
-    // TEMP DEBUG
-    /* <<< "IN CONDUCTOR PUTHELPER key", key, "shred", me.id() >>>; */
-
-    // TEMP DEBUG
-    /* <<< "TOP OF SHRED STATE MAP putHelper()" >>>; */
-
     Std.itoa(shredId) => string shredKey;
-
-    // TEMP DEBUG
-    /* <<< "SHRED STATE MAP shredKey", shredKey >>>; */
-
     if (state.find(shredKey) > 1) {
       <<< "ERROR: ILLEGAL STATE. shredKey should have 0 or 1 entries in Conductor" >>>;
       me.exit();
     }
-
-    // TEMP DEBUG
-    /* <<< "SHRED STATE MAP after find()" >>>; */
 
     if (state.find(shredKey) == 0) {
       OrderedArgMap shredStateMap;
@@ -103,21 +89,9 @@ public class Conductor {
     }
     state[shredKey] @=> OrderedArgMap shredStateMap;
 
-    // TEMP DEBUG
-    /* <<< "SHRED STATE MAP after new thread check, shredStateMap", shredStateMap >>>; */
-
-    // TEMP DEBUG
-    /* <<< "SHRED STATE MAP BEFORE key assignment, keys.size()", keys.size(), "keyCount", keyCount, "key", key, "keys[0]", keys[0], "keys.find(key)", keys.find(key) >>>; */
-
     if (!keys.hasKey(key)) {
       keys.put(key); 
     }
-
-    // TEMP DEBUG
-    /* <<< "SHRED STATE MAP after new thread check, key=keys[keyCount - 1]", keys[keyCount - 1], "val", val >>>; */
-
-    // TEMP DEBUG
-    /* <<< "BOTTOM OF SHRED STATE MAP putHelper()" >>>; */
 
     shredStateMap.put(key, val);
   }
@@ -132,11 +106,6 @@ public class Conductor {
 
   fun string[] getKeys() {
     return keys.getKeys();
-    /* string retKeys[keyCount]; */
-    /* for (0 => int i; i < keyCount; i++) { */
-    /*   keys[i] => retKeys[i]; */
-    /* } */
-    /* return retKeys; */
   }
 
   fun int keySize() {
@@ -150,18 +119,15 @@ public class Conductor {
   // Override
   fun void updateAll() {}
 
-  // Override
-  fun int getIntBehavior(int shredId, string behaviorKey) {} 
-  fun int getBoolBehavior(int shredId, string behaviorKey) {} 
-  fun float getFloatBehavior(int shredId, string behaviorKey) {} 
-  fun string getStringBehavior(int shredId, string behaviorKey) {} 
-  fun dur getDurationBehavior(int shredId, string behaviorKey) {} 
-  fun time getTimeBehavior(int shredId, string behaviorKey) {} 
+  fun ArgBase getBehavior(int shredId, string behaviorKey) {
+    Std.itoa(shredId) => string shredKey;
+    return state[shredKey].get(behaviorKey); 
+  }
 
   /**
    * Generates a random number to test against a threshold value. Assumes range of [0, 100).
    */
-  /*private*/ fun int exceedsThreshold(int threshold) {
+  /*protected*/ fun int exceedsThreshold(int threshold) {
     return Math.random2(0, 100) > threshold;
   } 
 }

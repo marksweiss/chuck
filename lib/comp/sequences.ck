@@ -31,7 +31,7 @@ public class Sequences {
 
   fun Sequence next() {
     // TEMP DEBUG
-    <<< "IN SEQUENCES.next() TOP, idx:", idx, " seqs size", seqs.size(), "thread", me.id() >>>;
+    /* <<< "IN SEQUENCES.next() TOP, idx:", idx, " seqs size", seqs.size(), "thread", me.id() >>>; */
 
     if (idx == seqs.size()) {
       if (!isLooping) {
@@ -45,7 +45,7 @@ public class Sequences {
 
   fun Sequence current() {
     // TEMP DEBUG
-    <<< "IN SEQUENCES.current(), idx:", idx, "seqs size", seqs.size(), "thread", me.id() >>>;
+    /* <<< "IN SEQUENCES.current(), idx:", idx, "seqs size", seqs.size(), "thread", me.id() >>>; */
 
     return seqs[idx];
   }

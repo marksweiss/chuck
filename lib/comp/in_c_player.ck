@@ -61,7 +61,7 @@ public class InCPlayer extends PlayerBase {
         conductor.update(me.id());
         
         // TEMP DEBUG
-        <<< "IN PLAYER CALLING CONDUCTOR" >>>;
+        /* <<< "IN PLAYER CALLING CONDUCTOR" >>>; */
 
         if (conductor.getBoolBehavior(me.id(), conductor.KEY_IS_ADVANCING)) {
           this.seqs.next() @=> seq;
@@ -85,7 +85,7 @@ public class InCPlayer extends PlayerBase {
         for (0 => int j; j < c.notes.size(); j++) {
           c.notes[j] @=> Note n;
           instr.setAttr("freq", Std.mtof(n.pitch));
-          n.gain => instr.getGain().gain;
+          /* n.gain => instr.getGain().gain; */
         }
 
         // reset note triggering state
