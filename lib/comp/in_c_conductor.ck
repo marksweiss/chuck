@@ -110,6 +110,49 @@ public class InCConductor extends Conductor {
 
   // ENSEMBLE SETTINGS
 
+  "NUM_PLAYERS" => string NUM_PLAYERS;
+  3 => NUM_PLAYERS;  
+  // Threshold number of phrases behind the furthest ahead any Player is allowed to slip.
+  // If they are more than 3 behind the leader, they must advance.     
+  "PHRASES_IDX_RANGE_THRESHOLD" => string PHRASES_IDX_RANGE_THRESHOLD;
+  3 => int PHRASES_IDX_RANGE_THRESHOLD;
+  // Prob that the Ensemble will seek to have all Players play the same phrase
+  // on any one iteration
+  "UNISON_PROB_FACTOR" => string UNISON_PROB_FACTOR;
+  20 => int UNISON_PROB_FACTOR;
+  // Threshold number of phrases apart within which all players 
+  // must be for Ensemble to seek unison
+  "MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON" => string MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON;
+  3 => int MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON;
+  // Probability that the ensemble will de/crescendo in a unison (may be buggy)
+  // TODO: bug is that code to build up crescendo over successive iterations isn't there
+  // and instead this just jumps the amplitude jarringly on one iteration
+  "CRESCENDO_PROB_FACTOR" => string CRESCENDO_PROB_FACTOR;
+  0 => int CRESCENDO_PROB_FACTOR;
+  "DIMINUENDO_PROB_FACTOR" => string DIMINUENDO_PROB_FACTOR;
+  0 => int DIMINUENDO_PROB_FACTOR;
+  // Maximum de/increase in volume (in CSound scale) that notes can gain in crescendo 
+  // pursued during a unison or in the final Conclusion
+  "MAX_AMP_RANGE_FOR_SEEKING_CRESCENDO" => string MAX_AMP_RANGE_FOR_SEEKING_CRESCENDO;
+  20 => int MAX_AMP_RANGE_FOR_SEEKING_CRESCENDO;
+  "MAX_AMP_RANGE_FOR_SEEKING_DIMINUENDO" => string MAX_AMP_RANGE_FOR_SEEKING_DIMINUENDO;
+  20 => int MAX_AMP_RANGE_FOR_SEEKING_DIMINUENDO;
+  // Parameters governing the Conclusion
+  // This is the ratio of steps in the Conclusion to the total steps before the Conclusion  
+  "CONCLUSION_STEPS_RATIO" => string CONCLUSION_STEPS_RATIO;
+  0.1 => float CONCLUSION_STEPS_RATIO;
+  // This extends the duration of the repetition of the last phrase
+  // during the final coda.  At the start of the coda each player
+  // has its start time pushed ahead to be closer to the maximum
+  // so that they arrive at the end closer together.  This factor offsets the Player from
+  // repeating the last phrase until exactly reaching the Conclusion  
+  "CONCLUSION_CUR_START_OFFSET_FACTOR" => string CONCLUSION_CUR_START_OFFSET_FACTOR;
+  0.05 => float CONCLUSION_CUR_START_OFFSET_FACTOR;
+  // Maximum number of crescendo and decrescendo steps in the conclusion, supporting the 
+  // Instruction indicating ensemble should de/crescendo "several times"
+  "MAX_NUMBER_CONCLUDING_CRESCENDOS" => string MAX_NUMBER_CONCLUDING_CRESCENDOS;
+  4 => int MAX_NUMBER_CONCLUDING_CRESCENDOS;
+
   // /ENSEMBLE SETTINGS
 
   
