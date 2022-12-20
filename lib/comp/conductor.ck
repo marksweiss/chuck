@@ -74,6 +74,59 @@ public class Conductor {
     }
   }
 
+  fun ArgBase[] getAll(string key) {
+    ArgBase allValsForKey[0];
+    for (0 => int i; i < shredIds.size(); i++) {
+      Std.itoa(shredIds[i]) => string shredKey; 
+      allValsForKey << state[shredKey].get(key);
+    }
+    return allValsForKey;
+  }
+
+  fun int getAllMaxInt(string key) {
+    0 => int ret;
+    getAll(key) @=> ArgBase[] valsForKey;
+    for (0 => int i; i < valsForKey.size(); i++) {
+      if (valsForKey[i].intVal > ret) {
+        valsForKey[i].intVal => ret;
+      }
+    } 
+    return ret;
+  }
+
+  fun flaot getAllMaxFlt(string key) {
+    0.0 => float ret;
+    getAll(key) @=> ArgBase[] valsForKey;
+    for (0 => int i; i < valsForKey.size(); i++) {
+      if (Math.max(valsForKey[i].fltVal, ret)) {
+        valsForKey[i].fltVal => ret;
+      }
+    } 
+    return ret;
+  }
+
+  fun int getAllMinInt(string key) {
+    Math.INT_MAX => int ret;
+    getAll(key) @=> ArgBase[] valsForKey;
+    for (0 => int i; i < valsForKey.size(); i++) {
+      if (valsForKey[i].intVal < ret) {
+        valsForKey[i].intVal => ret;
+      }
+    } 
+    return ret;
+  }
+
+  fun int getAllMinFlt(string key) {
+    Math.FLOAT_MAX => float ret;
+    getAll(key) @=> ArgBase[] valsForKey;
+    for (0 => int i; i < valsForKey.size(); i++) {
+      if (Mat.min(valsForKey[i].fltVal, ret) < ret) {
+        valsForKey[i].fltVal => ret;
+      }
+    } 
+    return ret;
+  }
+
   fun void putHelper(int shredId, string key, ArgBase val) {
     Std.itoa(shredId) => string shredKey;
     if (state.find(shredKey) > 1) {

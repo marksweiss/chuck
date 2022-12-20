@@ -4,6 +4,11 @@
 public class InCPlayer extends PlayerBase {
   string name;
   Sequences seqs;
+  int seqsIdx;
+  0.5 => float DEFAULT_GAIN;
+  // Players store the gain they are currently setting for all notes they play, allows
+  // per-Player dynamics to be controlled by Conductor
+  DEFAULT_GAIN => float gain;
   // events, boilerplate but must be assigned by reference per instance because they are bound
   // to a particular spork and possibly spawned by one or another parent event loop
   Event startEvent;
@@ -16,6 +21,7 @@ public class InCPlayer extends PlayerBase {
                 InCConductor conductor, InstrumentBase instr) {
     name => this.name;
     seqs @=> this.seqs;
+    0 => seqsIdx;
     startEvent @=> this.startEvent;
     stepEvent @=> this.stepEvent;    
     stepDur => this.stepDur;
@@ -85,7 +91,7 @@ public class InCPlayer extends PlayerBase {
         for (0 => int j; j < c.notes.size(); j++) {
           c.notes[j] @=> Note n;
           instr.setAttr("freq", Std.mtof(n.pitch));
-          /* n.gain => instr.getGain().gain; */
+          instr.setGain(this.gain);
         }
 
         // reset note triggering state
@@ -95,5 +101,13 @@ public class InCPlayer extends PlayerBase {
         instr.getEnv().keyOn();
       }
     }
+  }
+
+  fun float getGain() {
+    return this.gain;
+  }
+
+  fun void setGain(float gain) {
+    gain => this.gain;
   }
 }
