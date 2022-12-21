@@ -6,17 +6,50 @@
 // Machine.add("lib/comp/conductor.ck"); 
 // Machine.add("lib/test/assert.ck"); 
 
+// NOTES and Questions From Previous Implementation
+// https://github.com/marksweiss/aleatoric/blob/master/compositions/Terry_Riley-In_C/midi/In_C_midi_user_instruction.rb 
+// Pre play rules and Post play rules - do we need this?
+// Players hold their own state
+// Ensemble holds its own state and can check Players' state, some of it state
+//  is derived from checking Players' state
+// Separate "business logic" implentations of the rules execute rule logic against
+//  Player and Ensemble state and determine whether:
+//  - Player advances
+//  - Player prepends a Rest note
+//  - Player raises or lowers volume or goes silent, itself to "listen" or with group
+//    logic orchestrated by the Ensemble if going into crescendo / descrescendo
+//  - Player improvises
+
+// RULES IMPLEMENTATION
+
+// TODO HANDLE THE has_advanced logic in the original code by just calling all the predicates in
+// a cascade and handle early exit on should advance, should be encapsulated from Player
+
 public class InCConductor extends Conductor {
+
+  // *******************
+  // PLAYER SETTINGS
+  // *******************
+  Note N;
   OrderedArgMap settings; 
 
+  // *******************
   // State Keys for Player Settings
   "PHRASE_IDX" => string PHRASE_IDX; 
   "GAIN" => string GAIN;
-  "REACHED_UNISON" => string REACHED_UNISON; 
+  "PLAYER_HAS_REACHED_UNISON" => string PLAYER_HAS_REACHED_UNISON;
+  "PLAYER_HAS_ADVANCED" => string PLAYER_HAS_ADVANCED;
+  "PLAYER_REACHED_LAST_PHRASE" => string PLAYER_REACHED_LAST_PHRASE;
+  "PLAYER_PHRASE_PLAY_COUNT" => string PLAYER_PHRASE_PLAY_COUNT; 
 
-  // PLAYER SETTINGS
-  Note N;
-
+  // *******************
+  // State Keys for Ensemble Settings
+  "ALL_PLAYERS_REACHED_UNISON" => string ALL_PLAYERS_REACHED_UNISON;
+  "ALL_PLAYERS_REACHED_CONCLUSION" => string ALL_PLAYERS_REACHED_CONCLUSION;
+  "ALL_PLAYERS_REACHED_CONCLUDING_UNISON" => string ALL_PLAYERS_REACHED_CONCLUDING_UNISON; 
+  
+  // *******************
+  // Settings constants
   "NUM_PHRASES" => string NUM_PHRASES;
   settings.put(IntArg.make(NUM_PHRASES, 53));
  
@@ -121,7 +154,9 @@ public class InCConductor extends Conductor {
   // /PLAYER SETTINGS
 
 
+  // *******************
   // ENSEMBLE SETTINGS
+  // *******************
 
   "NUM_PLAYERS" => string NUM_PLAYERS;
   3 => NUM_PLAYERS;  
@@ -168,7 +203,11 @@ public class InCConductor extends Conductor {
 
   // /ENSEMBLE SETTINGS
 
-  
+ 
+  // *******************
+  // API
+  // *******************
+ 
   // Override
   fun void update(int shredId) {
     /* isAdvancing(shredId); */
@@ -181,31 +220,42 @@ public class InCConductor extends Conductor {
     }
   }
 
-  // NOTES and Questions From Previous Implementation
-  // https://github.com/marksweiss/aleatoric/blob/master/compositions/Terry_Riley-In_C/midi/In_C_midi_user_instruction.rb 
-  // Pre play rules and Post play rules - do we need this?
-  // Players hold their own state
-  // Ensemble holds its own state and can check Players' state, some of it state
-  //  is derived from checking Players' state
-  // Helpers test threshold value against Settings value and set state of Players and Ensemble
-  // Separate "business logic" implentations of the rules execute rule logic against
-  //  Player and Ensemble state and determine whether:
-  //  - Player advances
-  //  - Player prepends a Rest note
-  //  - Player raises or lowers volume or goes silent, itself to "listen" or with group
-  //    logic orchestrated by the Ensemble if going into crescendo / descrescendo
-  //  - Player improvises
+  // *******************
+  // INSTRUCTIONS
+  // *******************
 
-  // RULES IMPLEMENTATION
+  // *******************
+  // No-op Instructions
 
-  // TODO Player needs
-  // - currentPhraseIdx
-  // - currentPhrasePlayCount - number of times current phrase has been played
-  // - hasAdvanced
- 
-  // TODO HANDLE THE has_advanced logic in the original code by just calling all the predicates in
-  // a cascade and handle early exit on should advance, should be encapsulated from Player
- 
+  // "All performers play from the same page of 53 melodic patterns played in sequence."
+  // "Any number of any kind of instruments can play.  A group of about 35 is desired if possible but smaller or larger groups will work.  If vocalist(s) join in they can use any vowel and consonant sounds they like."
+  // "The tempo is left to the discretion of the performers, obviously not too slow, but not faster than performers can comfortably play."
+  // "If for some reason a pattern can’t be played, the performer should omit it and go on."
+  // "Instruments can be amplified if desired.  Electronic keyboards are welcome also."
+
+  // Player Pre-play Performance Instructions
+
+  // "Patterns are to be played consecutively with each performer having the freedom to determine how many 
+  //  times he or she will repeat each pattern before moving on to the next.  There is no fixed rule 
+  //  as to the number of repetitions a pattern may have, however, since performances normally average 
+  //  between 45 minutes and an hour and a half, it can be assumed that one would repeat each pattern 
+  //  from somewhere between 45 seconds and a minute and a half or longer."
+  fun instruction10(int playerId) {
+    if (seekingUnison(playerId)) {
+      put(playerId, PHRASE_IDX, get(playerId, PHRASE_IDX) + 1));
+      put(playerId, PLAYER_HAS_ADVANCED, true);
+      put(playerId, PLAYER_HAS_REACHED_UNISON, true);
+    }
+  }
+
+  // TODO OTHER PRE-PLAY
+  // THEN PLAY NOTES
+  // THEN PUT STATE BASED ON PRE-PLAY CHANGES, esp. ENSEMBLE STATE BASED ON ALL PLAYERS
+
+  // *******************
+  // INSTRUCTION HELPERS
+  // *******************
+
   fun int reachedLastPhrase(int playerId) {
     phraseIdx(playerId) == NUM_PHRASES - 1;
   }
@@ -227,9 +277,8 @@ public class InCConductor extends Conductor {
     return curPhrasePlayCount * seqDuration < settings.MIN_REPEAT_PHRASE_DURATION
   }
 
-  fun int seeking_unison(int playerId) {
-    getAllMaxInt(PHRASE_IDX) - getAllMinInt(PHRASE_IDX) => int playersPhraseIdxRange;  
-    playersPhraseIdxRange < settings.MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON => int inRange;
+  fun int seekingUnison(int playerId) {
+    playersPhraseIdxRange() < settings.MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON => int inRange;
     return inRange && exceedsThreshold(setttings.UNISON_PROB);
   }
 
@@ -251,5 +300,9 @@ public class InCConductor extends Conductor {
  
   fun /*private*/ int phraseIdx(int playerId) {
     return get(playerId, PHRASE_IDX);
+  }
+
+  fun /*private*/ int playersPhraseIdxRange() {
+    return getAllMaxInt(PHRASE_IDX) - getAllMinInt(PHRASE_IDX);
   }
 } 
