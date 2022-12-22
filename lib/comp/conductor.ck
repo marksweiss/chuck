@@ -35,6 +35,8 @@ public class Conductor {
   DurationArg D;
   TimeArg T;
 
+  // copy of all phrases
+
   fun void put(int shredId, string key, int val) {
     I.make(key, val) @=> IntArg arg;
     putHelper(shredId, key, arg);

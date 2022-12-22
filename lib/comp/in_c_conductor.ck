@@ -2,6 +2,7 @@
 // Machine.add("lib/arg_parser/float_arg.ck"); 
 // Machine.add("lib/arg_parser/int_arg.ck"); 
 // Machine.add("lib/collection/arg_map.ck");
+// Machine.add("lib/collection/object_map.ck");
 // Machine.add("lib/comp/note_const.ck"); 
 // Machine.add("lib/comp/conductor.ck"); 
 // Machine.add("lib/test/assert.ck"); 
@@ -31,7 +32,8 @@ public class InCConductor extends Conductor {
   // PLAYER SETTINGS
   // *******************
   Note N;
-  OrderedArgMap settings; 
+  OrderedArgMap settings;
+  OrderedObjectMap playerPhraseMap;
 
   // *******************
   // State Keys for Player Settings
@@ -41,6 +43,7 @@ public class InCConductor extends Conductor {
   "PLAYER_HAS_ADVANCED" => string PLAYER_HAS_ADVANCED;
   "PLAYER_REACHED_LAST_PHRASE" => string PLAYER_REACHED_LAST_PHRASE;
   "PLAYER_PHRASE_PLAY_COUNT" => string PLAYER_PHRASE_PLAY_COUNT; 
+  "PLAYER_AT_REST" => string PLAYER_AT_REST;
 
   // *******************
   // State Keys for Ensemble Settings
@@ -52,6 +55,7 @@ public class InCConductor extends Conductor {
   // Settings constants
   "NUM_PHRASES" => string NUM_PHRASES;
   settings.put(IntArg.make(NUM_PHRASES, 53));
+  1.0 => float NO_FACTOR;
  
   // Player must play each phrase at least this long
   // Insures that short phrases are played enough to counterpoint with longer phrases
@@ -108,14 +112,14 @@ public class InCConductor extends Conductor {
   // Threshold for the ratio of this Players average amp for its current phrase
   //  to the max average amp among all the Players. Ratio above/below this means the Player
   //  will raise/lower its amp by amp_de/crescendo_adj_factor    
-  "AMP_ADJ_CRESCENDO_RATIO_THRESHOLD" => string AMP_ADJ_CRESCENDO_RATIO_THRESHOLD;
-  settings.put(IntArg.make(AMP_ADJ_CRESCENDO_RATIO_THRESHOLD, 80));
-  "AMP_CRESCENDO_ADJ_FACTOR" => string AMP_CRESCENDO_ADJ_FACTOR;
-  settings.put(FloatArg.make(AMP_CRESCENDO_ADJ_FACTOR, 1.1));
-  "AMP_ADJ_DIMINUENDO_RATIO_THRESHOLD" => AMP_ADJ_DIMINUENDO_RATIO_THRESHOLD;
-  settings.put(FloatArg.make(AMP_ADJ_DIMINUENDO_RATIO_THRESHOLD, 1.2));
-  "AMP_DIMINUENDO_ADJ_FACTOR" => AMP_DIMINUENDO_ADJ_FACTOR;
-  settings.put(IntArg.make(AMP_DIMINUENDO_ADJ_FACTOR, 90));
+  "GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD" => string GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD;
+  settings.put(IntArg.make(GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD, 80));
+  "GAIN_CRESCENDO_ADJ_FACTOR" => string GAIN_CRESCENDO_ADJ_FACTOR;
+  settings.put(FloatArg.make(GAIN_CRESCENDO_ADJ_FACTOR, 1.1));
+  "GAIN_ADJ_DIMINUENDO_RATIO_THRESHOLD" => GAIN_ADJ_DIMINUENDO_RATIO_THRESHOLD;
+  settings.put(FloatArg.make(GAIN_ADJ_DIMINUENDO_RATIO_THRESHOLD, 1.2));
+  "GAIN_DIMINUENDO_ADJ_FACTOR" => GAIN_DIMINUENDO_ADJ_FACTOR;
+  settings.put(IntArg.make(GAIN_DIMINUENDO_ADJ_FACTOR, 90));
   // Prob that a Player is seeking de/crescendo  
   "CRESCENDO_PROB" => string CRESCENDO_PROB;
   settings.put(IntArg.make(CRESCENDO_PROB, 50));
@@ -209,8 +213,24 @@ public class InCConductor extends Conductor {
   // *******************
  
   // Override
+  // TODO playerId vs. shredId semantics
   fun void update(int shredId) {
+    // TODO SHOULD WE EVEN HAVE A BASE CLASS INTERFACE?
+    // No-op
+
+    // TODO CALL ALL THE INSTRUCTIONS
     /* isAdvancing(shredId); */
+  }
+
+  /**
+   * Runs all update instructions based on current state for Player, all Players. Returns
+   * either the input phrase in final updated form to play or, if the player advanced
+   * to next phrase during the update, the next phrase in final updated form to play.
+   */  
+  fun Sequence update(int playerId, Sequence phrase) {
+    playerPhraseMap.put(Std.itoa(playerId), phrase);
+    // TODO CALL ALL THE INSTRUCTIONS
+    // TODO RETURN THE FINAL UPDATED SEQUENCE TO PLAY ON THIS ITERATION
   }
 
   // Override
@@ -228,8 +248,10 @@ public class InCConductor extends Conductor {
   // No-op Instructions
 
   // "All performers play from the same page of 53 melodic patterns played in sequence."
-  // "Any number of any kind of instruments can play.  A group of about 35 is desired if possible but smaller or larger groups will work.  If vocalist(s) join in they can use any vowel and consonant sounds they like."
-  // "The tempo is left to the discretion of the performers, obviously not too slow, but not faster than performers can comfortably play."
+  // "Any number of any kind of instruments can play.  A group of about 35 is desired if possible
+  //  but smaller or larger groups will work.  If vocalist(s) join in they can use any vowel and consonant sounds they like."
+  // "The tempo is left to the discretion of the performers, obviously not too slow, but not faster than performers can
+  //  comfortably play."
   // "If for some reason a pattern can’t be played, the performer should omit it and go on."
   // "Instruments can be amplified if desired.  Electronic keyboards are welcome also."
 
@@ -240,11 +262,40 @@ public class InCConductor extends Conductor {
   //  as to the number of repetitions a pattern may have, however, since performances normally average 
   //  between 45 minutes and an hour and a half, it can be assumed that one would repeat each pattern 
   //  from somewhere between 45 seconds and a minute and a half or longer."
-  fun instruction10(int playerId) {
+  fun void instructionSeekUnison(int playerId) {
     if (seekingUnison(playerId)) {
       put(playerId, PHRASE_IDX, get(playerId, PHRASE_IDX) + 1));
       put(playerId, PLAYER_HAS_ADVANCED, true);
       put(playerId, PLAYER_HAS_REACHED_UNISON, true);
+    }
+  }
+
+  // "It is very important that performers listen very carefully to one another and this means occasionally to drop out
+  //  and listen. ... As an ensemble, it is very desirable to play very softly as well as very loudly and to try to diminuendo
+  //  and crescendo together."
+  fun void instructionRestOrCrescendoDecrescendo(int playerId) {
+    NO_FACTOR => float gainAdjFactor;
+    if (rest(playerId)) {
+      // TOOD DO WE NEED 'GAIN' IN STATE? PROBABLY NOT SINCE WE ARE NOW SETTING NOTE VALUES DIRECTLY HERE
+      /* put(playerId, GAIN, 0.0); */
+      0.0 => gainAdjFactor;
+      put(playerId, PLAYER_AT_REST, true);
+    } else {
+      getGainAdjFactor(playerId) => gainAdjFactor;
+      put(playerId, PLAYER_AT_REST, false);
+    }
+
+    if (!assertFloatEqual(gainAdjFactor, NO_FACTOR) {
+      playerPhraseMap.get(Std.itoa(playerId)) $ Sequence => Sequence playerPhrase;
+      // for each chord in the phrase
+      for (0 => int i; i < playerPhrase.size(); i++) {
+        playerPhrase[i] => Chord c;
+        // for each note in the chord
+        for (0 => int k; k < c.size(); k++) {
+          // adjust the note's gain
+          c[k].gain * gainAdjFactor => c[k].gain;
+        } 
+      }
     }
   }
 
@@ -256,19 +307,19 @@ public class InCConductor extends Conductor {
   // INSTRUCTION HELPERS
   // *******************
 
-  fun int reachedLastPhrase(int playerId) {
+  fun /*private*/ int reachedLastPhrase(int playerId) {
     phraseIdx(playerId) == NUM_PHRASES - 1;
   }
 
-  fun int advancePhraseIdx(int playerId) {
+  fun /*private*/ int advancePhraseIdx(int playerId) {
     return !reachedLastPhrase(playerId) && exceedsThreshold(settings.PHRASE_ADVANCE_PROB);
   }
 
-  fun int advancePhraseIdxTooFarBehind(int playerId) {
+  fun /*private*/ int advancePhraseIdxTooFarBehind(int playerId) {
     return getAllMaxInt(PHRASE_IDX) - phraseIdx(playerId) > settings.PHRASES_IDX_RANGE_THRESHOLD;
   }
 
-  fun int repeatCurPhrase(Sequence seq, int curPhrasePlayCount) {
+  fun /*private*/ int repeatCurPhrase(Sequence seq, int curPhrasePlayCount) {
     float seqDuration;
     Chord chord;
     while (seq.next() != null) {
@@ -277,18 +328,18 @@ public class InCConductor extends Conductor {
     return curPhrasePlayCount * seqDuration < settings.MIN_REPEAT_PHRASE_DURATION
   }
 
-  fun int seekingUnison(int playerId) {
+  fun /*private*/ int seekingUnison(int playerId) {
     playersPhraseIdxRange() < settings.MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON => int inRange;
     return inRange && exceedsThreshold(setttings.UNISON_PROB);
   }
 
-  fun int seekingCrescendo(int playerId) {
+  fun /*private*/ int seekingCrescendo(int playerId) {
     ampRange() => float curAmpRange;
     assertFloatLessThan(ampRange, settings.MAX_AMP_RANGE_FOR_SEEKING_CRESCENDO) => int ampInMaxRange;
     return ampInMaxRange && exceedsThreshold(settings.CRESCENDO_PROB);
   }
  
-  fun int seekingDiminuendo(int playerId) {
+  fun /*private*/ int seekingDiminuendo(int playerId) {
     ampRange() => float curAmpRange;
     assertFloatLessThan(ampRange, settings.MAX_AMP_RANGE_FOR_SEEKING_DIMINUENDO) => int ampInMaxRange;
     return ampInMaxRange && exceedsThreshold(settings.DIMINUENDO_PROB);
@@ -305,4 +356,46 @@ public class InCConductor extends Conductor {
   fun /*private*/ int playersPhraseIdxRange() {
     return getAllMaxInt(PHRASE_IDX) - getAllMinInt(PHRASE_IDX);
   }
-} 
+
+  fun /*private*/ int rest(int playerId) {
+    1.0 => float stayAtRestProbFactor;
+    if (get(playerId, PLAYER_AT_REST)) {
+      STAY_AT_REST_PROB_FACTOR => stayAtRestProbFactor;
+    }
+    return exceedsThreshold(settings.REST_PROB_FACTOR * stayAtRestProbFactor);
+  }
+
+  fun /*private*/ float getGainAdjFactor(int playerId) {
+    getEnsembleMaxGain() => float ensembleMaxGain;
+    if (assertFloatEqual(maxGain, 0.0)) {
+      1.0 => maxGain;
+    }
+    getPlayerMaxGain(Std.ito(playerId)) => float playerMaxGain;
+    playerMaxGain / ensembleMaxGain => float gainRatio;
+    if (seekingCrescendo(playerId) && gainRatio < GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD) {
+      return GAIN_CRESCENDO_ADJ_FACTOR;
+    } else if (seekingDiminuendo(playerId) && gainRatio < GAIN_ADJ_DIMINUENDO_RATIO_THRESHOLD) {
+      return GAIN_DIMINUENDO_ADJ_FACTOR;
+    } else {
+      return NO_FACTOR;
+    }
+  }
+
+  fun /*private*/ float getPlayerMaxGain(string playerId) [
+    playerPhraseMap.get(playerId) $ Sequence => Sequence playerPhrase;
+    0.0 => float maxGain;
+    for (0 => int i; i < playerPhrase.size(); i++) {
+      Math.max(playerPhrase.chords[i][0].gain, maxGain) => maxGain;
+    }
+    return maxGain;
+  }
+
+  fun /*private*/ float getEnsembleMaxGain() {
+    0.0 => float maxGain;
+    playerPhraseMap.keys() => string playerIdKeys[];
+    for (0 => int i; i < playerIdKeys.size(); i++) {
+      Math.max(getPlayerMaxGain(playerIdKeys[i]), maxGain) => maxGain;
+    }
+    return maxGain;
+  }
+}
