@@ -3,7 +3,10 @@
 // Machine.add("lib/arg_parser/int_arg.ck"); 
 // Machine.add("lib/collection/arg_map.ck");
 // Machine.add("lib/collection/object_map.ck");
+// Machine.add("lib/comp/clock.ck"); 
+// Machine.add("lib/comp/note.ck"); 
 // Machine.add("lib/comp/note_const.ck"); 
+// Machine.add("lib/comp/chord.ck"); 
 // Machine.add("lib/comp/conductor.ck"); 
 // Machine.add("lib/test/assert.ck"); 
 
@@ -32,6 +35,7 @@ public class InCConductor extends Conductor {
   // PLAYER SETTINGS
   // *******************
   Note N;
+  Clock K;
   OrderedArgMap settings;
   OrderedObjectMap playerPhraseMap;
 
@@ -44,6 +48,7 @@ public class InCConductor extends Conductor {
   "PLAYER_REACHED_LAST_PHRASE" => string PLAYER_REACHED_LAST_PHRASE;
   "PLAYER_PHRASE_PLAY_COUNT" => string PLAYER_PHRASE_PLAY_COUNT; 
   "PLAYER_AT_REST" => string PLAYER_AT_REST;
+  "PLAYER_ADJ_PHASE_COUNT" => string PLAYER_ADJ_PHASE_COUNT; 
 
   // *******************
   // State Keys for Ensemble Settings
@@ -77,8 +82,8 @@ public class InCConductor extends Conductor {
   // during a performance
   
   // Percentage prob that a Player will adjust phase on any given iteration
-  "ADJ_PHASE_PROB_FACTOR" => string ADJ_PHASE_PROB_FACTOR:
-  settings.put(IntArg.make(ADJ_PHASE_PROB_FACTOR, 7));
+  "ADJ_PHASE_PROB" => string ADJ_PHASE_PROB:
+  settings.put(IntArg.make(ADJ_PHASE_PROB, 7));
   // Supports Instruction that Player this is too often in alignment should favor
   // trying to be out of phase a bit more. If Player hasn't adjusted phase
   // this many times or more, then adj_phase_prob_increase_factor will be applied
@@ -87,8 +92,11 @@ public class InCConductor extends Conductor {
   "ADJ_PHASE_PROB_INCREASE_FACTOR" => string ADJ_PHASE_PROB_INCREASE_FACTOR;
   settings.put(IntArg.make(ADJ_PHASE_PROB_INCREASE_FACTOR, 2));
   // The length of the rest Note (in seconds) inserted if a Player is adjusting its phase  
+  K.QRTR => float PHASE_ADJ_NOTE_DUR;
   "PHASE_ADJ_DUR" => string PHASE_ADJ_DUR;
-  settings.put(IntArg.make(PHASE_ADJ_DUR, 55));
+  settings.put(IntArg.make(PHASE_ADJ_DUR, PHASE_ADJ_NOTE_DUR));
+  N.make(0, K.NO_GAIN, PHASE_ADJ_NOTE_DUR) @=> Note PHASE_ADJ_REST_NOTE;
+
   // Prob that a Player will seek unison on any given iteration.  The idea is that
   // to seek unison the Ensemble and all the Players must seek unison  
   "UNISON_PROB" => string UNISON_PROB;
@@ -228,7 +236,7 @@ public class InCConductor extends Conductor {
    * to next phrase during the update, the next phrase in final updated form to play.
    */  
   fun Sequence update(int playerId, Sequence phrase) {
-    playerPhraseMap.put(Std.itoa(playerId), phrase);
+    playerPhraseMap.put(idToKey(playerId), phrase);
     // TODO CALL ALL THE INSTRUCTIONS
     // TODO RETURN THE FINAL UPDATED SEQUENCE TO PLAY ON THIS ITERATION
   }
@@ -264,7 +272,7 @@ public class InCConductor extends Conductor {
   //  from somewhere between 45 seconds and a minute and a half or longer."
   fun void instructionSeekUnison(int playerId) {
     if (seekingUnison(playerId)) {
-      put(playerId, PHRASE_IDX, get(playerId, PHRASE_IDX) + 1));
+      increment(playerId, PHRASE_IDX);
       put(playerId, PLAYER_HAS_ADVANCED, true);
       put(playerId, PLAYER_HAS_REACHED_UNISON, true);
     }
@@ -286,7 +294,7 @@ public class InCConductor extends Conductor {
     }
 
     if (!assertFloatEqual(gainAdjFactor, NO_FACTOR) {
-      playerPhraseMap.get(Std.itoa(playerId)) $ Sequence => Sequence playerPhrase;
+      getPhrase(playerId) => Sequence playerPhrase;
       // for each chord in the phrase
       for (0 => int i; i < playerPhrase.size(); i++) {
         playerPhrase[i] => Chord c;
@@ -296,6 +304,28 @@ public class InCConductor extends Conductor {
           c[k].gain * gainAdjFactor => c[k].gain;
         } 
       }
+    }
+  }
+
+  // "Each pattern can be played in unison or canonically in any alignment with itself or with its neighboring patterns.  ..."
+  fun void instructionChangeAlignment(int playerId) {
+    if (adjustPhase(playerId)) {
+      // copy the rest Note into a new Chord
+      N.make(PHASE_ADJ_REST_NOTE) @=> Note phaseAdjRestNote;
+      Chord phaseAdjRestChord;
+      phaseAdjRestChord.init(phaseAdjRestNote);
+      // construct a new Sequence
+      Sequence adjustedPhrase;
+      adjustedPhrase.init(false);  // not looping
+      // prepend the rest Chord into the new Sequence
+      adjustedPhrase.add(phaseAdjRestChord);
+      // get the current Phrase and append it into the addjust phrase after the rest note
+      getPhrase(playerId) @=> Sequence currentPhrase; 
+      while (currentPhrase.next() != null) {
+        adjustedPhrase.add(currentPhrase.current());
+      }
+      // replace the phrase state for the player with the new phrase with the new alignment
+      playerPhraseMap.put(idToKey(playerId), adjustedPhrase);
     }
   }
 
@@ -365,6 +395,20 @@ public class InCConductor extends Conductor {
     return exceedsThreshold(settings.REST_PROB_FACTOR * stayAtRestProbFactor);
   }
 
+  fun /*private*/ int adjustPhase(int playerId) {
+    settings.ADJ_PHASE_PROB => float adjPhaseProb;
+    if (get(playerId, PLAYER_ADJ_PHASE_COUNT) <= settings.ADJ_PHASE_COUNT_THRESHOLD) {
+      adjPhaseProb * settings.ADJ_PHASE_PROB_INCREASE_FACTOR => adjPhaseProb;
+    }
+
+    exceedsThreshold(adjPhaseProb) => int adjustPhase;
+    if (adjustPhase) {
+      increment(playerId, PLAYER_ADJ_PHASE_COUNT);
+    }
+
+    return adjustPhase;
+  }
+
   fun /*private*/ float getGainAdjFactor(int playerId) {
     getEnsembleMaxGain() => float ensembleMaxGain;
     if (assertFloatEqual(maxGain, 0.0)) {
@@ -397,5 +441,18 @@ public class InCConductor extends Conductor {
       Math.max(getPlayerMaxGain(playerIdKeys[i]), maxGain) => maxGain;
     }
     return maxGain;
+  }
+
+  fun /*private*/ Sequence  getPhrase(int playerId) {
+    playerPhraseMap.get(idToKey(playerId)) $ Sequence => Sequence playerPhrase;
+    return playerPhrase;
+  }
+
+  fun /*private*/ string idToKey(int playerId) {
+    return Std.itoa(playerId);
+  }
+
+  fun /*private*/ void increment(int playerId, string key) {
+    put(playerId, key, get(playerId, key) + 1);
   }
 }
