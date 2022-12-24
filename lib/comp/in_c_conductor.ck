@@ -69,7 +69,6 @@ public class InCConductor extends Conductor {
 
   // The most important factor governing advance of Players through phrases, this is simply
   // the percentage prob that they advance on any given iteration  
-  "PHRASE_ADVANCE" => string PHRASE_ADVANCE;
   "PHRASE_ADVANCE_PROB" => string PHRASE_ADVANCE_PROB;
   // assumes range [0, 100), i.e. this advances 28% of the time
   settings.put(IntArg.make(PHRASE_ADVANCE_PROB, 28));
@@ -161,7 +160,7 @@ public class InCConductor extends Conductor {
   // Minimum average duration of notes in a phrase for that phrase to be more likely
   //  to transpose down rather than up  
   "TRANSPOSE_DOWN_DUR_THRESHOLD" => string TRANSPOSE_DOWN_DUR_THRESHOLD;
-  settings.put(FloatArg.make(TRANSPOSE_DOWN_DUR_THRESHOLD, 2.0));
+  settings.put(FloatArg.make(TRANSPOSE_DOWN_DUR_THRESHOLD, 2::second));
 
   // /PLAYER SETTINGS
 
@@ -254,24 +253,63 @@ public class InCConductor extends Conductor {
 
   // *******************
   // No-op Instructions
+  // *******************
 
   // "All performers play from the same page of 53 melodic patterns played in sequence."
+
   // "Any number of any kind of instruments can play.  A group of about 35 is desired if possible
   //  but smaller or larger groups will work.  If vocalist(s) join in they can use any vowel and consonant sounds they like."
+
   // "The tempo is left to the discretion of the performers, obviously not too slow, but not faster than performers can
   //  comfortably play."
+
   // "If for some reason a pattern can’t be played, the performer should omit it and go on."
+
   // "Instruments can be amplified if desired.  Electronic keyboards are welcome also."
 
+  // TODO IMPLEMENT PULSE
+  // "The ensemble can be aided by the means of an eighth note pulse played on the high c’s of the piano or on a mallet instrument.  
+  // It is also possible to use improvised percussion in strict rhythm (drum set, cymbals, bells, etc.), 
+  //  if it is carefully done and doesn’t overpower the ensemble.  
+  // All performers must play strictly in rhythm and it is essential that everyone play each pattern carefully"
+
+  // TODO IMPLEMENT THIS
+  // "It is important to think of patterns periodically so that when you are resting you are conscious of the larger 
+  //  periodic composite accents that are sounding, and when you re-enter you are aware of what effect your entrance 
+  //  will have on the music’s flow."
+
+  // *******************
+  // / No-op Instructions
+  // *******************
+
+  // *******************
   // Player Pre-play Performance Instructions
+  // *******************
+  // instruction business logic, call predicates and adjust player and player phrase state
 
   // "Patterns are to be played consecutively with each performer having the freedom to determine how many 
   //  times he or she will repeat each pattern before moving on to the next.  There is no fixed rule 
   //  as to the number of repetitions a pattern may have, however, since performances normally average 
   //  between 45 minutes and an hour and a half, it can be assumed that one would repeat each pattern 
   //  from somewhere between 45 seconds and a minute and a half or longer."
-  fun void instructionSeekUnison(int playerId) {
-    if (seekingUnison(playerId)) {
+  fun void instructionAdvancePhraseIdx(int playerId) {
+    if (!hasAdvanced(playerId) && advancePhraseIdx(playerId)) {
+      increment(playerId, PHRASE_IDX);
+      put(playerId, PLAYER_HAS_ADVANCED, true);
+    }
+  }
+
+  //  "... As the performance progresses, performers should stay within 2 or 3 patterns of each other. ..."
+  fun void instructionAdvancePhraseIdxTooFarBehind(int playerId) {
+    if (!hasAdvanced(playerId) && tooFarBehind(playerId)) {
+      increment(playerId, PHRASE_IDX);
+      put(playerId, PLAYER_HAS_ADVANCED, true);
+    }
+  }
+
+  // "The group should aim to merge into a unison at least once or twice during the performance ..."
+  fun void instructionAdvancePhraseIdxSeekingUnison(int playerId) {
+    if (!hasAdvanced(playerId) && seekingUnison(playerId)) {
       increment(playerId, PHRASE_IDX);
       put(playerId, PLAYER_HAS_ADVANCED, true);
       put(playerId, PLAYER_HAS_REACHED_UNISON, true);
@@ -289,12 +327,12 @@ public class InCConductor extends Conductor {
       0.0 => gainAdjFactor;
       put(playerId, PLAYER_AT_REST, true);
     } else {
-      getGainAdjFactor(playerId) => gainAdjFactor;
+      gainAdjFactor(playerId) => gainAdjFactor;
       put(playerId, PLAYER_AT_REST, false);
     }
 
     if (!assertFloatEqual(gainAdjFactor, NO_FACTOR) {
-      getPhrase(playerId) => Sequence playerPhrase;
+      phrase(playerId) => Sequence playerPhrase;
       // for each chord in the phrase
       for (0 => int i; i < playerPhrase.size(); i++) {
         playerPhrase[i] => Chord c;
@@ -308,45 +346,61 @@ public class InCConductor extends Conductor {
   }
 
   // "Each pattern can be played in unison or canonically in any alignment with itself or with its neighboring patterns.  ..."
+  // ... if the players seem to be consistently too much in the same alignment of a pattern, 
+  //  they should try shifting their alignment by an eighth note or quarter note with what’s going on in the
+  //  rest of the ensemble."
   fun void instructionChangeAlignment(int playerId) {
     if (adjustPhase(playerId)) {
       // copy the rest Note into a new Chord
       N.make(PHASE_ADJ_REST_NOTE) @=> Note phaseAdjRestNote;
-      Chord phaseAdjRestChord;
+      Chord phaseAdjRestChord;transposeShift
       phaseAdjRestChord.init(phaseAdjRestNote);
+
       // construct a new Sequence
       Sequence adjustedPhrase;
       adjustedPhrase.init(false);  // not looping
       // prepend the rest Chord into the new Sequence
       adjustedPhrase.add(phaseAdjRestChord);
-      // get the current Phrase and append it into the addjust phrase after the rest note
-      getPhrase(playerId) @=> Sequence currentPhrase; 
+
+      // get the current Phrase and append it into the adjusted phrase after the rest note
+      phrase(playerId) @=> Sequence currentPhrase; 
       while (currentPhrase.next() != null) {
         adjustedPhrase.add(currentPhrase.current());
       }
+
       // replace the phrase state for the player with the new phrase with the new alignment
       playerPhraseMap.put(idToKey(playerId), adjustedPhrase);
     }
   }
 
-  // TODO OTHER PRE-PLAY
-  // THEN PLAY NOTES
-  // THEN PUT STATE BASED ON PRE-PLAY CHANGES, esp. ENSEMBLE STATE BASED ON ALL PLAYERS
+  // "It is OK to transpose patterns by an octave, especially to transpose up.  Transposing down by octaves 
+  //  works best on the patterns containing notes of long durations. 
+  // TODO IMPLEMENT THIS Augmentation of rhythmic values can also be effective."
+  fun void instructionTranspose(int playerId) {
+    if (transpose(playerId)) {
+      transposeShift(playerId) => float shift;
 
-  // *******************
-  // INSTRUCTION HELPERS
-  // *******************
+      phrase(playerId) @=> Sequence currentPhrase; 
+      while (currentPhrase.next() != null) {
+        currentPhrase.current() @=> Chord c;
+        for (0 => int i; i < c.size(); i++) {
+          c.notes[i].pitch += shift;
+        }
+      }
+    }
+  }
 
+  // ***********************
+  // Performance Instruction Helpers
+  // ***********************
+  // instruction business logic, boolean predicates based on state and threshold tests against tunable parameters
+  
   fun /*private*/ int reachedLastPhrase(int playerId) {
     phraseIdx(playerId) == NUM_PHRASES - 1;
   }
 
   fun /*private*/ int advancePhraseIdx(int playerId) {
     return !reachedLastPhrase(playerId) && exceedsThreshold(settings.PHRASE_ADVANCE_PROB);
-  }
-
-  fun /*private*/ int advancePhraseIdxTooFarBehind(int playerId) {
-    return getAllMaxInt(PHRASE_IDX) - phraseIdx(playerId) > settings.PHRASES_IDX_RANGE_THRESHOLD;
   }
 
   fun /*private*/ int repeatCurPhrase(Sequence seq, int curPhrasePlayCount) {
@@ -375,18 +429,6 @@ public class InCConductor extends Conductor {
     return ampInMaxRange && exceedsThreshold(settings.DIMINUENDO_PROB);
   }
  
-  fun /*private*/ float ampRange() {
-    return getAllMaxFlt(GAIN) - getAllMinFlt(GAIN);  
-  }
- 
-  fun /*private*/ int phraseIdx(int playerId) {
-    return get(playerId, PHRASE_IDX);
-  }
-
-  fun /*private*/ int playersPhraseIdxRange() {
-    return getAllMaxInt(PHRASE_IDX) - getAllMinInt(PHRASE_IDX);
-  }
-
   fun /*private*/ int rest(int playerId) {
     1.0 => float stayAtRestProbFactor;
     if (get(playerId, PLAYER_AT_REST)) {
@@ -409,8 +451,45 @@ public class InCConductor extends Conductor {
     return adjustPhase;
   }
 
-  fun /*private*/ float getGainAdjFactor(int playerId) {
-    getEnsembleMaxGain() => float ensembleMaxGain;
+  fun /*private*/ int tooFarBehind(int playerId) {
+    if (reachedLastPhrase(playerId) || get(playerId, PLAYER_HAS_ADVANCED)) {
+      return false;
+    }
+    return getAllMaxInt(PHRASE_IDX) - get(playerId, PHRASE_IDX) >= settings.PHRASES_IDX_RANGE_THRESHOLD;
+  }
+
+  fun /*private*/ int transpose(int playerId) {
+    return exceedsThreshold(settings.TRANSPOSE_PROB_FACTOR);
+  }
+
+  // ***********************
+  // Performance Instruction Util Helpers
+  // ***********************
+  // non-boolean getters or calculations of derived values
+
+  fun /*private*/ float ampRange() {
+    return getAllMaxFlt(GAIN) - getAllMinFlt(GAIN);  
+  }
+ 
+  fun /*private*/ int phraseIdx(int playerId) {
+    return get(playerId, PHRASE_IDX);
+  }
+
+  fun /*private*/ Sequence phrase(int playerId) {
+    playerPhraseMap.get(idToKey(playerId)) $ Sequence => Sequence playerPhrase;
+    return playerPhrase;
+  }
+
+  fun /*private*/ int hasAdvanced(int playerId) {
+    return get(playerId, PLAYER_HAS_ADVANCED);
+  }
+
+  fun /*private*/ int playersPhraseIdxRange() {
+    return getAllMaxInt(PHRASE_IDX) - getAllMinInt(PHRASE_IDX);
+  }
+
+  fun /*private*/ float gainAdjFactor(int playerId) {
+    ensembleMaxGain() => float ensembleMaxGain;
     if (assertFloatEqual(maxGain, 0.0)) {
       1.0 => maxGain;
     }
@@ -425,6 +504,20 @@ public class InCConductor extends Conductor {
     }
   }
 
+  fun float transposeFactor(int playerId) {
+    phrase(playerId) @=> Sequence playerPhrase;
+    dur total;
+    while (playerPhrase.next() != null) {
+      total += playerPhrase.current().notes[0].duration;
+    }
+    total / playerPhrase.size() => meanPhraseDuration;
+    if (exceedsThreshold(settings.TRANSPOSE_DOWN_PROB_FACTOR) && meanPhraseDuration >= settings.TRANSPOSE_DOWN_DUR_THRESHOLD) {
+      return settings.TRANSPOSE_SHIFT_DOWN_FACTOR;
+    } else {
+      return settings.TRANSPOSE_SHIFT_UP_FACTOR;
+    }
+  }
+
   fun /*private*/ float getPlayerMaxGain(string playerId) [
     playerPhraseMap.get(playerId) $ Sequence => Sequence playerPhrase;
     0.0 => float maxGain;
@@ -434,18 +527,13 @@ public class InCConductor extends Conductor {
     return maxGain;
   }
 
-  fun /*private*/ float getEnsembleMaxGain() {
+  fun /*private*/ float ensembleMaxGain() {
     0.0 => float maxGain;
     playerPhraseMap.keys() => string playerIdKeys[];
     for (0 => int i; i < playerIdKeys.size(); i++) {
       Math.max(getPlayerMaxGain(playerIdKeys[i]), maxGain) => maxGain;
     }
     return maxGain;
-  }
-
-  fun /*private*/ Sequence  getPhrase(int playerId) {
-    playerPhraseMap.get(idToKey(playerId)) $ Sequence => Sequence playerPhrase;
-    return playerPhrase;
   }
 
   fun /*private*/ string idToKey(int playerId) {
