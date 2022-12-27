@@ -27,6 +27,8 @@ public class Conductor {
   int shredIds[MAX_NUM_SHREDS];
   0 => int shredIdCount;  
 
+  OrderedArgMap globalState[1];
+
   // objects to call static make() ctors
   ArgBase A;
   IntArg I;
@@ -35,8 +37,7 @@ public class Conductor {
   DurationArg D;
   TimeArg T;
 
-  // copy of all phrases
-
+  // Accessors
   fun void put(int shredId, string key, int val) {
     I.make(key, val) @=> IntArg arg;
     putHelper(shredId, key, arg);
@@ -62,6 +63,31 @@ public class Conductor {
     putHelper(shredId, key, arg);
   }
 
+  fun void putGlobal(string key, int val) {
+    I.make(key, val) @=> IntArg arg;
+    putHelper(key, arg);
+  }
+
+  fun void putGlobal(string key, float val) {
+    F.make(key, val) @=> FloatArg arg;
+    putHelper(key, arg);
+  }
+
+  fun void putGlobal(string key, string val) {
+    S.make(key, val) @=> StringArg arg;
+    putHelper(key, arg);
+  }
+
+  fun void putGlobal(string key, dur val) {
+    D.make(key, val) @=> DurationArg arg;
+    putHelper(key, arg);
+  }
+
+  fun void putGlobal(string key, time val) {
+    T.make(key, val) @=> TimeArg arg;
+    putHelper(key, arg);
+  }
+
   fun ArgBase get(int shredId, string key) {
     Std.itoa(shredId) => string shredKey;
     if (state.find(shredKey) > 1) {
@@ -85,6 +111,7 @@ public class Conductor {
     return allValsForKey;
   }
 
+  // Aggregates
   fun int getAllMaxInt(string key) {
     0 => int ret;
     getAll(key) @=> ArgBase[] valsForKey;
@@ -129,7 +156,84 @@ public class Conductor {
     return ret;
   }
 
-  fun void putHelper(int shredId, string key, ArgBase val) {
+  fun ArgBase getGlobal(string key) {
+    return globalState.get(key);
+  }
+ 
+  // Metadata, counts and keys 
+  fun int size() {
+    return count;
+  }
+
+  fun int globalStateSize() {
+    return globalState.size();
+  }
+
+  fun int shredSize() {
+    return shredIdCount;
+  }
+
+  fun string[] getKeys() {
+    return keys.getKeys();
+  }
+
+  fun string[] getGlobalKeys() {
+    return globalState.keys();
+  }
+
+  fun int keySize() {
+    return keyCount;
+  }
+
+  fun int globalKeySize() {
+    return globalState.size();
+  }
+
+  fun int hasKey(int shredId, string key) {
+    Std.itoa(shredId) => string shredKey;
+    return state.get(shredKey).hasKey(key);
+  }
+
+  fun int hasGlobalKey(string key) {
+    Std.itoa(shredId) => string shredKey;
+    return globalState.get(key);
+  }
+
+  // Public API
+  // Override
+  /**
+   * Intended to be called during performance, by Players, to update state associated with this player
+   */
+  fun void update(int shredId) {}
+
+  // Override
+  /**
+   * Intended to be called during performance, by Players, to update state associated with every player 
+   */
+  fun void updateAll() {}
+
+  // Override
+  /**
+   * Intended to be called by the control loop, to end the performance when all Players have stopped playing
+   */
+  fun void isPlaying() {}
+
+  fun ArgBase getBehavior(int shredId, string behaviorKey) {
+    Std.itoa(shredId) => string shredKey;
+    return state[shredKey].get(behaviorKey); 
+  }
+
+  /**
+   * Generates a random number to test against a threshold value. Assumes range of [0, 100). Used to generate
+   * performance behavior that is dynamic over time against tunable parameters.
+   */
+  fun /*protected*/ int exceedsThreshold(int threshold) {
+    return Math.random2(0, 100) > threshold;
+  } 
+
+  // Private Helpers
+
+  fun /*private*/ void putHelper(int shredId, string key, ArgBase val) {
     Std.itoa(shredId) => string shredKey;
     if (state.find(shredKey) > 1) {
       <<< "ERROR: ILLEGAL STATE. shredKey should have 0 or 1 entries in Conductor" >>>;
@@ -151,38 +255,7 @@ public class Conductor {
     shredStateMap.put(key, val);
   }
   
-  fun int size() {
-    return count;
+  fun void /*private*/ putHelper(string key, ArgBase val) {
+    globalState.put(key, val);
   }
-
-  fun int shredSize() {
-    return shredIdCount;
-  }
-
-  fun string[] getKeys() {
-    return keys.getKeys();
-  }
-
-  fun int keySize() {
-    return keyCount;
-  }
-
-  // TODO THIS IS THE COMPOSITION API USED BY PLAYERS
-  // Override
-  fun void update(int shredId) {}
-
-  // Override
-  fun void updateAll() {}
-
-  fun ArgBase getBehavior(int shredId, string behaviorKey) {
-    Std.itoa(shredId) => string shredKey;
-    return state[shredKey].get(behaviorKey); 
-  }
-
-  /**
-   * Generates a random number to test against a threshold value. Assumes range of [0, 100).
-   */
-  /*protected*/ fun int exceedsThreshold(int threshold) {
-    return Math.random2(0, 100) > threshold;
-  } 
 }

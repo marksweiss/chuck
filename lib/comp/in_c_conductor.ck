@@ -38,10 +38,13 @@ public class InCConductor extends Conductor {
   Clock K;
   OrderedArgMap settings;
   OrderedObjectMap playerPhraseMap;
+  int concludingCrescendoGainAdjustments[1];
+  int concludingDecrescendoGainAdjustments[1];
 
   // *******************
   // State Keys for Player Settings
   "PHRASE_IDX" => string PHRASE_IDX; 
+  // TOOD DO WE NEED 'GAIN' IN STATE? PROBABLY NOT SINCE WE ARE NOW SETTING NOTE VALUES DIRECTLY HERE
   "GAIN" => string GAIN;
   "PLAYER_HAS_REACHED_UNISON" => string PLAYER_HAS_REACHED_UNISON;
   "PLAYER_HAS_ADVANCED" => string PLAYER_HAS_ADVANCED;
@@ -49,17 +52,23 @@ public class InCConductor extends Conductor {
   "PLAYER_PHRASE_PLAY_COUNT" => string PLAYER_PHRASE_PLAY_COUNT; 
   "PLAYER_AT_REST" => string PLAYER_AT_REST;
   "PLAYER_ADJ_PHASE_COUNT" => string PLAYER_ADJ_PHASE_COUNT; 
+  "PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT" => string PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT; 
+  "PLAYER_LAST_PHRASE_CRESCENDO_PLAY_COUNT" => string PLAYER_LAST_PHRASE_CRESCENDO_PLAY_COUNT; 
+  "PLAYER_HAS_STOPPED" => strin PLAYER_HAS_STOPPED;
 
   // *******************
   // State Keys for Ensemble Settings
+  "NUM_PLAYERS" => string NUM_PLAYERS;
+  "NUM_PHRASES" => string NUM_PHRASES;
   "ALL_PLAYERS_REACHED_UNISON" => string ALL_PLAYERS_REACHED_UNISON;
   "ALL_PLAYERS_REACHED_CONCLUSION" => string ALL_PLAYERS_REACHED_CONCLUSION;
   "ALL_PLAYERS_REACHED_CONCLUDING_UNISON" => string ALL_PLAYERS_REACHED_CONCLUDING_UNISON; 
+  "NUM_PLAYS_BEFORE_CONCLUDING_CRESCENDOS" => string NUM_PLAYS_BEFORE_CONCLUDING_CRESCENDO;
+  "NUM_CONCLUDING_CRESCENDOS" => string NUM_CONCLUDING_CRESCENDOS;
+  "ALL_PLAYERS_STOPPED" => string ALL_PLAYERS_STOPPED;
   
   // *******************
   // Settings constants
-  "NUM_PHRASES" => string NUM_PHRASES;
-  settings.put(IntArg.make(NUM_PHRASES, 53));
   1.0 => float NO_FACTOR;
  
   // Player must play each phrase at least this long
@@ -164,13 +173,10 @@ public class InCConductor extends Conductor {
 
   // /PLAYER SETTINGS
 
-
   // *******************
   // ENSEMBLE SETTINGS
   // *******************
 
-  "NUM_PLAYERS" => string NUM_PLAYERS;
-  3 => NUM_PLAYERS;  
   // Threshold number of phrases behind the furthest ahead any Player is allowed to slip.
   // If they are more than 3 behind the leader, they must advance.     
   "PHRASES_IDX_RANGE_THRESHOLD" => string PHRASES_IDX_RANGE_THRESHOLD;
@@ -198,27 +204,72 @@ public class InCConductor extends Conductor {
   20 => int MAX_AMP_RANGE_FOR_SEEKING_DIMINUENDO;
   // Parameters governing the Conclusion
   // This is the ratio of steps in the Conclusion to the total steps before the Conclusion  
-  "CONCLUSION_STEPS_RATIO" => string CONCLUSION_STEPS_RATIO;
-  0.1 => float CONCLUSION_STEPS_RATIO;
+  // TODO DO WE NEED THIS?
+  /* "CONCLUSION_STEPS_RATIO" => string CONCLUSION_STEPS_RATIO; */
+  /* 0.1 => float CONCLUSION_STEPS_RATIO; */
   // This extends the duration of the repetition of the last phrase
   // during the final coda.  At the start of the coda each player
   // has its start time pushed ahead to be closer to the maximum
   // so that they arrive at the end closer together.  This factor offsets the Player from
   // repeating the last phrase until exactly reaching the Conclusion  
-  "CONCLUSION_CUR_START_OFFSET_FACTOR" => string CONCLUSION_CUR_START_OFFSET_FACTOR;
-  0.05 => float CONCLUSION_CUR_START_OFFSET_FACTOR;
+  // TODO DO WE NEED THIS?
+  /* "CONCLUSION_CUR_START_OFFSET_FACTOR" => string CONCLUSION_CUR_START_OFFSET_FACTOR; */
+  /* 0.05 => float CONCLUSION_CUR_START_OFFSET_FACTOR; */
   // Maximum number of crescendo and decrescendo steps in the conclusion, supporting the 
   // Instruction indicating ensemble should de/crescendo "several times"
-  "MAX_NUMBER_CONCLUDING_CRESCENDOS" => string MAX_NUMBER_CONCLUDING_CRESCENDOS;
-  4 => int MAX_NUMBER_CONCLUDING_CRESCENDOS;
+  "MIN_NUM_CONCLUDING_CRESCENDOS" => string MIN_NUM_CONCLUDING_CRESCENDOS;
+  2 => int MAX_NUM_CONCLUDING_CRESCENDOS;
+  "MAX_NUM_CONCLUDING_CRESCENDOS" => string MAX_NUM_CONCLUDING_CRESCENDOS;
+  6 => int MAX_NUM_CONCLUDING_CRESCENDOS;
+  "MIN_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION" => string MIN_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION;
+  2 => int MIN_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION;
+  "MAX_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION" => string MAX_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION;
+  4 => int MAX_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION;
 
   // /ENSEMBLE SETTINGS
 
+  fun void init(int numPhrases, int numPlayers, Sequence lastPhrase) {
+    putGlobal(NUM_PHRASES, numPhrases);
+    putGlobal(NUM_PLAYERS, numPlayers);
+
+    // initialize global state for all Players
+    putGlobal(settings.ALL_PLAYERS_REACHED_UNISON, false);
+    putGlobal(settings.ALL_PLAYERS_REACHED_LAST_PHRASE, false);
+    putGlobal(settings.ALL_PLAYERS_REACHED_LAST_PHRASE_UNISON, false);
+    putGlobal(settings.ALL_PLAYERS_STOPPED, false);
+    // set now to use in conclusion, number of repetitions of last phrase before concluding crescendo
+    // and number of concluding crescendos
+    putGlobal(settings.NUM_PLAYS_BEFORE_CONCLUDING_CRESCENDO,
+              Math.random2(settings.MIN_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION,
+                           settings.MAX_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION));
+
+    Math.random2(settings.MIN_NUM_CONCLUDING_CRESCENDOS, settings.MAX_NUM_CONCLUDING_CRESCENDOS)) => int numCrescendos;
+    // times 2 because each iteration by a player in the crescendo is either the crescendo up or
+    // decrescendo back down, instruction handler uses % to know whether the sign the player should apply to gain
+    putGlobal(settings.NUM_CONCLUDING_CRESCENDOS, 2 * numCrescendos);
+
+    for (0 => int i; i < lastPhrase.size(); i++) {
+      lastPhrase.chords[i].notes[0] @=> Note n;
+      ((n.gain * GAIN_CRESCENDO_ADJ_FACTOR) - n.gain) / (numCrescendos $ float) => float chordCrescendoAdj;
+      ((n.gain * GAIN_DIMINUENDO_ADJ_FACTOR) - n.gain) / (numCrescendos $ float) * -1.0 => float chordDecrescendoAdj;
+      concludingCrescendoGainAdjustments << chordCrescendoAdj;
+      concludingDecrescendoGainAdjustments << chordDecrescendoAdj;
+    }
+  }
  
   // *******************
   // API
   // *******************
  
+  /**
+   * Driver loop polls ALL_PLAYERS_STOPPED and ends process once it is true
+   */
+  // Override
+  fun int isPlaying() {
+    for (0 => int i; i < settings.NUM_PLAYERS;
+    return !settings.ALL_PLAYERS_STOPPED;
+  }
+
   // Override
   // TODO playerId vs. shredId semantics
   fun void update(int shredId) {
@@ -342,6 +393,7 @@ public class InCConductor extends Conductor {
           c[k].gain * gainAdjFactor => c[k].gain;
         } 
       }
+      playerPhraseMap.put(idToKey(playerId), playerPhrase);
     }
   }
 
@@ -387,8 +439,67 @@ public class InCConductor extends Conductor {
           c.notes[i].pitch += shift;
         }
       }
+      playerPhraseMap.put(idToKey(playerId), currentPhrase);
     }
   }
+
+  // "In C is ended in this way:  when each performer arrives at figure #53, he or she stays on it until the entire
+  // ensemble has arrived there. The group then makes a large crescendo and diminuendo a few times and each player
+  // drops out as he or she wishes." 
+  fun void instructionConclusionCrescendoDescrescento(int playerId) {
+    // check if this  Player has reached the last phrase and set state if it has
+    if (!get(playerId, PLAYER_HAS_STOPPED) && reachedLastPhrase(playerId)) {
+      put(playerId, settings.PLAYER_REACHED_LAST_PHRASE, true);
+
+      // now check if all players have reached the last phrase
+      ensembleReachedLastPhraseCrescendo() => int inLastPhraseCrescendo; 
+      
+      if (ensembleReachedLastPhrase() && !inLastPhraseCrescendo) {
+        // if the player is endtering the last phrase for the first time, set its count state
+        if (!hasKey(playerId, settings.PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT) {
+          put(playerId, settings.PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT, 1);
+        }
+        // player is on the last phrase and not applying any gain change, so just play back the phrase no change
+        get(playerId, settings.PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT) => int playCount;
+        put(playerId, settings.PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT, playCount + 1);
+        
+      } else if (inLastPhraseCrescendo) {
+        if (!hasKey(playerId, settings.PLAYER_LAST_PHRASE_CRESCENDO_PLAY_COUNT) {
+          put(playerId, settings.PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT, 1);
+        }
+        get(playerId, settings.PLAYER_LAST_PHRASE_CRESCENDO_PLAY_COUNT) => int playCount;
+
+        phrase(playerId) @=> Sequence currentPhrase; 
+        // even iterations are crescendo, odd decrescendo
+        // player is on a decrescendo this iteration, actually increment state that they
+        // have completed a crescendo iteration
+        if (playCount + 1 % 2 == 1) {
+          for (0 => int i; i < concludingDecrescendoGainAdjustments.size(); i++) {
+            concludingDecrescendoGainAdjustments.size[i] => float gainAdjFactor;  
+            currentPhrase.chords[i] @=> Chord c;
+            for (0 => int i; i < c.size(); i++) {
+              c.notes[i].gain += gainAdjFactor;
+            }
+        } else {
+          for (0 => int i; i < concludingCrescendoGainAdjustments.size(); i++) {
+            concludingCrescendoGainAdjustments.size[i] => float gainAdjFactor;  
+            currentPhrase.chords[i] @=> Chord c;
+            for (0 => int i; i < c.size(); i++) {
+              c.notes[i].gain += gainAdjFactor;
+            }
+          }
+        }
+        playerPhraseMap.put(idToKey(playerId), currentPhrase);
+        put(playerId, settings.PLAYER_LAST_PHRASE_CRESCENDO_PLAY_COUNT, playCount++);
+        
+        // Set state for player being stopped if they have finished all crescendos
+        if (playCount == getGlobal(NUM_CONCLUDING_CRESCENDOS)) {
+          put(playerId, settings.PLAYER_HAS_STOPPED, true); 
+        } 
+      }
+    }
+  }
+
 
   // ***********************
   // Performance Instruction Helpers
@@ -397,6 +508,10 @@ public class InCConductor extends Conductor {
   
   fun /*private*/ int reachedLastPhrase(int playerId) {
     phraseIdx(playerId) == NUM_PHRASES - 1;
+  }
+
+  fun /*private*/ int reachedLastPhraseCrescendo(int playerId) {
+    get(playerId, settings.PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT) == settings.NUM_PLAYS_BEFORE_CONCLUDING_CRESCENDO;
   }
 
   fun /*private*/ int advancePhraseIdx(int playerId) {
@@ -460,6 +575,26 @@ public class InCConductor extends Conductor {
 
   fun /*private*/ int transpose(int playerId) {
     return exceedsThreshold(settings.TRANSPOSE_PROB_FACTOR);
+  }
+
+  fun /*private*/ int ensembleReachedLastPhrase() {
+    playerPhraseMap.keys() @=> string playerIds[];
+    for (0 => int i; i <  playerIds.size(); i++) {
+      if (!reachedLastPhrase(playerIds[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  fun /*private*/ int ensembleReachedLastPhraseCrescendo() {
+    playerPhraseMap.keys() @=> string playerIds[];
+    for (0 => int i; i <  playerIds.size(); i++) {
+      if (!reachedLastPhraseCrescendo(playerIds[i])) {
+        return false;
+      }
+    }
+    return true;
   }
 
   // ***********************
