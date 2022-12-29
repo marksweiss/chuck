@@ -500,7 +500,6 @@ public class InCConductor extends Conductor {
     }
   }
 
-
   // ***********************
   // Performance Instruction Helpers
   // ***********************
