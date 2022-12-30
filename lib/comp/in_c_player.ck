@@ -70,9 +70,9 @@ public class InCPlayer extends PlayerBase {
         /* <<< "IN PLAYER CALLING CONDUCTOR" >>>; */
 
         // TODO USE NEW API
-        if (conductor.getBoolBehavior(me.id(), conductor.KEY_IS_ADVANCING)) {
-          this.seqs.next() @=> seq;
-        }
+        /* if (conductor.getBoolBehavior(me.id(), conductor.KEY_IS_ADVANCING)) { */
+        /*   this.seqs.next() @=> seq; */
+        /* } */
 
         // determine whether the next note is the next note in this sequence, or the
         // first note in this sequence (because we are looping and reached the end)

@@ -75,7 +75,7 @@ fun void main () {
   /* <<< "IN COMP SINOSC, stepEvent address =", stepEvent, "shredId", me.id() >>>; */
   
   Clock clock;
-  clock.init(BPM, startEvent, stepEvent, conductor);
+  clock.init(BPM, startEvent, stepEvent);
 
   // declare sequence containers
   true => int isLooping;
