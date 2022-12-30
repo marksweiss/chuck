@@ -5,6 +5,7 @@
 
 public class NoteConst {
   1.0 => float DEFAULT_GAIN;
+  0.0 => float NO_GAIN;
   // default to Western 12-note "piano" scale
   12 => static int NUM_NOTES_IN_OCTAVE;
 
@@ -60,7 +61,6 @@ public class NoteConst {
   } 
 
   // Rest Constants
-  0.0 => float NO_GAIN;
   n.make(0, C, NO_GAIN, k.SXTYFRTH) @=> Note REST_64;
   n.make(0, C, NO_GAIN, k.THRTYSCND) @=> Note REST_32;
   n.make(0, C, NO_GAIN, k.SXTNTH) @=> Note REST_16;

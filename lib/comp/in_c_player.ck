@@ -69,6 +69,7 @@ public class InCPlayer extends PlayerBase {
         // TEMP DEBUG
         /* <<< "IN PLAYER CALLING CONDUCTOR" >>>; */
 
+        // TODO USE NEW API
         if (conductor.getBoolBehavior(me.id(), conductor.KEY_IS_ADVANCING)) {
           this.seqs.next() @=> seq;
         }

@@ -28,13 +28,11 @@ public class Clock {
 
   Event startEvent;
   Event stepEvent;
-  Conductor conductor;
+  0.0 => float NO_GAIN;
 
   // bpm - beats per minute, number of quarter notes per minute
   // i.e. 60 bpm means a quarter note is 1 second
-  fun void init(float bpm, Event startEvent, Event stepEvent, Conductor conductor) {
-    conductor @=> this.conductor;
-
+  fun void init(float bpm, Event startEvent, Event stepEvent) {
     <<< "Clock: BEAT_STEP", BEAT_STEP >>>;
     <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>;
     <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
@@ -83,8 +81,6 @@ public class Clock {
       // TEMP DEBUG
       /* <<< "CLOCK BEFORE BROADCAST STEP EVENT, stepEvent", stepEvent, "shredId", me.id() >>>; */
 
-      // Call the conductor to calculate new global state for all instrument player threads
-      this.conductor.updateAll();
       // Advance global time by smallest defined tempo duration, also shared with players.
       // When Clock blocks on Event and Players block on Event, then this means `now` advances
       // time globally for all shreds. (If there is no Event then each shred advances time

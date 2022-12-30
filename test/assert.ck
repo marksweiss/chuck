@@ -132,6 +132,10 @@ public class Assert {
     return ((Math.fabs(Math.remainder(expected, actual)) * 100000) $ int) == 0;
   }
 
+  fun static int assertFloatNotEqual(float expected, float actual) {
+    return !assertFloatEqual(expected, actual); 
+  }
+
   // TODO TEST
   fun /*private*/ static int assertFloatLessThan(float left, float right) {
     /* return ((Math.remainder(left, right) * 100000) $ int) < 0; */

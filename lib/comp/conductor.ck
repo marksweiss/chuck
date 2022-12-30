@@ -102,6 +102,10 @@ public class Conductor {
     }
   }
 
+  fun int getBool(int shredId, string key) {
+    return get(shredId, key).intVal == true;
+  }
+
   fun ArgBase[] getAll(string key) {
     ArgBase allValsForKey[0];
     for (0 => int i; i < shredIds.size(); i++) {
@@ -215,7 +219,7 @@ public class Conductor {
   /**
    * Intended to be called by the control loop, to end the performance when all Players have stopped playing
    */
-  fun void isPlaying() {}
+  fun int isPlaying() {}
 
   fun ArgBase getBehavior(int shredId, string behaviorKey) {
     Std.itoa(shredId) => string shredKey;
