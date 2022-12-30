@@ -1,10 +1,3 @@
-// Machine.add("lib/comp/conductor.ck");
-// Machine.add("lib/comp/scale.ck");
-// Machine.add("lib/comp/note.ck");
-// Machine.add("lib/comp/chord.ck");
-// Machine.add("lib/comp/sequence.ck");
-// Machine.add("lib/comp/sequences.ck");
-// Machine.add("lib/comp/clock.ck");
 // Machine.add("lib/comp/instrument/instrument_base.ck");
 // Machine.add("test/assert.ck");
 

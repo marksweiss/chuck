@@ -16,7 +16,7 @@
  * are any of the scalar value types supported by ArgBase.
  */
 public class Conductor {
-  // state is an associate array of OrderedMaps, keyed by shredId
+  // state is an associative array of OrderedMaps, keyed by shredId
   OrderedArgMap state[1];
   0 => int count;
 
@@ -27,7 +27,7 @@ public class Conductor {
   int shredIds[MAX_NUM_SHREDS];
   0 => int shredIdCount;  
 
-  OrderedArgMap globalState[1];
+  OrderedArgMap globalState;
 
   // objects to call static make() ctors
   ArgBase A;
@@ -114,7 +114,7 @@ public class Conductor {
   // Aggregates
   fun int getAllMaxInt(string key) {
     0 => int ret;
-    getAll(key) @=> ArgBase[] valsForKey;
+    getAll(key) @=> ArgBase valsForKey[];
     for (0 => int i; i < valsForKey.size(); i++) {
       if (valsForKey[i].intVal > ret) {
         valsForKey[i].intVal => ret;
@@ -123,9 +123,9 @@ public class Conductor {
     return ret;
   }
 
-  fun flaot getAllMaxFlt(string key) {
+  fun float getAllMaxFlt(string key) {
     0.0 => float ret;
-    getAll(key) @=> ArgBase[] valsForKey;
+    getAll(key) @=> ArgBase valsForKey[];
     for (0 => int i; i < valsForKey.size(); i++) {
       if (Math.max(valsForKey[i].fltVal, ret)) {
         valsForKey[i].fltVal => ret;
@@ -136,7 +136,7 @@ public class Conductor {
 
   fun int getAllMinInt(string key) {
     Math.INT_MAX => int ret;
-    getAll(key) @=> ArgBase[] valsForKey;
+    getAll(key) @=> ArgBase valsForKey[];
     for (0 => int i; i < valsForKey.size(); i++) {
       if (valsForKey[i].intVal < ret) {
         valsForKey[i].intVal => ret;
@@ -145,11 +145,11 @@ public class Conductor {
     return ret;
   }
 
-  fun int getAllMinFlt(string key) {
+  fun float getAllMinFlt(string key) {
     Math.FLOAT_MAX => float ret;
-    getAll(key) @=> ArgBase[] valsForKey;
+    getAll(key) @=> ArgBase valsForKey[];
     for (0 => int i; i < valsForKey.size(); i++) {
-      if (Mat.min(valsForKey[i].fltVal, ret) < ret) {
+      if (Math.min(valsForKey[i].fltVal, ret) < ret) {
         valsForKey[i].fltVal => ret;
       }
     } 
@@ -178,7 +178,7 @@ public class Conductor {
   }
 
   fun string[] getGlobalKeys() {
-    return globalState.keys();
+    return globalState.getKeys();
   }
 
   fun int keySize() {
@@ -191,12 +191,11 @@ public class Conductor {
 
   fun int hasKey(int shredId, string key) {
     Std.itoa(shredId) => string shredKey;
-    return state.get(shredKey).hasKey(key);
+    return state[shredKey].hasKey(key);
   }
 
   fun int hasGlobalKey(string key) {
-    Std.itoa(shredId) => string shredKey;
-    return globalState.get(key);
+    return globalState.hasKey(key);
   }
 
   // Public API

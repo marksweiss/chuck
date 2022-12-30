@@ -1,8 +1,3 @@
-// Machine.add("lib/arg_parser/arg_parser.ck")
-// Machine.add("lib/comp/note.ck")
-// Machine.add("lib/comp/chord.ck")
-// Machine.add("lib/comp/time.ck")
-
 /**
  * Base interface for an Instrument, which wraps a UGen. Concrete classes add one more more UGen
  * members, implement configure to take the arguments to initialize the state of their Ugen(s),

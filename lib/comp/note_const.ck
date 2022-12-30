@@ -11,12 +11,11 @@ public class NoteConst {
   // Init Clock so that duration of notes are set 
   // Events not used but needed to init the Clock
   Note n;
-  Conductor conductor;
   Clock k;
   120 => int BPM;
   Event startEvent;
   Event stepEvent; 
-  k.init(BPM, startEvent, stepEvent, conductor);  
+  k.init(BPM, startEvent, stepEvent);  
 
   // constants defining the pitch offset of each note, in any octave
   0 => static int C;
