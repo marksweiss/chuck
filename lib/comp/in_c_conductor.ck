@@ -13,16 +13,17 @@
 
 // NOTES and Questions From Previous Implementation
 // https://github.com/marksweiss/aleatoric/blob/master/compositions/Terry_Riley-In_C/midi/In_C_midi_user_instruction.rb 
-// Pre play rules and Post play rules - do we need this?
-// Players hold their own state
-// Ensemble holds its own state and can check Players' state, some of it state
+// DONT NEED Pre play rules and Post play rules - do we need this?
+// DONE Players hold their own state
+// DONE Ensemble holds its own state and can check Players' state, some of it state
 //  is derived from checking Players' state
-// Separate "business logic" implentations of the rules execute rule logic against
-//  Player and Ensemble state and determine whether:
-//  - Player advances
-//  - Player prepends a Rest note
-//  - Player raises or lowers volume or goes silent, itself to "listen" or with group
+// DONE Separate "business logic" implentations of the rules execute rule logic against
+//  DONE Player and Ensemble state and determine whether:
+//  - DONE Player advances
+//  - DONE Player prepends a isResting note
+//  - DONE Player raises or lowers volume or goes silent, itself to "listen" or with group
 //    logic orchestrated by the Ensemble if going into crescendo / descrescendo
+// TODO
 //  - Player improvises
 
 // RULES IMPLEMENTATION
@@ -49,12 +50,12 @@ public class InCConductor extends Conductor {
   // State Keys for Player Conf
   "PHRASE_IDX" => string PHRASE_IDX; 
   // TOOD DO WE NEED 'GAIN' IN STATE? PROBABLY NOT SINCE WE ARE NOW SETTING NOTE VALUES DIRECTLY HERE
-  "GAIN" => string GAIN;
+  "PLAYER_GAIN" => string PLAYER_GAIN;
   "PLAYER_HAS_REACHED_UNISON" => string PLAYER_HAS_REACHED_UNISON;
   "PLAYER_HAS_ADVANCED" => string PLAYER_HAS_ADVANCED;
   "PLAYER_REACHED_LAST_PHRASE" => string PLAYER_REACHED_LAST_PHRASE;
   "PLAYER_PHRASE_PLAY_COUNT" => string PLAYER_PHRASE_PLAY_COUNT; 
-  "PLAYER_AT_REST" => string PLAYER_AT_REST;
+  "PLAYER_AT_isResting" => string PLAYER_AT_isResting;
   "PLAYER_ADJ_PHASE_COUNT" => string PLAYER_ADJ_PHASE_COUNT; 
   "PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT" => string PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT; 
   "PLAYER_LAST_PHRASE_CRESCENDO_PLAY_COUNT" => string PLAYER_LAST_PHRASE_CRESCENDO_PLAY_COUNT; 
@@ -68,60 +69,50 @@ public class InCConductor extends Conductor {
   "ALL_PLAYERS_REACHED_CONCLUSION" => string ALL_PLAYERS_REACHED_CONCLUSION;
   "ALL_PLAYERS_REACHED_LAST_PHRASE" => string ALL_PLAYERS_REACHED_LAST_PHRASE;
   "ALL_PLAYERS_REACHED_LAST_PHRASE_UNISON" => string ALL_PLAYERS_REACHED_LAST_PHRASE_UNISON; 
-  "NUM_PLAYS_BEFORE_CONCLUDING_CRESCENDOS" => string NUM_PLAYS_BEFORE_CONCLUDING_CRESCENDO;
-  "NUM_CONCLUDING_CRESCENDOS" => string NUM_CONCLUDING_CRESCENDOS;
   "ALL_PLAYERS_STOPPED" => string ALL_PLAYERS_STOPPED;
   
   // *******************
-  // Conf constants
+  // Conf Constant Values
   1.0 => float NO_FACTOR;
  
   // Player must play each phrase at least this long
   // Insures that short phrases are played enough to counterpoint with longer phrases
-  "MIN_REPEAT_PHRASE_DURATION" => string  MIN_REPEAT_PHRASE_DURATION;
-  conf.put(DurationArg.make(MIN_REPEAT_PHRASE_DURATION, 2.0 * NC.REST_1.duration));
+  2.0 * NC.isResting_1.duration => dur MIN_REPEAT_PHRASE_DURATION;
 
   // The most important factor governing advance of Players through phrases, this is simply
   // the percentage prob that they advance on any given iteration  
-  "PHRASE_ADVANCE_PROB" => string PHRASE_ADVANCE_PROB;
   // assumes range [0, 100), i.e. this advances 28% of the time
-  conf.put(IntArg.make(PHRASE_ADVANCE_PROB, 28));
+  28 => int PHRASE_ADVANCE_PROB;
 
   // Player Phrase Phase 
   // Tunable parms for shifting playing of current phrase out of its current
   // phase, and also to shift it more in alignment.  Shift simple pre-pends
-  // a rest Note to current phrase before writing it to Score.  Supports
+  // a isResting Note to current phrase before writing it to Score.  Supports
   // score directive to adjust phase, and another to move in and out of phase
   // during a performance
   
   // Percentage prob that a Player will adjust phase on any given iteration
-  "ADJ_PHASE_PROB" => string ADJ_PHASE_PROB;
-  conf.put(IntArg.make(ADJ_PHASE_PROB, 7));
+  7 => int ADJ_PHASE_PROB;
   // Supports Instruction that Player this is too often in alignment should favor
   // trying to be out of phase a bit more. If Player hasn't adjusted phase
   // this many times or more, then adj_phase_prob_increase_factor will be applied
-  "ADJ_PHASE_COUNT_THRESHOLD" => string ADJ_PHASE_COUNT_THRESHOLD;
-  conf.put(IntArg.make(ADJ_PHASE_COUNT_THRESHOLD, 1));
-  "ADJ_PHASE_PROB_INCREASE_FACTOR" => string ADJ_PHASE_PROB_INCREASE_FACTOR;
-  conf.put(IntArg.make(ADJ_PHASE_PROB_INCREASE_FACTOR, 2));
-  // The length of the rest Note (in seconds) inserted if a Player is adjusting its phase  
+  1 => int ADJ_PHASE_COUNT_THRESHOLD;
+  2 => int ADJ_PHASE_PROB_INCREASE_FACTOR;
+  // The length of the isResting Note (in seconds) inserted if a Player is adjusting its phase  
   K.QRTR => dur PHASE_ADJ_NOTE_DUR;
-  N.make(0, NC.NO_GAIN, PHASE_ADJ_NOTE_DUR) @=> Note PHASE_ADJ_REST_NOTE;
+  N.make(0, NC.NO_GAIN, PHASE_ADJ_NOTE_DUR) @=> Note PHASE_ADJ_isResting_NOTE;
 
   // Prob that a Player will seek unison on any given iteration.  The idea is that
   // to seek unison the Ensemble and all the Players must seek unison  
-  "PLAYER_UNISON_PROB" => string PLAYER_UNISON_PROB;
-  conf.put(IntArg.make(PLAYER_UNISON_PROB, 20));
+  20 => int PLAYER_UNISON_PROB;
 
-  // Player Rest/Play
-  // Tunable parms for probability that Player will rest rather than playing a note.
+  // Player isResting/Play
+  // Tunable parms for probability that Player will isResting rather than playing a note.
   // Supports score directive to listen as well as play and not always play
-  // Prob that a Player will try to rest on a given iteration (not play)
-  "REST_PROB_FACTOR" => string REST_PROB_FACTOR; 
-  conf.put(IntArg.make(REST_PROB_FACTOR, 10));
-  // Factor multiplied by rest_prob_factor if the Player is already at rest  
-  "STAY_AT_REST_PROB_FACTOR" => string STAY_AT_REST_PROB_FACTOR;
-  conf.put(FloatArg.make(STAY_AT_REST_PROB_FACTOR, 1.5));
+  // Prob that a Player will try to isResting on a given iteration (not play)
+  10 => int isResting_PROB_FACTOR;
+  // Factor multiplied by isResting_prob_factor if the Player is already at isResting  
+  1.5 => float STAY_AT_isResting_PROB_FACTOR;
   
   // Player Volume Adjusment, De/Crescendo
   // Tunable parms for adjusting volume up and down, and prob of making
@@ -131,48 +122,33 @@ public class InCConductor extends Conductor {
   // Threshold for the ratio of this Players average amp for its current phrase
   //  to the max average amp among all the Players. Ratio above/below this means the Player
   //  will raise/lower its amp by amp_de/crescendo_adj_factor    
-  "GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD" => string GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD;
-  conf.put(FloatArg.make(GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD, 0.8));
-  "GAIN_CRESCENDO_ADJ_FACTOR" => string GAIN_CRESCENDO_ADJ_FACTOR;
-  conf.put(FloatArg.make(GAIN_CRESCENDO_ADJ_FACTOR, 1.1));
-  "GAIN_ADJ_DECRESCENDO_RATIO_THRESHOLD" => string GAIN_ADJ_DECRESCENDO_RATIO_THRESHOLD;
-  conf.put(FloatArg.make(GAIN_ADJ_DECRESCENDO_RATIO_THRESHOLD, 1.2));
-  "GAIN_DECRESCENDO_ADJ_FACTOR" => string GAIN_DECRESCENDO_ADJ_FACTOR;
-  conf.put(FloatArg.make(GAIN_DECRESCENDO_ADJ_FACTOR, 1.1));
+  0.8 => float GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD;
+  1.1 => float GAIN_CRESCENDO_ADJ_FACTOR;
+  1.2 => float GAIN_ADJ_DECRESCENDO_RATIO_THRESHOLD;
+  1.1 => float GAIN_DECRESCENDO_ADJ_FACTOR;
   // Prob that a Player is seeking de/crescendo  
-  "CRESCENDO_PROB" => string CRESCENDO_PROB;
-  conf.put(IntArg.make(CRESCENDO_PROB, 50));
-  "DECRESCENDO_PROB" => string DECRESCENDO_PROB;
-  conf.put(IntArg.make(DECRESCENDO_PROB, 50));
+  50 => int CRESCENDO_PROB;
+  50 => int DECRESCENDO_PROB;
   
   // Player Transpose
   // Tunable parms for transposing the playing of a phrase.  Suppports score directive
   //  to transpose as desired.
   // Prob that a Player will seek to transpose its current phrase
-  "TRANSPOSE_PROB_FACTOR" => string TRANSPOSE_PROB_FACTOR;
-  conf.put(IntArg.make(TRANSPOSE_PROB_FACTOR, 20));
+  20 => int TRANSPOSE_PROB_FACTOR;
   // Number of octaves to transpose if the Player does do so
   // Amount that represents the number of semitones to shift, e.g. 12 for one octave
-  "TRANSPOSE_SHIFT_NUM_OCTAVES" => string TRANSPOSE_SHIFT_NUM_OCTAVES; 
-  conf.put(IntArg.make(TRANSPOSE_SHIFT_NUM_OCTAVES, 1));
-  // Sadly, we need this also, because CSound is float type and MIDI is int type (0.0 or 0)
-  "TRANSPOSE_NO_SHIFT" => string TRANSPOSE_NO_SHIFT;
-  conf.put(IntArg.make(TRANSPOSE_NO_SHIFT, 0));
+  1 => int TRANSPOSE_SHIFT_NUM_OCTAVES;
   // Factor for shift down
-  "TRANSPOSE_DOWN_FACTOR" => string TRANSPOSE_DOWN_FACTOR;
-  conf.put(IntArg.make(TRANSPOSE_DOWN_FACTOR, -1));
+  -1 => int TRANSPOSE_DOWN_FACTOR;
   // Factor for shift up
-  "TRANSPOSE_UP_FACTOR" => string TRANSPOSE_UP_FACTOR;  
-  conf.put(IntArg.make(TRANSPOSE_UP_FACTOR, 1));
+  1 => int TRANSPOSE_UP_FACTOR;
   // From the Instructions: "Transposing down by octaves works best on the patterns containing notes of long durations."
   // Minimum average duration of notes in a phrase for that phrase to be more likely
   //  to transpose down rather than up
-  "TRANSPOSE_DOWN_PROB_FACTOR" => string TRANSPOSE_DOWN_PROB_FACTOR;
-  conf.put(IntArg.make(TRANSPOSE_DOWN_PROB_FACTOR, 50));
+  50 => int TRANSPOSE_DOWN_PROB_FACTOR;
   // Minimum average duration of notes in a phrase for that phrase to be more likely
   //  to transpose down rather than up  
-  "TRANSPOSE_DOWN_DUR_THRESHOLD" => string TRANSPOSE_DOWN_DUR_THRESHOLD;
-  conf.put(DurationArg.make(TRANSPOSE_DOWN_DUR_THRESHOLD, 2::second));
+  2::second => dur TRANSPOSE_DOWN_DUR_THRESHOLD;
 
   // /PLAYER conf
 
@@ -182,30 +158,23 @@ public class InCConductor extends Conductor {
 
   // Threshold number of phrases behind the furthest ahead any Player is allowed to slip.
   // If they are more than 3 behind the leader, they must advance.     
-  "PHRASES_IDX_RANGE_THRESHOLD" => string PHRASES_IDX_RANGE_THRESHOLD;
-  conf.put(IntArg.make(PHRASES_IDX_RANGE_THRESHOLD, 3));
+  3 => int PHRASES_IDX_RANGE_THRESHOLD;
   // Prob that the Ensemble will seek to have all Players play the same phrase
   // on any one iteration
-  "ENSEMBLE_UNISON_PROB" => string ENSEMBLE_UNISON_PROB;
-  conf.put(IntArg.make(ENSEMBLE_UNISON_PROB, 90));
+  90 => int ENSEMBLE_UNISON_PROB;
   // Threshold number of phrases apart within which all players 
   // must be for Ensemble to seek unison
-  "MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON" => string MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON;
-  conf.put(IntArg.make(MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON, 3));
+  3 => int MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON;
   // Probability that the ensemble will de/crescendo in a unison (may be buggy)
   // TODO: bug is that code to build up crescendo over successive iterations isn't there
   // and instead this just jumps the amplitude jarringly on one iteration
-  "ENSEMBLE_CRESCENDO_PROB" => string ENSEMBLE_CRESCENDO_PROB;
-  conf.put(IntArg.make(ENSEMBLE_CRESCENDO_PROB, 20));
-  "ENSEMBLE_DECRESCENDO_PROB" => string ENSEMBLE_DECRESCENDO_PROB;
-  conf.put(IntArg.make(ENSEMBLE_DECRESCENDO_PROB, 5));
+  20 => int ENSEMBLE_CRESCENDO_PROB;
+  5 => int ENSEMBLE_DECRESCENDO_PROB;
   // Maximum de/increase in volume (in CSound scale) that notes can gain in crescendo 
   // pursued during a unison or in the final Conclusion
-  "MAX_GAIN_RANGE_FOR_SEEKING_CRESCENDO" => string MAX_GAIN_RANGE_FOR_SEEKING_CRESCENDO;
-  conf.put(FloatArg.make(MAX_GAIN_RANGE_FOR_SEEKING_CRESCENDO, 0.2));
+  0.2 => float MAX_GAIN_RANGE_FOR_SEEKING_CRESCENDO;
   // Maximum de/increase in volume (in CSound scale) that notes can gain in crescendo 
-  "MAX_GAIN_RANGE_FOR_SEEKING_DECRESCENDO" => string MAX_GAIN_RANGE_FOR_SEEKING_DECRESCENDO;
-  conf.put(FloatArg.make(MAX_GAIN_RANGE_FOR_SEEKING_DECRESCENDO, 0.2));
+  0.2 => float MAX_GAIN_RANGE_FOR_SEEKING_DECRESCENDO;
   // Parameters governing the Conclusion
   // This is the ratio of steps in the Conclusion to the total steps before the Conclusion  
   // TODO DO WE NEED THIS?
@@ -221,20 +190,17 @@ public class InCConductor extends Conductor {
   /* 0.05 => float CONCLUSION_CUR_START_OFFSET_FACTOR; */
   // Maximum number of crescendo and decrescendo steps in the conclusion, supporting the 
   // Instruction indicating ensemble should de/crescendo "several times"
-  "MIN_NUM_CONCLUDING_CRESCENDOS" => string MIN_NUM_CONCLUDING_CRESCENDOS;
-  conf.put(IntArg.make(MIN_NUM_CONCLUDING_CRESCENDOS, 2));
-  "MAX_NUM_CONCLUDING_CRESCENDOS" => string MAX_NUM_CONCLUDING_CRESCENDOS;
-  conf.put(IntArg.make(MAX_NUM_CONCLUDING_CRESCENDOS, 6));
-  "MIN_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION" => string MIN_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION;
-  conf.put(IntArg.make(MIN_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION, 2));
-  "MAX_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION" => string MAX_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION;
-  conf.put(IntArg.make(MAX_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION, 4));
+  2 => int MIN_NUM_CONCLUDING_CRESCENDOS;
+  6 => int MAX_NUM_CONCLUDING_CRESCENDOS;
+  // TODO DO WE NEED THe NELOW 2
+  2 => int MIN_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION;
+  4 => int MAX_LAST_PHRASE_REPETITIONS_BEFORE_CONCLUSION;
 
   // /ENSEMBLE conf
 
   fun void init(int numPhrases, int numPlayers, Sequence lastPhrase) {
-    putGlobal(NUM_PHRASES, numPhrases);
-    putGlobal(NUM_PLAYERS, numPlayers);
+    numPhrases => NUM_PHRASES;
+    numPlayers => NUM_PLAYERS;
 
     // initialize global state for all Players
     putGlobal(ALL_PLAYERS_REACHED_UNISON, false);
@@ -244,20 +210,18 @@ public class InCConductor extends Conductor {
     // set now to use in conclusion, number of repetitions of last phrase before concluding crescendo
     // and number of concluding crescendos
     putGlobal(NUM_PLAYS_BEFORE_CONCLUDING_CRESCENDO,
-              Std.rand2(conf.get(MIN_NUM_CONCLUDING_CRESCENDOS).intVal,
-                        conf.get(MAX_NUM_CONCLUDING_CRESCENDOS).intVal));
+              Std.rand2(MIN_NUM_CONCLUDING_CRESCENDOS, MAX_NUM_CONCLUDING_CRESCENDOS));
 
-    Std.rand2(conf.get(MIN_NUM_CONCLUDING_CRESCENDOS).intVal,
-              conf.get(MAX_NUM_CONCLUDING_CRESCENDOS).intVal) => int numCrescendos;
+    Std.rand2(MIN_NUM_CONCLUDING_CRESCENDOS, MAX_NUM_CONCLUDING_CRESCENDOS) => int numCrescendos;
     // times 2 because each iteration by a player in the crescendo is either the crescendo up or
     // decrescendo back down, instruction handler uses % to know whether the sign the player should apply to gain
     putGlobal(NUM_CONCLUDING_CRESCENDOS, 2 * numCrescendos);
 
     for (0 => int i; i < lastPhrase.size(); i++) {
       lastPhrase.chords[i].notes[0] @=> Note n;
-      ((n.gain * conf.get(GAIN_CRESCENDO_ADJ_FACTOR).fltVal) - n.gain) /
+      ((n.gain * GAIN_CRESCENDO_ADJ_FACTOR) - n.gain) /
         (numCrescendos $ float) => float chordCrescendoAdj;
-      ((n.gain * conf.get(GAIN_DECRESCENDO_ADJ_FACTOR).fltVal) - n.gain) /
+      ((n.gain * GAIN_DECRESCENDO_ADJ_FACTOR) - n.gain) /
         (numCrescendos $ float) * -1.0 => float chordDecrescendoAdj;
       concludingCrescendoGainAdjustments << chordCrescendoAdj;
       concludingDecrescendoGainAdjustments << chordDecrescendoAdj;
@@ -273,7 +237,8 @@ public class InCConductor extends Conductor {
    */
   // Override
   fun int isPlaying() {
-    return getGlobal(ALL_PLAYERS_STOPPED).intVal == false;
+    // TODO USE BoolArg and boolVal
+    return getGlobalBool(ALL_PLAYERS_STOPPED);
   }
 
   // Override
@@ -331,7 +296,7 @@ public class InCConductor extends Conductor {
   // All performers must play strictly in rhythm and it is essential that everyone play each pattern carefully"
 
   // TODO IMPLEMENT THIS
-  // "It is important to think of patterns periodically so that when you are resting you are conscious of the larger 
+  // "It is important to think of patterns periodically so that when you are isRestinging you are conscious of the larger 
   //  periodic composite accents that are sounding, and when you re-enter you are aware of what effect your entrance 
   //  will have on the music’s flow."
 
@@ -350,7 +315,7 @@ public class InCConductor extends Conductor {
   //  between 45 minutes and an hour and a half, it can be assumed that one would repeat each pattern 
   //  from somewhere between 45 seconds and a minute and a half or longer."
   fun void instructionAdvancePhraseIdx(int playerId) {
-    if (!hasAdvanced(playerId) && advancePhraseIdx(playerId)) {
+    if (!hasAdvanced(playerId) && isAdvancingPhraseIdx(playerId)) {
       increment(playerId, PHRASE_IDX);
       put(playerId, PLAYER_HAS_ADVANCED, true);
     }
@@ -358,7 +323,7 @@ public class InCConductor extends Conductor {
 
   //  "... As the performance progresses, performers should stay within 2 or 3 patterns of each other. ..."
   fun void instructionAdvancePhraseIdxTooFarBehind(int playerId) {
-    if (!hasAdvanced(playerId) && tooFarBehind(playerId)) {
+    if (!hasAdvanced(playerId) && isTooFarBehind(playerId)) {
       increment(playerId, PHRASE_IDX);
       put(playerId, PLAYER_HAS_ADVANCED, true);
     }
@@ -366,7 +331,7 @@ public class InCConductor extends Conductor {
 
   // "The group should aim to merge into a unison at least once or twice during the performance ..."
   fun void instructionAdvancePhraseIdxSeekingUnison(int playerId) {
-    if (!hasAdvanced(playerId) && seekingUnison(playerId) && ensembleSeekingUnison()) {
+    if (!hasAdvanced(playerId) && isSeekingUnison(playerId) && ensembleIsSeekingUnison()) {
       increment(playerId, PHRASE_IDX);
       put(playerId, PLAYER_HAS_ADVANCED, true);
       put(playerId, PLAYER_HAS_REACHED_UNISON, true);
@@ -376,14 +341,14 @@ public class InCConductor extends Conductor {
   // "It is very important that performers listen very carefully to one another and this means occasionally to drop out
   //  and listen. ... As an ensemble, it is very desirable to play very softly as well as very loudly and to try to diminuendo
   //  and crescendo together."
-  fun void instructionRestOrCrescendoDecrescendo(int playerId) {
+  fun void instructionisRestingOrCrescendoDecrescendo(int playerId) {
     NO_FACTOR => float gainAdj;
-    if (rest(playerId)) {
+    if (isResting(playerId)) {
       0.0 => gainAdj;
-      put(playerId, PLAYER_AT_REST, true);
+      put(playerId, PLAYER_AT_isResting, true);
     } else {
       gainAdjFactor(playerId) => gainAdj;
-      put(playerId, PLAYER_AT_REST, false);
+      put(playerId, PLAYER_AT_isResting, false);
     }
 
     Assert AS;
@@ -405,21 +370,21 @@ public class InCConductor extends Conductor {
   // "Each pattern can be played in unison or canonically in any alignment with itself or with its neighboring patterns.  ..."
   // ... if the players seem to be consistently too much in the same alignment of a pattern, 
   //  they should try shifting their alignment by an eighth note or quarter note with what’s going on in the
-  //  rest of the ensemble."
+  //  isResting of the ensemble."
   fun void instructionChangeAlignment(int playerId) {
-    if (adjustPhase(playerId)) {
-      // copy the rest Note into a new Chord
-      N.make(PHASE_ADJ_REST_NOTE) @=> Note phaseAdjRestNote;
-      Chord phaseAdjRestChord;
-      phaseAdjRestChord.init(phaseAdjRestNote);
+    if (isAdjustingPhase(playerId)) {
+      // copy the isResting Note into a new Chord
+      N.make(PHASE_ADJ_isResting_NOTE) @=> Note phaseAdjisRestingNote;
+      Chord phaseAdjisRestingChord;
+      phaseAdjisRestingChord.init(phaseAdjisRestingNote);
 
       // construct a new Sequence
       Sequence adjustedPhrase;
       adjustedPhrase.init(false);  // not looping
-      // prepend the rest Chord into the new Sequence
-      adjustedPhrase.add(phaseAdjRestChord);
+      // prepend the isResting Chord into the new Sequence
+      adjustedPhrase.add(phaseAdjisRestingChord);
 
-      // get the current Phrase and append it into the adjusted phrase after the rest note
+      // get the current Phrase and append it into the adjusted phrase after the isResting note
       phrase(playerId) @=> Sequence currentPhrase; 
       while (currentPhrase.next() != null) {
         adjustedPhrase.add(currentPhrase.current());
@@ -434,10 +399,10 @@ public class InCConductor extends Conductor {
   //  works best on the patterns containing notes of long durations. 
   // TODO IMPLEMENT THIS Augmentation of rhythmic values can also be effective."
   fun void instructionTranspose(int playerId) {
-    if (transpose(playerId)) {
+    if (isTransposing(playerId)) {
       // sign of shift * number of octaves * num notes in octave
       transposeDirection(playerId) *
-        conf.get(TRANSPOSE_SHIFT_NUM_OCTAVES).intVal *
+        TRANSPOSE_SHIFT_NUM_OCTAVES *
         SCL.NUM_NOTES_IN_OCTAVE => int transposeInterval;
 
       phrase(playerId) @=> Sequence currentPhrase; 
@@ -456,26 +421,26 @@ public class InCConductor extends Conductor {
   // drops out as he or she wishes." 
   fun void instructionConclusionCrescendoDescrescento(int playerId) {
     // check if this  Player has reached the last phrase and set state if it has
-    if (!getBool(playerId, PLAYER_HAS_STOPPED) && reachedLastPhrase(playerId)) {
+    if (!getBool(playerId, PLAYER_HAS_STOPPED) && hasReachedLastPhrase(playerId)) {
       put(playerId, PLAYER_REACHED_LAST_PHRASE, true);
 
       // now check if all players have reached the last phrase
-      ensembleReachedLastPhraseCrescendo() => int inLastPhraseCrescendo; 
+      ensembleHasReachedLastPhraseCrescendo() => int inLastPhraseCrescendo; 
       
-      if (ensembleReachedLastPhrase() && !inLastPhraseCrescendo) {
+      if (ensembleHasReachedLastPhrase() && !inLastPhraseCrescendo) {
         // if the player is endtering the last phrase for the first time, set its count state
         if (!hasKey(playerId, PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT)) {
           put(playerId, PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT, 1);
         }
         // player is on the last phrase and not applying any gain change, so just play back the phrase no change
-        get(playerId, PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT).intVal => int playCount;
+        getInt(playerId, PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT) => int playCount;
         put(playerId, PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT, playCount + 1);
         
       } else if (inLastPhraseCrescendo) {
         if (!hasKey(playerId, PLAYER_LAST_PHRASE_CRESCENDO_PLAY_COUNT)) {
           put(playerId, PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT, 1);
         }
-        get(playerId, PLAYER_LAST_PHRASE_CRESCENDO_PLAY_COUNT).intVal => int playCount;
+        getInt(playerId, PLAYER_LAST_PHRASE_CRESCENDO_PLAY_COUNT) => int playCount;
 
         phrase(playerId) @=> Sequence currentPhrase; 
         // even iterations are crescendo, odd decrescendo
@@ -514,111 +479,109 @@ public class InCConductor extends Conductor {
   // ***********************
   // instruction business logic, boolean predicates based on state and threshold tests against tunable parameters
   
-  fun /*private*/ int reachedLastPhrase(int playerId) {
-    phraseIdx(playerId) == conf.get(NUM_PHRASES).intVal - 1;
+  fun /*private*/ int hasReachedLastPhrase(int playerId) {
+    phraseIdx(playerId) == NUM_PHRASES - 1;
   }
 
-  fun /*private*/ int reachedLastPhraseCrescendo(int playerId) {
-    return get(playerId, PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT).intVal ==
-      conf.get(NUM_PLAYS_BEFORE_CONCLUDING_CRESCENDO).intVal;
+  fun /*private*/ int hasReachedLastPhraseCrescendo(int playerId) {
+    return getInt(playerId, PLAYER_LAST_PHRASE_BEFORE_CRESCENDO_PLAY_COUNT) == NUM_PLAYS_BEFORE_CONCLUDING_CRESCENDO;
   }
 
-  fun /*private*/ int advancePhraseIdx(int playerId) {
-    return !reachedLastPhrase(playerId) && exceedsThreshold(conf.get(PHRASE_ADVANCE_PROB).intVal);
+  fun /*private*/ int isAdvancingPhraseIdx(int playerId) {
+    return !hasReachedLastPhrase(playerId) && exceedsThreshold(PHRASE_ADVANCE_PROB);
   }
 
-  fun /*private*/ int repeatCurPhrase(Sequence seq, int curPhrasePlayCount) {
+  fun /*private*/ int isRepeatingCurPhrase(Sequence seq, int curPhrasePlayCount) {
     dur seqDuration;
     Chord chord;
     while (seq.next() != null) {
       seq.current().notes[0].duration +=> seqDuration; 
     }
-    return curPhrasePlayCount * seqDuration < conf.get(MIN_REPEAT_PHRASE_DURATION).durVal;
+    return curPhrasePlayCount * seqDuration < MIN_REPEAT_PHRASE_DURATION;
   }
 
-  fun /*private*/ int seekingUnison(int playerId) {
-    playersPhraseIdxRange() < conf.get(MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON).intVal => int inRange;
-    return inRange && exceedsThreshold(conf.get(PLAYER_UNISON_PROB).intVal);
+  fun /*private*/ int isSeekingUnison(int playerId) {
+    playersPhraseIdxRange() < MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON => int inRange;
+    return inRange && exceedsThreshold(PLAYER_UNISON_PROB);
   }
 
-  fun /*private*/ int seekingCrescendo(int playerId) {
+  fun /*private*/ int isSeekingCrescendo(int playerId) {
     ampRange() => float curAmpRange;
     Assert AS;
-    AS.assertFloatLessThan(curAmpRange,
-                           conf.get(MAX_GAIN_RANGE_FOR_SEEKING_CRESCENDO).fltVal) => int ampInMaxRange;
-    return ampInMaxRange && exceedsThreshold(conf.get(CRESCENDO_PROB).intVal);
+    AS.assertFloatLessThan(curAmpRange, MAX_GAIN_RANGE_FOR_SEEKING_CRESCENDO) => int ampInMaxRange;
+    return ampInMaxRange && exceedsThreshold(CRESCENDO_PROB);
   }
  
-  fun /*private*/ int seekingDiminuendo(int playerId) {
+  fun /*private*/ int isSeekingDiminuendo(int playerId) {
     ampRange() => float curAmpRange;
     Assert AS;
-    AS.assertFloatLessThan(curAmpRange, conf.get(MAX_GAIN_RANGE_FOR_SEEKING_DECRESCENDO).fltVal) => int ampInMaxRange;
-    return ampInMaxRange && exceedsThreshold(conf.get(DECRESCENDO_PROB).intVal);
+    AS.assertFloatLessThan(curAmpRange, MAX_GAIN_RANGE_FOR_SEEKING_DECRESCENDO) => int ampInMaxRange;
+    return ampInMaxRange && exceedsThreshold(DECRESCENDO_PROB);
   }
  
-  fun /*private*/ int rest(int playerId) {
-    1.0 => float stayAtRestProbFactor;
-    if (get(playerId, PLAYER_AT_REST).intVal) {
-      conf.get(STAY_AT_REST_PROB_FACTOR).intVal => stayAtRestProbFactor;
+  fun /*private*/ int isResting(int playerId) {
+    1.0 => float stayAtisRestingProbFactor;
+    if (getBool(playerId, PLAYER_AT_isResting) {
+      STAY_AT_isResting_PROB_FACTOR => stayAtisRestingProbFactor;
     }
-    return exceedsThreshold(((conf.get(REST_PROB_FACTOR).intVal $ float) * stayAtRestProbFactor) $ int);
+    return exceedsThreshold((isResting_PROB_FACTOR * stayAtisRestingProbFactor) $ int);
   }
 
-  fun /*private*/ int adjustPhase(int playerId) {
-    conf.get(ADJ_PHASE_PROB).intVal => int adjPhaseProb;
-    if (get(playerId, PLAYER_ADJ_PHASE_COUNT).intVal <= conf.get(ADJ_PHASE_COUNT_THRESHOLD).intVal) {
-      conf.get(ADJ_PHASE_PROB_INCREASE_FACTOR).intVal *=> adjPhaseProb;
+  fun /*private*/ int isAdjustingPhase(int playerId) {
+    ADJ_PHASE_PROB => int adjPhaseProb;
+    if (getInt(playerId, PLAYER_ADJ_PHASE_COUNT) <= ADJ_PHASE_COUNT_THRESHOLD) {
+      ADJ_PHASE_PROB_INCREASE_FACTOR *=> adjPhaseProb;
     }
 
-    exceedsThreshold(adjPhaseProb) => int adjustPhase;
-    if (adjustPhase) {
+    exceedsThreshold(adjPhaseProb) => int isAdjusting;
+    if (isAdjusting) {
       increment(playerId, PLAYER_ADJ_PHASE_COUNT);
     }
 
-    return adjustPhase;
+    return isAdjusting;
   }
 
-  fun /*private*/ int tooFarBehind(int playerId) {
-    if (reachedLastPhrase(playerId) || get(playerId, PLAYER_HAS_ADVANCED).intVal) {
+  fun /*private*/ int isTooFarBehind(int playerId) {
+    if (hasReachedLastPhrase(playerId) || getInt(playerId, PLAYER_HAS_ADVANCED)) {
       return false;
     }
-    return getAllMaxInt(PHRASE_IDX) - get(playerId, PHRASE_IDX).intVal >= conf.get(PHRASES_IDX_RANGE_THRESHOLD).intVal;
+    return getAllMaxInt(PHRASE_IDX) - getInt(playerId, PHRASE_IDX) >= PHRASES_IDX_RANGE_THRESHOLD;
   }
 
-  fun /*private*/ int transpose(int playerId) {
-    return exceedsThreshold(conf.get(TRANSPOSE_PROB_FACTOR).intVal);
+  fun /*private*/ int isTransposing(int playerId) {
+    return exceedsThreshold(TRANSPOSE_PROB_FACTOR);
   }
 
-  fun /*private*/ int ensembleReachedLastPhrase() {
+  fun /*private*/ int ensembleHasReachedLastPhrase() {
     playerPhraseMap.getKeys() @=> string playerIds[];
     for (0 => int i; i <  playerIds.size(); i++) {
-      if (!reachedLastPhrase(Std.atoi(playerIds[i]))) {
+      if (!hasReachedLastPhrase(Std.atoi(playerIds[i]))) {
         return false;
       }
     }
     return true;
   }
 
-  fun /*private*/ int ensembleReachedLastPhraseCrescendo() {
+  fun /*private*/ int ensembleHasReachedLastPhraseCrescendo() {
     playerPhraseMap.getKeys() @=> string playerIds[];
     for (0 => int i; i <  playerIds.size(); i++) {
-      if (!reachedLastPhraseCrescendo(Std.atoi(playerIds[i]))) {
+      if (!hasReachedLastPhraseCrescendo(Std.atoi(playerIds[i]))) {
         return false;
       }
     }
     return true;
   }
 
-  fun /*private*/ int ensembleSeekingUnison() {
-    return exceedsThreshold(conf.get(ENSEMBLE_UNISON_PROB).intVal);
+  fun /*private*/ int ensembleIsSeekingUnison() {
+    return exceedsThreshold(ENSEMBLE_UNISON_PROB);
   }
 
-  fun /*private*/ int ensembleSeekingCrescendo() {
-    return exceedsThreshold(conf.get(ENSEMBLE_CRESCENDO_PROB).intVal);
+  fun /*private*/ int ensembleIsSeekingCrescendo() {
+    return exceedsThreshold(ENSEMBLE_CRESCENDO_PROB);
   }
 
-  fun /*private*/ int ensembleSeekingDecrescendo() {
-    return exceedsThreshold(conf.get(ENSEMBLE_DECRESCENDO_PROB).intVal);
+  fun /*private*/ int ensembleIsSeekingDecrescendo() {
+    return exceedsThreshold(ENSEMBLE_DECRESCENDO_PROB);
   }
 
   // ***********************
@@ -630,11 +593,11 @@ public class InCConductor extends Conductor {
   // NEED TO RECORD MAX AND MIN GAIN FOR EACH PLAYER with PLAYER_MAX_GAIN and PLAYER_MIN_GAIN keys
   // each place they adjust gain and then retrieve it here
   fun /*private*/ float ampRange() {
-    return getAllMaxFlt("GAIN") - getAllMinFlt("GAIN");
+    return getAllMaxFlt(PLAYER_GAIN) - getAllMinFlt(PLAYER_GAIN);
   }
  
   fun /*private*/ int phraseIdx(int playerId) {
-    return get(playerId, PHRASE_IDX).intVal;
+    return getInt(playerId, PHRASE_IDX);
   }
 
   fun /*private*/ Sequence phrase(int playerId) {
@@ -643,7 +606,7 @@ public class InCConductor extends Conductor {
   }
 
   fun /*private*/ int hasAdvanced(int playerId) {
-    return get(playerId, PLAYER_HAS_ADVANCED).intVal;
+    return getBool(playerId, PLAYER_HAS_ADVANCED);
   }
 
   fun /*private*/ int playersPhraseIdxRange() {
@@ -656,13 +619,13 @@ public class InCConductor extends Conductor {
     if (AS.assertFloatEqual(enMaxGain, 0.0)) {
       1.0 => enMaxGain;
     }
-    getPlayerMaxGain(idToKey(playerId)) => float playerMaxGain;
+    playerMaxGain(idToKey(playerId)) => float playerMaxGain;
     playerMaxGain / enMaxGain => float gainRatio;
-    if (seekingCrescendo(playerId) &&
-        AS.assertFloatLessThan(gainRatio, conf.get(GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD).fltVal)) {
-      return conf.get(GAIN_CRESCENDO_ADJ_FACTOR).fltVal;
-    } else if (seekingDiminuendo(playerId) && gainRatio < conf.get(GAIN_ADJ_DECRESCENDO_RATIO_THRESHOLD).fltVal) {
-      return conf.get(GAIN_DECRESCENDO_ADJ_FACTOR).fltVal;
+    if (isSeekingCrescendo(playerId) &&
+        AS.assertFloatLessThan(gainRatio, GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD) {
+      return GAIN_CRESCENDO_ADJ_FACTOR;
+    } else if (isSeekingDiminuendo(playerId) && gainRatio < GAIN_ADJ_DECRESCENDO_RATIO_THRESHOLD) {
+      return GAIN_DECRESCENDO_ADJ_FACTOR;
     } else {
       return NO_FACTOR;
     }
@@ -670,8 +633,8 @@ public class InCConductor extends Conductor {
 
   fun int transposeDirection(int playerId) {
     // early exit optimization to not do duration computation unless needed
-    if (!exceedsThreshold(conf.get(TRANSPOSE_DOWN_PROB_FACTOR).intVal)) {
-      return conf.get(TRANSPOSE_UP_FACTOR).intVal;
+    if (!exceedsThreshold(TRANSPOSE_DOWN_PROB_FACTOR)) {
+      return TRANSPOSE_UP_FACTOR;
     }
 
     phrase(playerId) @=> Sequence playerPhrase;
@@ -681,13 +644,13 @@ public class InCConductor extends Conductor {
     }
     total / playerPhrase.size() => dur meanPhraseDuration;
 
-    if (meanPhraseDuration >= conf.get(TRANSPOSE_DOWN_DUR_THRESHOLD).durVal) {
-      return conf.get(TRANSPOSE_DOWN_FACTOR).intVal;
+    if (meanPhraseDuration >= TRANSPOSE_DOWN_DUR_THRESHOLD) {
+      return TRANSPOSE_DOWN_FACTOR;
     }
-    return conf.get(TRANSPOSE_UP_FACTOR).intVal;
+    return TRANSPOSE_UP_FACTOR;
   }
 
-  fun /*private*/ float getPlayerMaxGain(string playerId) {
+  fun /*private*/ float playerMaxGain(string playerId) {
     playerPhraseMap.get(playerId) $ Sequence @=> Sequence playerPhrase;
     0.0 => float maxGain;
     for (0 => int i; i < playerPhrase.size(); i++) {
@@ -700,7 +663,7 @@ public class InCConductor extends Conductor {
     0.0 => float maxGain;
     playerPhraseMap.getKeys() @=> string playerIdKeys[];
     for (0 => int i; i < playerIdKeys.size(); i++) {
-      Math.max(getPlayerMaxGain(playerIdKeys[i]), maxGain) => maxGain;
+      Math.max(playerMaxGain(playerIdKeys[i]), maxGain) => maxGain;
     }
     return maxGain;
   }
@@ -710,6 +673,6 @@ public class InCConductor extends Conductor {
   }
 
   fun /*private*/ void increment(int playerId, string key) {
-    put(playerId, key, get(playerId, key).intVal + 1);
+    put(playerId, key, getInt(playerId, key) + 1);
   }
 }

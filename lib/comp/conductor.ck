@@ -102,6 +102,14 @@ public class Conductor {
     }
   }
 
+  fun float getFloat(int shredId, string key) {
+    return get(shredId, key).fltVal;
+  }
+
+  fun int getInt(int shredId, string key) {
+    return get(shredId, key).intVal;
+  }
+
   fun int getBool(int shredId, string key) {
     return get(shredId, key).intVal == true;
   }
@@ -164,12 +172,24 @@ public class Conductor {
     return globalState.get(key);
   }
  
+  fun float getGlobalFloat(string key) {
+    return globalState.get(key).fltVal;
+  }
+ 
+  fun int getGlobalInt(string key) {
+    return globalState.get(key).intVal;
+  }
+ 
+  fun int getGlobalBool(string key) {
+    return globalState.get(key).intVal == true;
+  }
+ 
   // Metadata, counts and keys 
   fun int size() {
     return count;
   }
 
-  fun int globalStateSize() {
+  fun int globalSize() {
     return globalState.size();
   }
 
@@ -207,20 +227,21 @@ public class Conductor {
   /**
    * Intended to be called during performance, by Players, to update state associated with this player
    */
-  fun void update(int shredId) {}
+  fun /*protected*/ void update(int shredId) {}
 
   // Override
   /**
    * Intended to be called during performance, by Players, to update state associated with every player 
    */
-  fun void updateAll() {}
+  fun /*protected*/ void updateAll() {}
 
   // Override
   /**
    * Intended to be called by the control loop, to end the performance when all Players have stopped playing
    */
-  fun int isPlaying() {}
+  fun /*protected*/ int isPlaying() {}
 
+  // TODO DO WE NEED THIS?
   fun ArgBase getBehavior(int shredId, string behaviorKey) {
     Std.itoa(shredId) => string shredKey;
     return state[shredKey].get(behaviorKey); 
