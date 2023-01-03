@@ -227,7 +227,7 @@ public class Conductor {
   /**
    * Intended to be called during performance, by Players, to update state associated with this player
    */
-  fun /*protected*/ void update(int shredId) {}
+  fun /*protected*/ void update(int shredId, Sequence sequence) {}
 
   // Override
   /**

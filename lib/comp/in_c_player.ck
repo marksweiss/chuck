@@ -63,16 +63,18 @@ public class InCPlayer extends PlayerBase {
         instr.getEnv().keyOff();
         instr.getEnv().releaseTime() => now;
 
-        // check Conductor state to determine whether to advance or stay on this phrase
-        conductor.update(me.id());
-        
-        // TEMP DEBUG
-        /* <<< "IN PLAYER CALLING CONDUCTOR" >>>; */
-
-        // TODO USE NEW API
-        /* if (conductor.getBoolBehavior(me.id(), conductor.KEY_IS_ADVANCING)) { */
-        /*   this.seqs.next() @=> seq; */
-        /* } */
+        // Conductor update current phrase or advanced to next phrase
+        conductor.update(me.id(), seq);
+        if (! conductor.isPlaying()) {
+          break;
+        }
+        if (! conductor.hasAdvanced(me.id())) {
+          conductor.getUpdatedPhrase(me.id()) @=> seq;
+        } else {
+          1 +=> seqsIdx;
+          seqs.next() @=> seq;          
+        }
+        // /Conductor update current phrase or advanced to next phrase
 
         // determine whether the next note is the next note in this sequence, or the
         // first note in this sequence (because we are looping and reached the end)
