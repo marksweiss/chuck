@@ -181,6 +181,10 @@ public class Conductor {
   }
  
   fun int getGlobalBool(string key) {
+
+    // TEMP DEBUG
+    <<< "DEBUG: globalState", globalState, "get(key)", globalState.get(key), "is null", globalState.get(key) == null >>>;
+
     return globalState.get(key).intVal == true;
   }
  

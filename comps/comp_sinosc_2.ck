@@ -41,13 +41,17 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   return conf;
 }
 
-fun void addPhrase(Note phrase[], Sequences seqs[]) {
+fun void addPhrase(Note phraseNotes[], Sequences seqs[]) {
   for (0 => int i; i < seqs.size(); ++i) {
-    Sequence seq;
-    seq.init(Std.itoa(i), false);  // not looping phrases 
-    seq.add(phrase);
-    seqs[i].add(seq);
+    seqs[i].add(makePhrase(phraseNotes, i));
   } 
+}
+
+fun Sequence makePhrase(Note phraseNotes[], int id) {
+  Sequence seq;
+  seq.init(Std.itoa(id), true);  // looping phrases 
+  seq.add(phraseNotes);
+  return seq;
 }
 
 fun void main () {
@@ -62,12 +66,11 @@ fun void main () {
   // TEMP DEBUG
   /* <<< "--------------------------\nIN SINOSC MAIN, shred id:" >>>; */
 
-  // global coordinator of interprocess state governing composition behavior, such
-  // as in this case whether instruments move to the next phrase or stay on the current one
-  InCConductor conductor;
-
   // init clock, tempo and time advance Events
-  240 => int BPM; 
+  10 => int NUM_PHRASES;
+  3 => int NUM_PLAYERS;
+
+  240 => int BPM;
   Event startEvent;
   Event stepEvent; 
 
@@ -79,13 +82,20 @@ fun void main () {
 
   // declare sequence containers
   true => int isLooping;
+
+  // For passing a copy of the initial, unmodified source sequences to the Conductor
+  // so ti can advance players to a clean copy of the next sequences, or undo changes
+  // to the player copy of a sequence
+  Sequences seqs0;
+  seqs0.init("seqs0", isLooping);
+
   Sequences seqs1;
   seqs1.init("seqs1", isLooping);
   Sequences seqs2;
   seqs2.init("seqs2", isLooping);
   Sequences seqs3;
   seqs3.init("seqs3", isLooping);
-  [seqs1, seqs2, seqs3] @=> Sequences seqs[];
+  [seqs0, seqs1, seqs2, seqs3] @=> Sequences seqs[];
 
   // declare chords / notes for each sequence
   NoteConst N;
@@ -114,6 +124,13 @@ fun void main () {
   instr1.init("instr1", conf1);
   instr2.init("instr2", conf2);
   instr3.init("instr3", conf3);
+
+  // global coordinator of interprocess state governing composition behavior, such
+  // as in this case whether instruments move to the next phrase or stay on the current one
+  0 => int id;
+  makePhrase([N.B4_16, N.G4_16], id) @=> Sequence lastPhrase;
+  InCConductor conductor;
+  conductor.init(NUM_PHRASES, NUM_PLAYERS, seqs0, lastPhrase);
 
   // declare the Players whose behavior governed by calling the Conductor to
   // to check their state changes, performing the notes of the Sequences using the

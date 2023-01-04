@@ -31,6 +31,10 @@ public class InCPlayer extends PlayerBase {
 
   // override
   fun void play() {
+    // TEMP DEBUG
+    <<< "DEBUG: isPlaying() AT TOP OF play()", this.conductor.isPlaying() >>>;
+    <<< "DEBUG: isPlaying() AT TOP OF play()", conductor.isPlaying() >>>;
+
     // block on startEvent to all sync start time on clock.sync()
     startEvent => now;
 
@@ -42,6 +46,9 @@ public class InCPlayer extends PlayerBase {
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord c;
     while (true) {
+      // TEMP DEBUG
+      <<< "DEBUG: IN play() WHILE LOOP seq", seq, "seq.name", seq.name >>>;
+
       // Block on event of next beat step broadcast by clock. Each player blocks until
       // the clock advances global `now` one tempo duration and then broadcasts on this
       // Event. Then each player wakes up, adds the duration of the current note being
@@ -57,23 +64,57 @@ public class InCPlayer extends PlayerBase {
       c.notes[0].duration => dur nextNoteDur;
       sinceLastNote + stepDur => sinceLastNote; 
 
+      // TEMP DEBUG
+      <<< "DEBUG: IN play() WHILE LOOP sinceLastNote", sinceLastNote, "nextNoteDur", nextNoteDur >>>;
+
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote == nextNoteDur) {
+
+        // TEMP DEBUG
+        <<< "DEBUG: IN play() sinceLastNote == nextNoteDur" >>>;
+
         // previous note ending, trigger release
         instr.getEnv().keyOff();
         instr.getEnv().releaseTime() => now;
 
+        // TEMP DEBUG
+        <<< "DEBUG: IN play() before update()" >>>;
+
         // Conductor update current phrase or advanced to next phrase
         conductor.update(me.id(), seq);
+
+        // TEMP DEBUG
+        <<< "DEBUG: IN play() after update()" >>>;
+
         if (! conductor.isPlaying()) {
           break;
         }
+
+        // TEMP DEBUG
+        <<< "DEBUG: IN play() after isPlaying()" >>>;
+
         if (! conductor.hasAdvanced(me.id())) {
+
+          // TEMP DEBUG
+          <<< "DEBUG: IN play() after hasAdvanced()" >>>;
+
           conductor.getUpdatedPhrase(me.id()) @=> seq;
         } else {
+
+          // TEMP DEBUG
+          <<< "DEBUG: IN play() after not hasAdvanced()" >>>;
+
           1 +=> seqsIdx;
           seqs.next() @=> seq;          
+
+          // TEMP DEBUG
+          <<< "DEBUG: IN play() after not hasAdvanced() new seq", seq.name >>>;
+
         }
+
+        // TEMP DEBUG
+        <<< "DEBUG: IN play() WHILE LOOP AFTER CONDUCTOR seq", seq, "is null", seq == null >>>;
+
         // /Conductor update current phrase or advanced to next phrase
 
         // determine whether the next note is the next note in this sequence, or the
