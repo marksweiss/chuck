@@ -214,9 +214,6 @@ public class InCConductor extends Conductor {
     putGlobal(ALL_PLAYERS_REACHED_LAST_PHRASE_UNISON, false);
     putGlobal(ALL_PLAYERS_STOPPED, false);
 
-    // TEMP DEBUG
-    <<< "DEBUG: isPlaying() in Conductor.init()", isPlaying() >>>;
-
     initCrescendo(lastPhrase);
   }
 
