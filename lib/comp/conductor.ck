@@ -111,6 +111,10 @@ public class Conductor {
   }
 
   fun int getBool(int shredId, string key) {
+
+    // TEMP DEBUG
+    <<<"DEBUG: IN getBool key=", key, "is null=", get(shredId, key) == null>>>;
+
     return get(shredId, key).intVal == true;
   }
 
@@ -183,7 +187,7 @@ public class Conductor {
   fun int getGlobalBool(string key) {
 
     // TEMP DEBUG
-    <<< "DEBUG: globalState", globalState, "get(key)", globalState.get(key), "is null", globalState.get(key) == null >>>;
+    <<< "DEBUG: globalState", globalState, "get(key).intVal", globalState.get(key).intVal, "is null", globalState.get(key) == null >>>;
 
     return globalState.get(key).intVal == true;
   }

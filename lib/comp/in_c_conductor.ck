@@ -268,7 +268,7 @@ public class InCConductor extends Conductor {
    */
   // Override
   fun int isPlaying() {
-    return getGlobalBool(ALL_PLAYERS_STOPPED);
+    return !getGlobalBool(ALL_PLAYERS_STOPPED);
   }
 
   /**
@@ -282,6 +282,8 @@ public class InCConductor extends Conductor {
   fun void update(int playerId, Sequence playerPhrase) {
     // Store phrase for player before running instructions
     playerPhraseMap.put(idToKey(playerId), playerPhrase);
+    // init state for player that may be checked before any instruction has set any state
+    put(playerId, PLAYER_HAS_ADVANCED, false);
 
     // TODO CALL ALL THE INSTRUCTIONS
 

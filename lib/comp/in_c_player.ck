@@ -87,6 +87,9 @@ public class InCPlayer extends PlayerBase {
         <<< "DEBUG: IN play() after update()" >>>;
 
         if (! conductor.isPlaying()) {
+          // TEMP DEBUG
+          <<< "DEBUG: IN play() after ! isPlaying()" >>>;
+
           break;
         }
 
@@ -145,6 +148,10 @@ public class InCPlayer extends PlayerBase {
         instr.getEnv().keyOn();
       }
     }
+
+    // TEMP DEBUG
+    <<< "DEBUG: IN play() after ! isPlaying() EXIT" >>>;
+    return;
   }
 
   fun float getGain() {

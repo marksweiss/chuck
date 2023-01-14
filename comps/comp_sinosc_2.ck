@@ -14,6 +14,11 @@ public void runClock(Clock clock) {
 
 public void runPlayer(PlayerBase player) {
   player.play();
+
+  // TODO HANGING HERE
+  // TEMP DEBUG
+  <<< "DEBUG: IN runPlayer() AFTER player.play()" >>>;
+  
 }
 
 fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur release) {
