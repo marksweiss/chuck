@@ -30,9 +30,19 @@
 
 // TODO HANDLE THE has_advanced logic in the original code by just calling all the predicates in
 // a cascade and handle early exit on should advance, should be encapsulated from Player
-
 public class InCConductor extends Conductor {
 
+  // TODO DESIGN FOR BUG FIX
+  // - each thread only sets lock to true for its own playerId, no contention
+  // - each thread only sets its phrase for its onw playerId, no contention
+  // - each thread reads phrase for all playerIds, contention, reading while writing, NPE or seg fault
+  // - so, each thread blocks on lockEvent for each other thread, when reading for that thread
+  // - each thread acquires lock when writing, broadcasts after writing
+  // - each thread block on lockEvent when reading for another playerId
+  // - each thread registers a lockEvent indexed (TODO HOW) to its playerId in init()
+
+  // TODO HACK
+  /* Event stateLocks[100]; */
   // *******************
   // PLAYER CONF
   // *******************
@@ -73,12 +83,13 @@ public class InCConductor extends Conductor {
   "NUM_CONCLUDING_CRESCENDOS" => string NUM_CONCLUDING_CRESCENDOS;
  
   // Const State Set in Init
-  int NUM_PLAYERS;
-  int NUM_PHRASES;
+  int numPlayers;
+  int numPhrases;
 
   // *******************
   // Conf Constant Values
   1.0 => float NO_FACTOR;
+  0.2 => float DEFAULT_PLAYER_GAIN;
  
   // Player must play each phrase at least this long
   // Insures that short phrases are played enough to counterpoint with longer phrases
@@ -204,8 +215,8 @@ public class InCConductor extends Conductor {
   // /ENSEMBLE conf
 
   fun void init(int numPhrases, int numPlayers, Sequences phrases, Sequence lastPhrase) {
-    numPhrases => NUM_PHRASES;
-    numPlayers => NUM_PLAYERS;
+    numPhrases => this.numPhrases;
+    numPlayers => this.numPlayers;
     phrases @=> this.phrases;
 
     // initialize global state for all Players
@@ -215,6 +226,12 @@ public class InCConductor extends Conductor {
     putGlobal(ALL_PLAYERS_STOPPED, false);
 
     initCrescendo(lastPhrase);
+  }
+
+  fun void initPlayer(int playerId) {
+    put(playerId, PHRASE_IDX, 0); 
+    put(playerId, PLAYER_HAS_ADVANCED, false);
+    put(playerId, PLAYER_GAIN, DEFAULT_PLAYER_GAIN);
   }
 
   fun /*private*/ void initCrescendo(Sequence lastPhrase) {
@@ -243,29 +260,14 @@ public class InCConductor extends Conductor {
   // API
   // *******************
 
-  /*
-  while (true) {
-    conductor.update(this.id, this.currentPhrase);
-    if (! conductor.isPlaying()) {
-      break;
-    }
-
-    if (! conductor.hasAdvanced(this.id)) {
-      conductor.getUpdatedPhrase(this.id) @=> this.currentPhrase;
-    } else {
-      this.sequences.next() @=> this.currentPhrase; 
-    }
-
-    // play currentPhrase
-  }
-  */
- 
-  /**
-   * Driver loop polls ALL_PLAYERS_STOPPED and ends process once it is true
-   */
   // Override
   fun int isPlaying() {
     return !getGlobalBool(ALL_PLAYERS_STOPPED);
+  }
+
+  fun Sequence doUpdate(int playerId, Sequence playerPhrase) {
+    update(playerId, playerPhrase);
+    return getUpdatedPhrase(playerId);
   }
 
   /**
@@ -274,22 +276,43 @@ public class InCConductor extends Conductor {
    * to next phrase during the update, the next phrase in final updated form to play.
    * Note that this is happening concurrently across all player threads, continuously as each
    * progresses through the phrases.
-   */  
+   */
   // Override
   fun void update(int playerId, Sequence playerPhrase) {
-    // Store phrase for player before running instructions
-    playerPhraseMap.put(idToKey(playerId), playerPhrase);
-    // init state for player that may be checked before any instruction has set any state
-    put(playerId, PLAYER_HAS_ADVANCED, false);
 
-    // TODO CALL ALL THE INSTRUCTIONS
+    // TODO HACK TO FIX BUG, where is shredId 0 coming from?
+    /* if (playerId == 0) return; */
+
+    // TEMP DEBUG
+    /* <<< "IN update() playerId", playerId >>>; */
+
+    // Store state for player before running instructions
+    playerPhraseMap.put(idToKey(playerId), playerPhrase);
+
+    // TEMP DEBUG
+    /* <<< "IN update() AFTER playerId", playerId >>>; */
+
+    // reset state for player that must be reset before each update
+    put(playerId, PLAYER_HAS_ADVANCED, false);
+    put(playerId, PLAYER_HAS_REACHED_UNISON, false);
+    put(playerId, PLAYER_AT_REST, false);
+
+    // Call all Instructions to update this player's state
+    instructionAdvancePhraseIdx(playerId);
+    instructionAdvancePhraseIdxTooFarBehind(playerId);
+    instructionAdvancePhraseIdxSeekingUnison(playerId);
+    instructionIsRestingOrCrescendoDecrescendo(playerId);
 
     // Store phrase for player back after running instructions, fetch it from state to get update
     phrase(playerId) @=> Sequence updatedPlayerPhrase;
     playerPhraseMap.put(idToKey(playerId), updatedPlayerPhrase);
+
+    // TEMP DEBUG
+    /* <<< "IN update() SECOND AFTER playerId", playerId >>>; */
   }
 
   // Override
+  // TODO NOT THREAD SAFE, REMOVE FROM INTERFACE?
   fun void updateAll() {
     for (0 => int i; i < this.shredSize(); i++) {
       update(this.shredIds[i], phrase(this.shredIds[i]));
@@ -390,7 +413,7 @@ public class InCConductor extends Conductor {
   // "It is very important that performers listen very carefully to one another and this means occasionally to drop out
   //  and listen. ... As an ensemble, it is very desirable to play very softly as well as very loudly and to try to diminuendo
   //  and crescendo together."
-  fun void instructionisRestingOrCrescendoDecrescendo(int playerId) {
+  fun void instructionIsRestingOrCrescendoDecrescendo(int playerId) {
     NO_FACTOR => float gainAdj;
     if (isResting(playerId)) {
       0.0 => gainAdj;
@@ -403,15 +426,32 @@ public class InCConductor extends Conductor {
     Assert AS;
     if (AS.assertFloatNotEqual(gainAdj, NO_FACTOR)) {
       phrase(playerId) @=> Sequence playerPhrase;
+
+      // TEMP DEBUG
+      /* 0 => int debugCount; */
+
       // for each chord in the phrase
       while (playerPhrase.next() != null) {
+        // TEMP DEBUG
+        /* <<< "DEBUG IN instructionIsRestingOrCrescendoDecrescendo() count", debugCount++, "playerId", playerId, "playerPhrase", playerPhrase >>>; */
+
+        // TODO IS THIS MODIFYING BY REFERENCE?
         playerPhrase.current() @=> Chord c;
+        
+        // TEMP DEBUG
+        /* <<< "DEBUG in_c_conductor instruction ... playerPhrase", playerPhrase, "size", playerPhrase.size() >>>; */
+
         // for each note in the chord
         for (0 => int i; i < c.size(); i++) {
           // adjust the note's gain
-          gainAdj *=> c.notes[i].gain;
+
+          // TEMP DEBUG
+          /* <<< "DEBUG IN instructionIsRestingOrCrescendoDecrescendo() gain loop note", c.notes[i] >>>; */
+
+          c.notes[i].gain * gainAdj => c.notes[i].gain;
         } 
       }
+
       playerPhraseMap.put(idToKey(playerId), playerPhrase);
     }
   }
@@ -529,7 +569,7 @@ public class InCConductor extends Conductor {
   // instruction business logic, boolean predicates based on state and threshold tests against tunable parameters
   
   fun /*private*/ int hasReachedLastPhrase(int playerId) {
-    phraseIdx(playerId) == NUM_PHRASES - 1;
+    phraseIdx(playerId) == this.numPhrases - 1;
   }
 
   fun /*private*/ int hasReachedLastPhraseCrescendo(int playerId) {
@@ -651,8 +691,9 @@ public class InCConductor extends Conductor {
   }
 
   fun /*private*/ Sequence phrase(int playerId) {
-    playerPhraseMap.get(idToKey(playerId)) $ Sequence @=> Sequence playerPhrase;
-    return playerPhrase;
+    if (me.id() != playerId) {
+    }
+    return playerPhraseMap.get(idToKey(playerId)) $ Sequence;
   }
 
   fun /*private*/ int hasAdvanced(int playerId) {
@@ -669,8 +710,12 @@ public class InCConductor extends Conductor {
     if (AS.assertFloatEqual(enMaxGain, 0.0)) {
       1.0 => enMaxGain;
     }
-    playerMaxGain(idToKey(playerId)) => float playerMaxGain;
-    playerMaxGain / enMaxGain => float gainRatio;
+    playerMaxGain(idToKey(playerId)) => float maxGain;
+
+    // TEMP DEBUG
+    /* <<< "playerMaxGain", maxGain >>>; */
+
+    maxGain / enMaxGain => float gainRatio;
     if (isSeekingCrescendo(playerId) &&
         AS.assertFloatLessThan(gainRatio, GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD)) {
       return GAIN_CRESCENDO_ADJ_FACTOR;
@@ -702,6 +747,10 @@ public class InCConductor extends Conductor {
 
   fun /*private*/ float playerMaxGain(string playerId) {
     playerPhraseMap.get(playerId) $ Sequence @=> Sequence playerPhrase;
+
+    // TEMP DEBUG
+    /* <<< "DEBUG in_c_conductor playerMaxGain() playerId", playerId, "playerPhrase", playerPhrase >>>; */
+
     0.0 => float maxGain;
     for (0 => int i; i < playerPhrase.size(); i++) {
       Math.max(playerPhrase.chords[i].notes[0].gain, maxGain) => maxGain;
@@ -712,7 +761,7 @@ public class InCConductor extends Conductor {
   fun /*private*/ float ensembleMaxGain() {
     0.0 => float maxGain;
     playerPhraseMap.getKeys() @=> string playerIdKeys[];
-    for (0 => int i; i < playerIdKeys.size(); i++) {
+    for (0 => int i; i < this.numPlayers; i++) {
       Math.max(playerMaxGain(playerIdKeys[i]), maxGain) => maxGain;
     }
     return maxGain;

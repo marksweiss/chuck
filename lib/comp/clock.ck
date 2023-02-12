@@ -28,11 +28,13 @@ public class Clock {
 
   Event startEvent;
   Event stepEvent;
+  Event playOutputEvent;
+  PlayerBase players[];
   0.0 => float NO_GAIN;
 
   // bpm - beats per minute, number of quarter notes per minute
   // i.e. 60 bpm means a quarter note is 1 second
-  fun void init(float bpm, Event startEvent, Event stepEvent) {
+  fun void init(float bpm, Event startEvent, Event stepEvent, Event playOutputEvent) {
     <<< "Clock: BEAT_STEP", BEAT_STEP >>>;
     <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>;
     <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
@@ -53,9 +55,7 @@ public class Clock {
 
     startEvent @=> this.startEvent; 
     stepEvent @=> this.stepEvent;
-
-    // TEMP DEBUG
-    /* <<< "IN CLOCK INIT, stepEvent address =", stepEvent, "shredId", me.id() >>>; */
+    playOutputEvent @=> this.playOutputEvent;
 
     D(0.015625) => SXTYFRTH;
     D(0.03125) => THRTYSCND;
@@ -68,6 +68,12 @@ public class Clock {
     <<< "Clock: SXTYFRTH", SXTYFRTH, "THRTYSCND", THRTYSCND, "SXTNTH", SXTNTH, "ETH", ETH, "QRTR", QRTR, "HLF", HLF, "WHL", WHL >>>;
   }
 
+  // Split from init() so users like NoteConst and ScaleConst which only need to calculate durations
+  // don't need a dependency on Player. TODO would likely be better to refactor into two classes
+  fun void registerPlayers(PlayerBase players[]) {
+    players @=> this.players;
+  }
+
   fun void play() {
     // TODO REALLY UNDERSTAND THIS. DO WE NEED BOTH SYNCS?
     // Sync now to closest next tempo duration unit
@@ -78,22 +84,31 @@ public class Clock {
     sync();
 
     while (true) {
-      // TEMP DEBUG
-      /* <<< "CLOCK BEFORE BROADCAST STEP EVENT, stepEvent", stepEvent, "shredId", me.id() >>>; */
-
       // Advance global time by smallest defined tempo duration, also shared with players.
       // When Clock blocks on Event and Players block on Event, then this means `now` advances
       // time globally for all shreds. (If there is no Event then each shred advances time
       // for its shred only by chucking durations to `now`).
       this.stepDur => now;
+
       // Block on the Event that another tempo duration has passed and wake up all Players.
       // Players calculate new value for time passed vs. the duration of the current Note
       // they are playing and stop Note, start new Note etc. if they need to, then they
       // block again on the same Event and control comes back here.
       this.stepEvent.broadcast();
 
-      // TEMP DEBUG
-      /* <<< "CLOCK AFTER BROADCAST ON STEPEVENT, stepEvent", stepEvent, "shredId", me.id() >>>; */
+      // One player at a time released to update state, including global ensemble state. This is
+      // just computation not output. Serialized access because there is shared global state
+      // and Chuck has no critical-section style locking, only what amounts to co-routine
+      // coordination where worker threads can block on an event and a control thread can allow one
+      // or all of them to advance by signal() or broadcast() on the event.
+      // So the first loop lets each player update its state without errors caused by updating
+      // shared state. Then the second broadcast() lets them all play their output.
+      // Then they block again, and the top of the loop here advances the clock and then we
+      // repeat the cycle.
+      for (0 => int i; i < players.size(); i++) {
+        players[i].signalUpdate();
+      }
+      playOutputEvent.broadcast();
     }
   }
 

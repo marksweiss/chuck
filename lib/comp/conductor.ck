@@ -115,10 +115,11 @@ public class Conductor {
   }
 
   fun ArgBase[] getAll(string key) {
-    ArgBase allValsForKey[0];
-    for (0 => int i; i < shredIds.size(); i++) {
+    ArgBase allValsForKey[shredIdCount];
+    // NOTE: use shredIdCount because size is 1 larger due to use of ++ in write to it
+    for (0 => int i; i < shredIdCount; i++) {
       Std.itoa(shredIds[i]) => string shredKey; 
-      allValsForKey << state[shredKey].get(key);
+      state[shredKey].get(key) @=> allValsForKey[i];
     }
     return allValsForKey;
   }
@@ -136,9 +137,18 @@ public class Conductor {
   }
 
   fun float getAllMaxFlt(string key) {
+
+    /* <<< "DEBUG: key", key >>>; */
+    /* <<< "DEBUG: key and is null", key, getAll(key) == null >>>; */
+
     0.0 => float ret;
     getAll(key) @=> ArgBase valsForKey[];
     for (0 => int i; i < valsForKey.size(); i++) {
+
+      /* <<< "DEBUG: valsForKey[i] is null", valsForKey[i] == null, "size", valsForKey.size(), "i", i >>>; */
+      /* <<< "DEBUG: shredIdCount", shredIdCount >>>; */
+      /* <<< "DEBUG: valsForKey[i].fltVal", valsForKey[i].fltVal >>>; */
+
       if (Math.max(valsForKey[i].fltVal, ret)) {
         valsForKey[i].fltVal => ret;
       }

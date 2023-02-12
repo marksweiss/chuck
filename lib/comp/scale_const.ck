@@ -43,9 +43,11 @@ public class ScaleConst {
   // Events not used but needed to init the Clock
   Clock k;
   120 => int BPM;
-  Event startEvent;
-  Event stepEvent; 
-  k.init(BPM, startEvent, stepEvent);  
+  Event dummyStartEvent;
+  Event dummyStepEvent; 
+  Event dummyPlayoutputEvent;
+  0 => int NUM_PLAYERS;
+  k.init(BPM, dummyStartEvent, dummyStepEvent, dummyPlayoutputEvent);  
 
   // Rest Constants
   0.0 => float NO_GAIN;

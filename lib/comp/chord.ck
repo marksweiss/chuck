@@ -9,7 +9,7 @@ public class Chord {
   1.0::second => static dur DEFAULT_DUR;
   5 => static int MAX_NUM_CHORD_NOTES;
  
-  Note notes[MAX_NUM_CHORD_NOTES];
+  Note notes[];
 
   fun void init(Note notes_[]) {
     notes_ @=> this.notes;

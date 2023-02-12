@@ -18,4 +18,6 @@ public class PlayerBase {
   fun InstrumentBase getInstrument(string key) {
     return instruments.get(key) $ InstrumentBase;
   }
+
+  fun void signalUpdate() {}
 }

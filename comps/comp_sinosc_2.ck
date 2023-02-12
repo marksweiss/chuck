@@ -1,11 +1,11 @@
-// cli: $> chuck test/assert.ck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck lib/arg_parser/float_arg.ck \
-//               lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck lib/arg_parser/string_arg.ck \
-//               lib/collection/arg_map.ck lib/collection/object_map.ck lib/collection/set.ck \
-//               lib/arg_parser/arg_parser.ck lib/comp/conductor.ck lib/comp/in_c_conductor.ck \
-//               lib/comp/note.ck lib/comp/chord.ck lib/comp/scale.ck \
-//               lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/instrument/instrument_base.ck lib/comp/clock.ck \
-//               lib/comp/note_const.ck lib/comp/scale_const.ck lib/comp/instrument/sinosc2.ck \
-//               lib/comp/player_base.ck lib/comp/in_c_player.ck comps/comp_sinosc_2.ck \
+// chuck --loop test/assert.ck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck
+// lib/arg_parser/float_arg.ck lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck
+// lib/arg_parser/string_arg.ck lib/arg_parser/arg_parser.ck lib/collection/arg_map.ck
+// lib/collection/object_map.ck lib/collection/set.ck lib/comp/instrument/instrument_base.ck
+// lib/comp/player_base.ck lib/comp/clock.ck lib/comp/note.ck lib/comp/chord.ck lib/comp/scale.ck
+// lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/note_const.ck lib/comp/scale_const.ck
+// jlib/comp/instrument/sinosc2.ck lib/comp/conductor.ck lib/comp/in_c_conductor.ck lib/comp/in_c_player.ck
+// comps/comp_sinosc_2.ck
 
 // For client to spork, which requires a free function as entry point
 public void runClock(Clock clock) {
@@ -14,11 +14,6 @@ public void runClock(Clock clock) {
 
 public void runPlayer(PlayerBase player) {
   player.play();
-
-  // TODO HANGING HERE
-  // TEMP DEBUG
-  <<< "DEBUG: IN runPlayer() AFTER player.play()" >>>;
-  
 }
 
 fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur release) {
@@ -68,9 +63,6 @@ fun void main () {
   // - Cleanup
   //   - move In C stuff into it's own directory
 
-  // TEMP DEBUG
-  /* <<< "--------------------------\nIN SINOSC MAIN, shred id:" >>>; */
-
   // init clock, tempo and time advance Events
   10 => int NUM_PHRASES;
   3 => int NUM_PLAYERS;
@@ -78,12 +70,10 @@ fun void main () {
   240 => int BPM;
   Event startEvent;
   Event stepEvent; 
+  Event playOutputEvent;
 
-  // TEMP DEBUG
-  /* <<< "IN COMP SINOSC, stepEvent address =", stepEvent, "shredId", me.id() >>>; */
-  
   Clock clock;
-  clock.init(BPM, startEvent, stepEvent);
+  clock.init(BPM, startEvent, stepEvent, playOutputEvent);
 
   // declare sequence containers
   true => int isLooping;
@@ -135,17 +125,22 @@ fun void main () {
   0 => int id;
   makePhrase([N.B4_16, N.G4_16], id) @=> Sequence lastPhrase;
   InCConductor conductor;
+  /* Event stateLock; */
   conductor.init(NUM_PHRASES, NUM_PLAYERS, seqs0, lastPhrase);
 
   // declare the Players whose behavior governed by calling the Conductor to
   // to check their state changes, performing the notes of the Sequences using the
   // Instruments to play the notes
   InCPlayer player1;
-  player1.init("player1", seqs1, startEvent, stepEvent, clock.stepDur, conductor, instr1);
+  player1.init("player1", seqs1, startEvent, stepEvent, playOutputEvent,
+               clock.stepDur, conductor, instr1);
   InCPlayer player2;
-  player2.init("player2", seqs2, startEvent, stepEvent, clock.stepDur, conductor, instr2);
+  player2.init("player2", seqs2, startEvent, stepEvent, playOutputEvent,
+               clock.stepDur, conductor, instr2);
   InCPlayer player3;
-  player3.init("player3", seqs3, startEvent, stepEvent, clock.stepDur, conductor, instr3);
+  player3.init("player3", seqs3, startEvent, stepEvent, playOutputEvent,
+               clock.stepDur, conductor, instr3);
+  clock.registerPlayers([player1, player2, player3]);
 
   // start clock thread and instrument play threads
   spork ~ runClock(clock);

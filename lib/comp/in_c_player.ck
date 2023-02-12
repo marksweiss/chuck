@@ -13,26 +13,37 @@ public class InCPlayer extends PlayerBase {
   // to a particular spork and possibly spawned by one or another parent event loop
   Event startEvent;
   Event stepEvent;
+  Event updateEvent; // each Player has their own, so each can be blocked/unblocked by Clock
+  Event playOutputEvent;
   dur stepDur;
   InCConductor conductor;
   InstrumentBase instr;
 
-  fun void init(string name, Sequences seqs, Event startEvent, Event stepEvent, dur stepDur,
-                InCConductor conductor, InstrumentBase instr) {
+  fun void init(string name, Sequences seqs, Event startEvent, Event stepEvent, Event playOutputEvent,
+                dur stepDur, InCConductor conductor, InstrumentBase instr) {
     name => this.name;
     seqs @=> this.seqs;
     0 => seqsIdx;
     startEvent @=> this.startEvent;
     stepEvent @=> this.stepEvent;    
+    playOutputEvent @=> this.playOutputEvent;
     stepDur => this.stepDur;
     conductor @=> this.conductor;
     instr @=> this.instr;
+  }
+
+  /* Override */
+  fun void signalUpdate() {
+    updateEvent.signal();
   }
 
   // override
   fun void play() {
     // block on startEvent to all sync start time on clock.sync()
     startEvent => now;
+
+    // set initial state in conductor for this player
+    conductor.initPlayer(me.id());
 
     // index of chord in sequence to play
     0 => int i;
@@ -63,21 +74,27 @@ public class InCPlayer extends PlayerBase {
         instr.getEnv().keyOff();
         instr.getEnv().releaseTime() => now;
 
+        // BLOCK HERE, ENTER ONE AT A TIME
+        updateEvent => now;
+
         // Conductor update current phrase or advanced to next phrase
-        conductor.update(me.id(), seq);
+        conductor.doUpdate(me.id(), seq) @=> Sequence updatedSeq;
 
         if (! conductor.isPlaying()) {
           break;
         }
 
         if (! conductor.hasAdvanced(me.id())) {
-          conductor.getUpdatedPhrase(me.id()) @=> seq;
+          updatedSeq @=> seq;
         } else {
           1 +=> seqsIdx;
           seqs.next() @=> seq;          
         }
         // /Conductor update current phrase or advanced to next phrase
 
+        // UNBLOCK HERE AND UPDATE LOCAL STATE AND PLAY OUTPUT CONCURRENTLY
+        playOutputEvent => now;
+  
         // determine whether the next note is the next note in this sequence, or the
         // first note in this sequence (because we are looping and reached the end)
         seq.next() @=> c;

@@ -64,17 +64,16 @@ public class Sequence {
         reset(); 
       }
     }
-
-    // TEMP DEBUG
-    /* <<< "IN SEQUENCE.next(), idx:", idx, " chords size", chords.size(), "thread", me.id() >>>; */
-
-    return chords[idx++];
+    
+    // TODO THIS WAS A BUG RUNS OFF THE END, CATCH IN UNIT TEST
+    if (idx + 1 < chords.size()) {
+      idx++;
+      return chords[idx];
+    }
+    return null;
   }
 
   fun Chord current() {
-    // TEMP DEBUG
-    /* <<< "IN SEQUENCE.current(), idx:", idx, " chords size", chords.size(), "thread", me.id() >>>; */
-
     return chords[idx];
   }
 

@@ -14,9 +14,10 @@ public class NoteConst {
   Note n;
   Clock k;
   120 => int BPM;
-  Event startEvent;
-  Event stepEvent; 
-  k.init(BPM, startEvent, stepEvent);  
+  Event dummyStartEvent;
+  Event dummyStepEvent; 
+  Event dummyPlayoutputEvent;
+  k.init(BPM, dummyStartEvent, dummyStepEvent, dummyPlayoutputEvent);  
 
   // constants defining the pitch offset of each note, in any octave
   0 => static int C;
