@@ -105,9 +105,31 @@ public class Clock {
       // shared state. Then the second broadcast() lets them all play their output.
       // Then they block again, and the top of the loop here advances the clock and then we
       // repeat the cycle.
-      for (0 => int i; i < players.size(); i++) {
-        players[i].signalUpdate();
+
+      // TODO MOVE TO A UTILS AND ADD A TEST
+      // So randomize so that players update state based on each more "concurrently" as they
+      // would in reality
+      OrderedStringSet playerUnusedIdxs;
+      players.size() => int numPlayers;
+      for (0 => int i; i < numPlayers; i++) {
+        playerUnusedIdxs.put(Std.itoa(i)); 
       }
+      int playerIdxs[numPlayers];
+      0 => int idxCount;
+      while (playerUnusedIdxs.notEmpty()) {
+        Math.random2(0, numPlayers - 1) => int idx;
+        Std.itoa(idx) => string idxKey;
+        if (playerUnusedIdxs.hasKey(idxKey)) {
+          idx => playerIdxs[idxCount];
+          idxCount++;
+          playerUnusedIdxs.delete(idxKey);
+        }
+      }
+
+      for (0 => int i; i < playerIdxs.size(); i++) {
+        players[playerIdxs[i]].signalUpdate();
+      }
+
       playOutputEvent.broadcast();
     }
   }

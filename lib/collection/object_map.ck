@@ -40,7 +40,7 @@ public class OrderedObjectMap {
 
   fun void delete(string key) {
     map.erase(key);
-    
+
     // manually rebuild keys, skipping key being erased, because clear() and reset() don't remove
     // non-associative elements from arrays
     string tempKeys[MAX_NUM_KEYS];
