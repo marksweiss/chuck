@@ -112,24 +112,6 @@ public class Clock {
       // So randomize so that players update state based on each more "concurrently" as they
       // would in reality
       u.permutation(0, players.size() - 1) @=> int playerIdxs[];
-
-      /* OrderedStringSet playerUnusedIdxs; */
-      /* players.size() => int numPlayers; */
-      /* for (0 => int i; i < numPlayers; i++) { */
-      /*   playerUnusedIdxs.put(Std.itoa(i)); */ 
-      /* } */
-      /* /1* int playerIdxs[numPlayers]; *1/ */
-      /* 0 => int idxCount; */
-      /* while (playerUnusedIdxs.notEmpty()) { */
-      /*   Math.random2(0, numPlayers - 1) => int idx; */
-      /*   Std.itoa(idx) => string idxKey; */
-      /*   if (playerUnusedIdxs.hasKey(idxKey)) { */
-      /*     idx => playerIdxs[idxCount]; */
-      /*     idxCount++; */
-      /*     playerUnusedIdxs.delete(idxKey); */
-      /*   } */
-      /* } */
-
       for (0 => int i; i < playerIdxs.size(); i++) {
         players[playerIdxs[i]].signalUpdate();
       }
