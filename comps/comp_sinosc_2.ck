@@ -67,7 +67,7 @@ fun void main () {
   10 => int NUM_PHRASES;
   3 => int NUM_PLAYERS;
 
-  240 => int BPM;
+  60 => int BPM;
   Event startEvent;
   Event stepEvent; 
   Event playOutputEvent;
@@ -125,7 +125,6 @@ fun void main () {
   0 => int id;
   makePhrase([N.B4_16, N.G4_16], id) @=> Sequence lastPhrase;
   InCConductor conductor;
-  /* Event stateLock; */
   conductor.init(NUM_PHRASES, NUM_PLAYERS, seqs0, lastPhrase);
 
   // declare the Players whose behavior governed by calling the Conductor to

@@ -32,15 +32,6 @@
 // a cascade and handle early exit on should advance, should be encapsulated from Player
 public class InCConductor extends Conductor {
 
-  // TODO DESIGN FOR BUG FIX
-  // - each thread only sets lock to true for its own playerId, no contention
-  // - each thread only sets its phrase for its onw playerId, no contention
-  // - each thread reads phrase for all playerIds, contention, reading while writing, NPE or seg fault
-  // - so, each thread blocks on lockEvent for each other thread, when reading for that thread
-  // - each thread acquires lock when writing, broadcasts after writing
-  // - each thread block on lockEvent when reading for another playerId
-  // - each thread registers a lockEvent indexed (TODO HOW) to its playerId in init()
-
   // TODO HACK
   /* Event stateLocks[100]; */
   // *******************
@@ -232,6 +223,7 @@ public class InCConductor extends Conductor {
     put(playerId, PHRASE_IDX, 0); 
     put(playerId, PLAYER_HAS_ADVANCED, false);
     put(playerId, PLAYER_GAIN, DEFAULT_PLAYER_GAIN);
+    put(playerId, PLAYER_ADJ_PHASE_COUNT, 0);
   }
 
   fun /*private*/ void initCrescendo(Sequence lastPhrase) {
@@ -302,6 +294,7 @@ public class InCConductor extends Conductor {
     instructionAdvancePhraseIdxTooFarBehind(playerId);
     instructionAdvancePhraseIdxSeekingUnison(playerId);
     instructionIsRestingOrCrescendoDecrescendo(playerId);
+    instructionChangeAlignment(playerId);
 
     // Store phrase for player back after running instructions, fetch it from state to get update
     phrase(playerId) @=> Sequence updatedPlayerPhrase;
@@ -475,8 +468,8 @@ public class InCConductor extends Conductor {
 
       // get the current Phrase and append it into the adjusted phrase after the isResting note
       phrase(playerId) @=> Sequence currentPhrase; 
-      while (currentPhrase.next() != null) {
-        adjustedPhrase.add(currentPhrase.current());
+      for (0 => int i; i < currentPhrase.size(); i++) {
+        adjustedPhrase.add(currentPhrase.chords[i]);
       }
 
       // replace the phrase state for the player with the new phrase with the new alignment
