@@ -1,3 +1,4 @@
+// Machine.add("lib/util/util.ck")
 // Machine.add("lib/comp/instrument.ck")
 // Machine.add("lib/comp/conductor.ck")
 
@@ -83,6 +84,9 @@ public class Clock {
     // Sync again to closest next tempo duration unit, all threads are now using synced time.
     sync();
 
+    // NOTE: lol chuck lang, with this in the loop there is an NPE in in_c_conductor
+    // but with it outside the loop there is not
+    Util u;
     while (true) {
       // Advance global time by smallest defined tempo duration, also shared with players.
       // When Clock blocks on Event and Players block on Event, then this means `now` advances
@@ -105,26 +109,26 @@ public class Clock {
       // shared state. Then the second broadcast() lets them all play their output.
       // Then they block again, and the top of the loop here advances the clock and then we
       // repeat the cycle.
-
-      // TODO MOVE TO A UTILS AND ADD A TEST
       // So randomize so that players update state based on each more "concurrently" as they
       // would in reality
-      OrderedStringSet playerUnusedIdxs;
-      players.size() => int numPlayers;
-      for (0 => int i; i < numPlayers; i++) {
-        playerUnusedIdxs.put(Std.itoa(i)); 
-      }
-      int playerIdxs[numPlayers];
-      0 => int idxCount;
-      while (playerUnusedIdxs.notEmpty()) {
-        Math.random2(0, numPlayers - 1) => int idx;
-        Std.itoa(idx) => string idxKey;
-        if (playerUnusedIdxs.hasKey(idxKey)) {
-          idx => playerIdxs[idxCount];
-          idxCount++;
-          playerUnusedIdxs.delete(idxKey);
-        }
-      }
+      u.permutation(0, players.size() - 1) @=> int playerIdxs[];
+
+      /* OrderedStringSet playerUnusedIdxs; */
+      /* players.size() => int numPlayers; */
+      /* for (0 => int i; i < numPlayers; i++) { */
+      /*   playerUnusedIdxs.put(Std.itoa(i)); */ 
+      /* } */
+      /* /1* int playerIdxs[numPlayers]; *1/ */
+      /* 0 => int idxCount; */
+      /* while (playerUnusedIdxs.notEmpty()) { */
+      /*   Math.random2(0, numPlayers - 1) => int idx; */
+      /*   Std.itoa(idx) => string idxKey; */
+      /*   if (playerUnusedIdxs.hasKey(idxKey)) { */
+      /*     idx => playerIdxs[idxCount]; */
+      /*     idxCount++; */
+      /*     playerUnusedIdxs.delete(idxKey); */
+      /*   } */
+      /* } */
 
       for (0 => int i; i < playerIdxs.size(); i++) {
         players[playerIdxs[i]].signalUpdate();

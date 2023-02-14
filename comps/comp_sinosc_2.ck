@@ -1,11 +1,11 @@
 // chuck --loop test/assert.ck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck
 // lib/arg_parser/float_arg.ck lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck
 // lib/arg_parser/string_arg.ck lib/arg_parser/arg_parser.ck lib/collection/arg_map.ck
-// lib/collection/object_map.ck lib/collection/set.ck lib/comp/instrument/instrument_base.ck
-// lib/comp/player_base.ck lib/comp/clock.ck lib/comp/note.ck lib/comp/chord.ck lib/comp/scale.ck
-// lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/note_const.ck lib/comp/scale_const.ck
-// jlib/comp/instrument/sinosc2.ck lib/comp/conductor.ck lib/comp/in_c_conductor.ck lib/comp/in_c_player.ck
-// comps/comp_sinosc_2.ck
+// lib/collection/object_map.ck lib/collection/set.ck lib/util/util.ck 
+// lib/comp/instrument/instrument_base.ck lib/comp/player_base.ck lib/comp/clock.ck
+// lib/comp/note.ck lib/comp/chord.ck lib/comp/scale.ck lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/note_const.ck
+// lib/comp/scale_const.ck lib/comp/instrument/sinosc2.ck lib/comp/conductor.ck
+// lib/comp/in_c_conductor.ck lib/comp/in_c_player.ck comps/comp_sinosc_2.ck
 
 // For client to spork, which requires a free function as entry point
 public void runClock(Clock clock) {
