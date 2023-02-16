@@ -20,9 +20,10 @@ public class Sequence {
   // ***
   // Container interface
   fun void add(Chord chord) {
+    Chord c;
     // dynamically resize with << operator, per here:
     // https://chuck.stanford.edu/doc/examples/array/array_dynamic.ck
-    this.chords << chord;
+    this.chords << c.make(chord);
   }
 
   fun void add(Chord chords[]) {

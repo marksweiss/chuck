@@ -9,17 +9,19 @@ public class Chord {
   1.0::second => static dur DEFAULT_DUR;
   5 => static int MAX_NUM_CHORD_NOTES;
  
-  Note notes[];
+  Note notes[0];
 
   fun void init(Note notes_[]) {
-    notes_ @=> this.notes;
+    Note n;
+    for (0 => int i; i < notes_.size(); i++) {
+      this.notes << n.make(notes_[i]); 
+    }
   }
 
   // TODO TEST
   fun void init(Note note) {
-    Note notes[1];
-    note @=> notes[0];
-    init(notes);
+    Note n;
+    notes << n.make(note);
   }
 
   fun static Chord make(Note notes_[]) {

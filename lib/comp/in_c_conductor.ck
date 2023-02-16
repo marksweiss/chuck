@@ -107,7 +107,7 @@ public class InCConductor extends Conductor {
   2 => int ADJ_PHASE_PROB_INCREASE_FACTOR;
   // The length of the isResting Note (in seconds) inserted if a Player is adjusting its phase  
   K.QRTR => dur PHASE_ADJ_NOTE_DUR;
-  N.make(0, NC.NO_GAIN, PHASE_ADJ_NOTE_DUR) @=> Note PHASE_ADJ_isResting_NOTE;
+  N.make(0, NC.NO_GAIN, PHASE_ADJ_NOTE_DUR) @=> Note PHASE_ADJ_IS_RESTING_NOTE;
 
   // Prob that a Player will seek unison on any given iteration.  The idea is that
   // to seek unison the Ensemble and all the Players must seek unison  
@@ -420,28 +420,12 @@ public class InCConductor extends Conductor {
     if (AS.assertFloatNotEqual(gainAdj, NO_FACTOR)) {
       phrase(playerId) @=> Sequence playerPhrase;
 
-      // TEMP DEBUG
-      /* 0 => int debugCount; */
-
       // for each chord in the phrase
       while (playerPhrase.next() != null) {
-        // TEMP DEBUG
-        /* <<< "DEBUG IN instructionIsRestingOrCrescendoDecrescendo() count", debugCount++, "playerId", playerId, "playerPhrase", playerPhrase >>>; */
-
-        // TODO IS THIS MODIFYING BY REFERENCE?
         playerPhrase.current() @=> Chord c;
-        
-        // TEMP DEBUG
-        /* <<< "DEBUG in_c_conductor instruction ... playerPhrase", playerPhrase, "size", playerPhrase.size() >>>; */
-
-        // for each note in the chord
         for (0 => int i; i < c.size(); i++) {
-          // adjust the note's gain
-
-          // TEMP DEBUG
-          /* <<< "DEBUG IN instructionIsRestingOrCrescendoDecrescendo() gain loop note", c.notes[i] >>>; */
-
-          c.notes[i].gain * gainAdj => c.notes[i].gain;
+          // adjust the note's gain, normalize to be <= 1.0
+          Math.min(c.notes[i].gain * gainAdj, 0.95) => c.notes[i].gain;
         } 
       }
 
@@ -456,15 +440,15 @@ public class InCConductor extends Conductor {
   fun void instructionChangeAlignment(int playerId) {
     if (isAdjustingPhase(playerId)) {
       // copy the isResting Note into a new Chord
-      N.make(PHASE_ADJ_isResting_NOTE) @=> Note phaseAdjisRestingNote;
-      Chord phaseAdjisRestingChord;
-      phaseAdjisRestingChord.init(phaseAdjisRestingNote);
+      N.make(PHASE_ADJ_IS_RESTING_NOTE) @=> Note phaseAdjisRestingNote;
+      Chord phaseAdjIsRestingChord;
+      phaseAdjIsRestingChord.init(phaseAdjisRestingNote);
 
       // construct a new Sequence
       Sequence adjustedPhrase;
       adjustedPhrase.init(false);  // not looping
       // prepend the isResting Chord into the new Sequence
-      adjustedPhrase.add(phaseAdjisRestingChord);
+      adjustedPhrase.add(phaseAdjIsRestingChord);
 
       // get the current Phrase and append it into the adjusted phrase after the isResting note
       phrase(playerId) @=> Sequence currentPhrase; 
