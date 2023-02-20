@@ -53,6 +53,10 @@ public class InCPlayer extends PlayerBase {
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord c;
     while (true) {
+
+      // TEMP DEBUG
+      <<< "TOP OF PLAYER PLAY() LOOP BEFORE STEP EVENT id ", me.id(), me.running() >>>;
+
       // Block on event of next beat step broadcast by clock. Each player blocks until
       // the clock advances global `now` one tempo duration and then broadcasts on this
       // Event. Then each player wakes up, adds the duration of the current note being
@@ -63,6 +67,9 @@ public class InCPlayer extends PlayerBase {
       // sequence, it is is the first note in the same sequence (if not advancing
       // to the next sequence) or the first note in the next sequence (if advancing).
       stepEvent => now;
+
+      // TEMP DEBUG
+      <<< "TOP OF PLAYER PLAY() LOOP AFTER STEP EVENT id ", me.id() >>>;
 
       // NOTE: assumes all notes in current chord are same duration
       c.notes[0].duration => dur nextNoteDur;

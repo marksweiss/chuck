@@ -18,6 +18,12 @@ public class OrderedObjectMap {
   -1 => static int END;
 
   fun void put(string key, Object val) {
+
+    // TEMP DEBUG
+    if (me.id() != 28) {
+      <<< "BEFORE MAP PUT BEFORE DELETE", map[key], "id", me.id() >>>;
+    }
+
     // if key already present, clear value for key, don't add key to keys
     if (map.find(key) == 1) {
       map.erase(key);
@@ -26,8 +32,14 @@ public class OrderedObjectMap {
       key => keys[count++];
     }
 
+    // TEMP DEBUG
+    /* <<< "BEFORE MAP PUT AFTER DELETE", map[key] >>>; */
+
     // set value for key
     val @=> map[key];
+
+    // TEMP DEBUG
+    /* <<< "AFTER MAP PUT", map[key], "key", key, "val", val, "id", me.id() >>>; */
   }
 
   fun Object get(string key) {
@@ -39,6 +51,7 @@ public class OrderedObjectMap {
   }
 
   fun void delete(string key) {
+    map[key] @=> Object val;
     map.erase(key);
 
     // manually rebuild keys, skipping key being erased, because clear() and reset() don't remove

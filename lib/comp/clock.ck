@@ -88,17 +88,27 @@ public class Clock {
     // but with it outside the loop there is not
     Util u;
     while (true) {
+
+      // TEMP DEBUG
+      <<< "CLOCK BEFORE STEPDUR NOW" >>>;
+
       // Advance global time by smallest defined tempo duration, also shared with players.
       // When Clock blocks on Event and Players block on Event, then this means `now` advances
       // time globally for all shreds. (If there is no Event then each shred advances time
       // for its shred only by chucking durations to `now`).
       this.stepDur => now;
 
+      // TEMP DEBUG
+      <<< "CLOCK BEFORE STEP EVENT BROADCAST" >>>;
+
       // Block on the Event that another tempo duration has passed and wake up all Players.
       // Players calculate new value for time passed vs. the duration of the current Note
       // they are playing and stop Note, start new Note etc. if they need to, then they
       // block again on the same Event and control comes back here.
       this.stepEvent.broadcast();
+
+      // TEMP DEBUG
+      <<< "CLOCK AFTER STEP EVENT BROADCAST" >>>;
 
       // One player at a time released to update state, including global ensemble state. This is
       // just computation not output. Serialized access because there is shared global state
@@ -117,6 +127,9 @@ public class Clock {
       }
 
       playOutputEvent.broadcast();
+
+      // TEMP DEBUG
+      <<< "CLOCK AFTER PLAY OUTPUT EVENT BROADCAST" >>>;
     }
   }
 

@@ -14,6 +14,9 @@ public class Util {
       me.exit();
     }
 
+    // TEMP DEBUG
+    /* <<< "BEFORE PERMUTE" >>>; */    
+
     OrderedStringSet unusedIdxs;
     (rangeMax - rangeMin) + 1 => int rangeSize;
     for (rangeMin => int i; i <= rangeMax; i++) {
@@ -31,6 +34,9 @@ public class Util {
         unusedIdxs.delete(idxKey);
       }
     }
+
+    // TEMP DEBUG
+    /* <<< "AFTER PERMUTE" >>>; */    
 
     return idxs;
   }
