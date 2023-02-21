@@ -138,6 +138,9 @@ public class InstrSinOsc2 extends InstrumentBase {
   // Override
   fun void setGain(int genIdx, float gainVal) {
     gainVal => gens[genIdx].gain;
+
+    // TEMP DEBUG
+    /* <<< "GAIN", gens[genIdx].gain, "GAINVAL", gainVal >>>; */
   }
 
   // Override

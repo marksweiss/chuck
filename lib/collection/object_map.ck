@@ -20,9 +20,9 @@ public class OrderedObjectMap {
   fun void put(string key, Object val) {
 
     // TEMP DEBUG
-    if (me.id() != 28) {
-      <<< "BEFORE MAP PUT BEFORE DELETE", map[key], "id", me.id() >>>;
-    }
+    /* if (me.id() != 28) { */
+    /*   <<< "BEFORE MAP PUT BEFORE DELETE", map[key], "id", me.id() >>>; */
+    /* } */
 
     // if key already present, clear value for key, don't add key to keys
     if (map.find(key) == 1) {

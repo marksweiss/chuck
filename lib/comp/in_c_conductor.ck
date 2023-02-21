@@ -448,14 +448,14 @@ public class InCConductor extends Conductor {
     if (isAdjustingPhase(playerId)) {
       // copy the isResting Note into a new Chord
       N.make(PHASE_ADJ_IS_RESTING_NOTE) @=> Note phaseAdjisRestingNote;
-      /* Chord phaseAdjIsRestingChord; */
-      /* phaseAdjIsRestingChord.init(phaseAdjisRestingNote); */
+      Chord phaseAdjIsRestingChord;
+      phaseAdjIsRestingChord.init(phaseAdjisRestingNote);
 
       // construct a new Sequence
-      /* Sequence adjustedPhrase; */
-      /* adjustedPhrase.init(false);  // not looping */
+      Sequence adjustedPhrase;
+      adjustedPhrase.init(false);  // not looping
       // prepend the isResting Chord into the new Sequence
-      /* adjustedPhrase.add(phaseAdjIsRestingChord); */
+      adjustedPhrase.add(phaseAdjIsRestingChord);
 
       // get the current Phrase and append it into the adjusted phrase after the isResting note
       phrase(playerId) @=> Sequence currentPhrase; 
@@ -463,19 +463,19 @@ public class InCConductor extends Conductor {
       // TEMP DEBUG
       /* <<< "BEFORE ADJ PHRASE currentPhrase.size()", currentPhrase.size(), "playerId", playerId >>>; */
 
-      /* for (0 => int i; i < currentPhrase.size(); i++) { */
-      /*   adjustedPhrase.add(currentPhrase.chords[i]); */
-      /* } */
+      for (0 => int i; i < currentPhrase.size(); i++) {
+        adjustedPhrase.add(currentPhrase.chords[i]);
+      }
 
       // TEMP DEBUG
       /* <<< "AFTER ADJ PHRASE adjustedPhrase.size()", adjustedPhrase.size() >>>; */
 
       // replace the phrase state for the player with the new phrase with the new alignment
-      /* playerPhraseMap.put(idToKey(playerId), adjustedPhrase); */
-      for (0 => int i; i < currentPhrase.chords[0].size(); i++) {
-        currentPhrase.chords[0].notes[i].duration => dur curDur;
-        curDur + phaseAdjisRestingNote.duration => currentPhrase.chords[0].notes[i].duration; 
-      }
+      playerPhraseMap.put(idToKey(playerId), adjustedPhrase);
+      /* for (0 => int i; i < currentPhrase.chords[0].size(); i++) { */
+      /*   currentPhrase.chords[0].notes[i].duration => dur curDur; */
+      /*   curDur + phaseAdjisRestingNote.duration => currentPhrase.chords[0].notes[i].duration; */ 
+      /* } */
     }
   }
 

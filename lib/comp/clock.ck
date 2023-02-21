@@ -29,13 +29,16 @@ public class Clock {
 
   Event startEvent;
   Event stepEvent;
+  Event updateEvent;
+  Event updateCompleteEvent;
   Event playOutputEvent;
   PlayerBase players[];
   0.0 => float NO_GAIN;
 
   // bpm - beats per minute, number of quarter notes per minute
   // i.e. 60 bpm means a quarter note is 1 second
-  fun void init(float bpm, Event startEvent, Event stepEvent, Event playOutputEvent) {
+  fun void init(float bpm, Event startEvent, Event stepEvent, Event updateEvent,
+                Event updateCompleteEvent, Event playOutputEvent) {
     <<< "Clock: BEAT_STEP", BEAT_STEP >>>;
     <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>;
     <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
@@ -56,6 +59,8 @@ public class Clock {
 
     startEvent @=> this.startEvent; 
     stepEvent @=> this.stepEvent;
+    updateEvent @=> this.updateEvent;
+    updateCompleteEvent @=> this.updateCompleteEvent;
     playOutputEvent @=> this.playOutputEvent;
 
     D(0.015625) => SXTYFRTH;
@@ -90,16 +95,7 @@ public class Clock {
     while (true) {
 
       // TEMP DEBUG
-      <<< "CLOCK BEFORE STEPDUR NOW" >>>;
-
-      // Advance global time by smallest defined tempo duration, also shared with players.
-      // When Clock blocks on Event and Players block on Event, then this means `now` advances
-      // time globally for all shreds. (If there is no Event then each shred advances time
-      // for its shred only by chucking durations to `now`).
-      this.stepDur => now;
-
-      // TEMP DEBUG
-      <<< "CLOCK BEFORE STEP EVENT BROADCAST" >>>;
+      /* <<< "CLOCK BEFORE STEP EVENT BROADCAST" >>>; */
 
       // Block on the Event that another tempo duration has passed and wake up all Players.
       // Players calculate new value for time passed vs. the duration of the current Note
@@ -108,7 +104,19 @@ public class Clock {
       this.stepEvent.broadcast();
 
       // TEMP DEBUG
-      <<< "CLOCK AFTER STEP EVENT BROADCAST" >>>;
+      /* <<< "CLOCK AFTER STEP EVENT BROADCAST" >>>; */
+
+      // TEMP DEBUG
+      /* <<< "CLOCK BEFORE STEPDUR NOW" >>>; */
+
+      // Advance global time by smallest defined tempo duration, also shared with players.
+      // When Clock blocks on Event and Players block on Event, then this means `now` advances
+      // time globally for all shreds. (If there is no Event then each shred advances time
+      // for its shred only by chucking durations to `now`).
+      this.stepDur => now;
+
+      // TEMP DEBUG
+      /* <<< "CLOCK AFTER STEPDUR NOW" >>>; */
 
       // One player at a time released to update state, including global ensemble state. This is
       // just computation not output. Serialized access because there is shared global state
@@ -121,15 +129,28 @@ public class Clock {
       // repeat the cycle.
       // So randomize so that players update state based on each more "concurrently" as they
       // would in reality
-      u.permutation(0, players.size() - 1) @=> int playerIdxs[];
-      for (0 => int i; i < playerIdxs.size(); i++) {
-        players[playerIdxs[i]].signalUpdate();
-      }
+      /* u.permutation(0, players.size() - 1) @=> int playerIdxs[]; */
+      /* for (0 => int i; i < playerIdxs.size(); i++) { */
+
+        // TEMP DEBUG
+        <<< "CLOCK BEFORE UPDATE() player addr", players[playerIdxs[i]], "idx", playerIdxs[i] >>>;
+
+        /* players[playerIdxs[i]].signalUpdate(); */
+        updateEvent.signal();
+
+        // TEMP DEBUG
+        <<< "CLOCK AFTER UPDATE() idx", playerIdxs[i] >>>;
+        // TODO BUG NEED TO BLOCK HERE AND EACH PLAYER SIGNALS BACK TO THE CLOCK AFTER IT IS DONE UPDATE
+        updateCompleteEvent => now;
+      /* } */
+
+      // TEMP DEBUG
+      /* <<< "CLOCK BEFORE PLAY OUTPUT EVENT BROADCAST" >>>; */
 
       playOutputEvent.broadcast();
 
       // TEMP DEBUG
-      <<< "CLOCK AFTER PLAY OUTPUT EVENT BROADCAST" >>>;
+      /* <<< "CLOCK AFTER PLAY OUTPUT EVENT BROADCAST" >>>; */
     }
   }
 

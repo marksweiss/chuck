@@ -70,10 +70,11 @@ fun void main () {
   60 => int BPM;
   Event startEvent;
   Event stepEvent; 
+  Event updateCompleteEvent;
   Event playOutputEvent;
 
   Clock clock;
-  clock.init(BPM, startEvent, stepEvent, playOutputEvent);
+  clock.init(BPM, startEvent, stepEvent, updateCompleteEvent, playOutputEvent);
 
   // declare sequence containers
   true => int isLooping;
@@ -131,13 +132,13 @@ fun void main () {
   // to check their state changes, performing the notes of the Sequences using the
   // Instruments to play the notes
   InCPlayer player1;
-  player1.init("player1", seqs1, startEvent, stepEvent, playOutputEvent,
+  player1.init("player1", seqs1, startEvent, stepEvent, updateCompleteEvent, playOutputEvent,
                clock.stepDur, conductor, instr1);
   InCPlayer player2;
-  player2.init("player2", seqs2, startEvent, stepEvent, playOutputEvent,
+  player2.init("player2", seqs2, startEvent, stepEvent, updateCompleteEvent, playOutputEvent,
                clock.stepDur, conductor, instr2);
   InCPlayer player3;
-  player3.init("player3", seqs3, startEvent, stepEvent, playOutputEvent,
+  player3.init("player3", seqs3, startEvent, stepEvent, updateCompleteEvent, playOutputEvent,
                clock.stepDur, conductor, instr3);
   clock.registerPlayers([player1, player2, player3]);
 
