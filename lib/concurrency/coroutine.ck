@@ -3,15 +3,26 @@ public void runThing(Thing thing) {
   thing.run();
 }
 
+
+// TODO THIS ONLY WORKS FOR TWO PROCESSES BECAUSE IT RELIES ON SIGNAL
+// TODO NEED A SEPARATE CO-ROUTINE CHAIN CLASS
+
 public class Coroutine {
-  // TODO HACK
-  Event nextEvents[10];
-  Event pauseEvents[10];
+  0 => int registeredProcesses;
+  2 => int NUM_PROCESSES;
+  Event nextEvents[NUM_PROCESSES];
+  Event pauseEvents[NUM_PROCESSES];
 
   fun void register(int id) {
+    if (this.registeredProcesses == 2) {
+      <<< "Coroutine only supports orchestrating two processes" >>>;
+      me.exit();
+    }
+
     Event event;
     event @=> pauseEvents[id];
-    <<< "IN INIT ID", id , this.pauseEvents[id] >>>;
+    1 +=> registeredProcesses;
+    <<< "IN INIT ID", id , "ID EVENT", this.pauseEvents[id] >>>;
   }
 
   fun void connect(int id, int nextId) {
@@ -19,7 +30,7 @@ public class Coroutine {
     // i.e. when id calls signalNext it signals the event for nextId
     pauseEvents[nextId] @=> Event nextEvent;
     nextEvent @=> nextEvents[id];
-    <<< "IN CONNECT NEXT_ID", nextId , this.nextEvents[id] >>>;
+    <<< "IN CONNECT ID", id, "NEXT_ID", nextId, "NEXT EVENT", this.nextEvents[id] >>>;
   }
 
   fun void yield(int id) {
@@ -28,15 +39,15 @@ public class Coroutine {
   }
 
   fun void signalNext(int id) {
-    <<< "IN SIGNAL_NEXT BEFORE ", id, this.nextEvents[id] >>>;
+    <<< "IN SIGNAL_NEXT BEFORE ", id, "NEXT EVENT", this.nextEvents[id] >>>;
     this.nextEvents[id].signal();
-    <<< "IN SIGNAL_NEXT AFTER ", id, this.nextEvents[id] >>>;
+    <<< "IN SIGNAL_NEXT AFTER ", id, "NEXT EVENT", this.nextEvents[id] >>>;
   }
 
   fun void pause(int id) {
-    <<< "IN PAUSE BEFORE ", id, this.pauseEvents[id] >>>;
+    <<< "IN PAUSE BEFORE ", id, "ID EVENT", this.pauseEvents[id] >>>;
     this.pauseEvents[id] => now;
-    <<< "IN PAUSE AFTER ", id, this.pauseEvents[id] >>>;
+    <<< "IN PAUSE AFTER ", id, "ID EVENT", this.pauseEvents[id] >>>;
   }
 }
 
