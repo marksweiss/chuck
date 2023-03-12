@@ -32,7 +32,7 @@ public class Clock {
   Event updateEvent;
   Event updateCompleteEvent;
   Event playOutputEvent;
-  PlayerBase players[];
+  /* PlayerBase players[]; */
   0.0 => float NO_GAIN;
 
   // bpm - beats per minute, number of quarter notes per minute
@@ -76,9 +76,9 @@ public class Clock {
 
   // Split from init() so users like NoteConst and ScaleConst which only need to calculate durations
   // don't need a dependency on Player. TODO would likely be better to refactor into two classes
-  fun void registerPlayers(PlayerBase players[]) {
-    players @=> this.players;
-  }
+  /* fun void registerPlayers(PlayerBase players[]) { */
+  /*   players @=> this.players; */
+  /* } */
 
   fun void play() {
     // TODO REALLY UNDERSTAND THIS. DO WE NEED BOTH SYNCS?
@@ -133,15 +133,38 @@ public class Clock {
       /* for (0 => int i; i < playerIdxs.size(); i++) { */
 
         // TEMP DEBUG
-        <<< "CLOCK BEFORE UPDATE() player addr", players[playerIdxs[i]], "idx", playerIdxs[i] >>>;
+        /* <<< "CLOCK BEFORE UPDATE() player addr", players[playerIdxs[i]], "idx", playerIdxs[i] >>>; */
+
+        // TODO
+        // The idea is
+        // - loop without blocking in this control loop while incrementing time, whih
+        //   successively unblocks and advances time in each Player loop until all are blocked on update
+        // - always signal update here, which is a no-op if no Player is blocked and releases one
+        //   to start update if any oare blocked on update
+        // - signal to start update MUST block this thread so that the only advancing thread is the
+        //   signalled Player
+        // - therefore the signalled Player MUST unblock this thread so that it can iterate in event loop
+        //   and again signal, thus advancing time and then unblocking the next Player, etc.
+        // How to do this
+        // - players block on stepEvent
+        // - each clock iteration starts by advancinb time, i.e. singalling stepEvent
+        // - players block on updateEvent only when time has advanced to the end of their current note,
+        //   i.e. they are ready to play, TODO THIS DOESN'T MAKE SENSE TO COUPLE UPDATING AND PLAYING,
+        //   WHY ISN'T STATE ADVANCING ON EVERY TIME IERATION AND THEN NOTES ARE EMITTED WHEN TIME
+        //   HAS ADVANCED TO THE NEXT NOTE?
+        // - Clock signalling updateEvent must block clock itself, does this by passing Event that it will
+        //   block on INTO a wrapper call or each Player has a reference to clock or the event, so
+        //   Clock calls signal wrapper, which calls clockBlock.blockMe() and the calls updateEvent.signal()
+        //   and then does the update and then calls clockBloc.unblockMe() and then blocks on outputEvent
+        //   TODO AGAIN THIS DOES NOT MAKE SENSE TO COUPLE UPDATE AND OUTPUT 
 
         /* players[playerIdxs[i]].signalUpdate(); */
-        updateEvent.signal();
+        updateEvent.signalUpdate(updateCompleteEvent);
 
         // TEMP DEBUG
-        <<< "CLOCK AFTER UPDATE() idx", playerIdxs[i] >>>;
+        /* <<< "CLOCK AFTER UPDATE() idx", playerIdxs[i] >>>; */
         // TODO BUG NEED TO BLOCK HERE AND EACH PLAYER SIGNALS BACK TO THE CLOCK AFTER IT IS DONE UPDATE
-        updateCompleteEvent => now;
+        /* updateCompleteEvent => now; */
       /* } */
 
       // TEMP DEBUG

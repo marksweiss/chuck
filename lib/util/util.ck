@@ -14,15 +14,13 @@ public class Util {
       me.exit();
     }
 
-    // TEMP DEBUG
-    /* <<< "BEFORE PERMUTE" >>>; */    
-
     OrderedStringSet unusedIdxs;
     (rangeMax - rangeMin) + 1 => int rangeSize;
     for (rangeMin => int i; i <= rangeMax; i++) {
       unusedIdxs.put(Std.itoa(i)); 
     }
 
+    // TODO THIS IS OBVIOUSLY TERRIBLE, brute force on a target set dwindling to 0
     int idxs[rangeSize];
     0 => int idxCount;
     while (unusedIdxs.notEmpty()) {
@@ -34,9 +32,6 @@ public class Util {
         unusedIdxs.delete(idxKey);
       }
     }
-
-    // TEMP DEBUG
-    /* <<< "AFTER PERMUTE" >>>; */    
 
     return idxs;
   }
