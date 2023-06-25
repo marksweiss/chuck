@@ -1,11 +1,12 @@
-// chuck --loop test/assert.ck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck
-// lib/arg_parser/float_arg.ck lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck
-// lib/arg_parser/string_arg.ck lib/arg_parser/arg_parser.ck lib/collection/arg_map.ck
-// lib/collection/object_map.ck lib/collection/set.ck lib/util/util.ck 
-// lib/comp/instrument/instrument_base.ck lib/comp/player_base.ck lib/comp/clock.ck
-// lib/comp/note.ck lib/comp/chord.ck lib/comp/scale.ck lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/note_const.ck
-// lib/comp/scale_const.ck lib/comp/instrument/sinosc2.ck lib/comp/conductor.ck
-// lib/comp/in_c_conductor.ck lib/comp/in_c_player.ck comps/comp_sinosc_2.ck
+/* chuck --loop test/assert.ck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck */
+/* lib/arg_parser/float_arg.ck lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck */
+/* lib/arg_parser/string_arg.ck lib/arg_parser/arg_parser.ck lib/collection/arg_map.ck */
+/* lib/collection/object_map.ck lib/collection/set.ck lib/util/util.ck lib/concurrency/lock.ck */
+/* lib/concurrency/coroutine.ck lib/concurrency/coroutine_controller.ck
+/* lib/comp/instrument/instrument_base.ck lib/comp/player_base.ck lib/comp/clock.ck lib/comp/note.ck */
+/* lib/comp/chord.ck lib/comp/scale.ck lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/note_const.ck */
+/* lib/comp/scale_const.ck lib/comp/instrument/sinosc2.ck lib/comp/conductor.ck lib/comp/in_c_conductor.ck */
+/* lib/comp/in_c_player.ck comps/comp_sinosc_2.ck *1/ */
 
 // For client to spork, which requires a free function as entry point
 public void runClock(Clock clock) {
@@ -80,11 +81,10 @@ fun void main () {
   true => int isLooping;
 
   // For passing a copy of the initial, unmodified source sequences to the Conductor
-  // so ti can advance players to a clean copy of the next sequences, or undo changes
+  // so it can advance players to a clean copy of the next sequences, or undo changes
   // to the player copy of a sequence
   Sequences seqs0;
   seqs0.init("seqs0", isLooping);
-
   Sequences seqs1;
   seqs1.init("seqs1", isLooping);
   Sequences seqs2;
@@ -131,6 +131,17 @@ fun void main () {
   // declare the Players whose behavior governed by calling the Conductor to
   // to check their state changes, performing the notes of the Sequences using the
   // Instruments to play the notes
+  CoroutineController CC;
+  Coroutine cor;
+  Lock lock;
+
+  CoroutineController corPlayer1;
+  corPlayer1.init(1, "cor_player1", cor, lock, CC.IS_HEAD);
+  CoroutineController corPlayer2;
+  corPlayer2.init(2, "cor_player2", cor, lock, CC.IS_NOT_HEAD);
+  CoroutineController corPlayer1;
+  corPlayer3.init(3, "cor_player3", cor, lock, CC.IS_NOT_HEAD);
+
   InCPlayer player1;
   player1.init("player1", seqs1, startEvent, stepEvent, updateCompleteEvent, playOutputEvent,
                clock.stepDur, conductor, instr1);

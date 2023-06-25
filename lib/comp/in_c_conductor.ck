@@ -10,6 +10,9 @@
 // Machine.add("lib/comp/chord.ck"); 
 // Machine.add("lib/comp/conductor.ck"); 
 // Machine.add("lib/test/assert.ck"); 
+// Machine.add("lib/concurrency/lock.ck"); 
+// Machine.add("lib/concurrency/coroutine.ck"); 
+// Machine.add("lib/concurrency/coroutine_controller.ck"); 
 
 // NOTES and Questions From Previous Implementation
 // https://github.com/marksweiss/aleatoric/blob/master/compositions/Terry_Riley-In_C/midi/In_C_midi_user_instruction.rb 
@@ -105,7 +108,7 @@ public class InCConductor extends Conductor {
   // this many times or more, then adj_phase_prob_increase_factor will be applied
   1 => int ADJ_PHASE_COUNT_THRESHOLD;
   2 => int ADJ_PHASE_PROB_INCREASE_FACTOR;
-  // The length of the isResting Note (in seconds) inserted if a Player is adjusting its phase  
+  // The length of the isResting Note inserted if a Player is adjusting its phase  
   K.QRTR => dur PHASE_ADJ_NOTE_DUR;
   N.make(0, NC.NO_GAIN, PHASE_ADJ_NOTE_DUR) @=> Note PHASE_ADJ_IS_RESTING_NOTE;
 
@@ -143,7 +146,6 @@ public class InCConductor extends Conductor {
   // Prob that a Player will seek to transpose its current phrase
   20 => int TRANSPOSE_PROB_FACTOR;
   // Number of octaves to transpose if the Player does do so
-  // Amount that represents the number of semitones to shift, e.g. 12 for one octave
   1 => int TRANSPOSE_SHIFT_NUM_OCTAVES;
   // Factor for shift down
   -1 => int TRANSPOSE_DOWN_FACTOR;
@@ -177,10 +179,10 @@ public class InCConductor extends Conductor {
   // and instead this just jumps the amplitude jarringly on one iteration
   20 => int ENSEMBLE_CRESCENDO_PROB;
   5 => int ENSEMBLE_DECRESCENDO_PROB;
-  // Maximum de/increase in volume (in CSound scale) that notes can gain in crescendo 
+  // Maximum de/increase in volume that notes can gain in crescendo 
   // pursued during a unison or in the final Conclusion
   0.2 => float MAX_GAIN_RANGE_FOR_SEEKING_CRESCENDO;
-  // Maximum de/increase in volume (in CSound scale) that notes can gain in crescendo 
+  // Maximum de/increase in volume that notes can gain in crescendo 
   0.2 => float MAX_GAIN_RANGE_FOR_SEEKING_DECRESCENDO;
   // Parameters governing the Conclusion
   // This is the ratio of steps in the Conclusion to the total steps before the Conclusion  

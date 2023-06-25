@@ -16,12 +16,13 @@ public class InCPlayer extends PlayerBase {
   Event updateEvent;
   Event updateCompleteEvent; // Player signals Clock so Clock can signal next Player to update
   Event playOutputEvent;
+  CoroutineController corController;
   dur stepDur;
   InCConductor conductor;
   InstrumentBase instr;
 
   fun void init(string name, Sequences seqs, Event startEvent, Event stepEvent, Event updateEvent,
-                Event updateCompleteEvent, Event playOutputEvent,
+                Event updateCompleteEvent, Event playOutputEvent, CoroutineController corController,
                 dur stepDur, InCConductor conductor, InstrumentBase instr) {
     name => this.name;
     seqs @=> this.seqs;
@@ -31,6 +32,7 @@ public class InCPlayer extends PlayerBase {
     updateEvent @=> this.updateEvent;
     updateCompleteEvent @=> this.updateCompleteEvent;
     playOutputEvent @=> this.playOutputEvent;
+    corController @=> this.corController;
     stepDur => this.stepDur;
     conductor @=> this.conductor;
     instr @=> this.instr;
@@ -89,6 +91,7 @@ public class InCPlayer extends PlayerBase {
         // TEMP DEBUG
         <<< "PLAYER BEFORE BLOCK ON UPDATE EVENT", me.id() >>>; 
 
+        // TODO CAN WE GET RID OF THIS EVENT WHICH DOESN'T ACTUALLY WORK TO COORDINATE UPDATE, USE COR
         // BLOCK HERE, ENTER ONE AT A TIME
         updateEvent => now;
 
@@ -99,8 +102,13 @@ public class InCPlayer extends PlayerBase {
         instr.getEnv().keyOff();
         instr.getEnv().releaseTime() => now;
 
+        // TODO THIS IS THE GLOBAL STATE WE NEED TO SYNCHRONIZE ACCESS TO, DOES COR WORK?
+        if (! corController.isHead) {
+          corController.lock => now;
+        }
         // Conductor update current phrase or advanced to next phrase
-        conductor.doUpdate(me.id(), seq) @=> Sequence updatedSeq;
+        conductor.doUpdate(me.id(), seq) @=> Sequence seq;
+        corController.yield(corController.id);
 
         if (! conductor.isPlaying()) {
           break;
@@ -123,6 +131,7 @@ public class InCPlayer extends PlayerBase {
         // TEMP DEBUG
         <<< "AFTER UPDATE COMPLETE EVENT SIGNAL BEFORE BLOCK PLAY OUTPUT EVENT", me.id() >>>;
 
+        // TODO CAN WE GET RID OF THIS EVENT WHICH DOESN'T ACTUALLY WORK TO COORDINATE UPDATE, USE COR
         // BLOCK HERE AND THEN UNBLOCK BY CLOCK AND UPDATE LOCAL STATE AND PLAY OUTPUT CONCURRENTLY
         playOutputEvent => now;
   

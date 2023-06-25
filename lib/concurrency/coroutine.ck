@@ -1,7 +1,7 @@
-public void runThing(Thing thing) {
-  <<< "IN RUN_THING()" >>>;
-  thing.run();
-}
+/* public void runCorr(CoroutineDoSomethingExample corr) { */
+/*   <<< "IN RUN_THING()" >>>; */
+/*   corr.run(); */
+/* } */
 
 
 // TODO THIS ONLY WORKS FOR TWO PROCESSES BECAUSE IT RELIES ON SIGNAL
@@ -9,13 +9,13 @@ public void runThing(Thing thing) {
 
 public class Coroutine {
   0 => int registeredProcesses;
-  2 => int NUM_PROCESSES;
+  3 => int NUM_PROCESSES;
   Event nextEvents[NUM_PROCESSES];
   Event pauseEvents[NUM_PROCESSES];
 
   fun void register(int id) {
-    if (this.registeredProcesses == 2) {
-      <<< "Coroutine only supports orchestrating two processes" >>>;
+    if (this.registeredProcesses == NUM_PROCESSES) {
+      <<< "Coroutine only supports orchestrating", NUM_PROCESSES, "processes" >>>;
       me.exit();
     }
 
@@ -28,8 +28,7 @@ public class Coroutine {
   fun void connect(int id, int nextId) {
     // get the Event bound to nextId and set it as the nextEvent for id, by reference
     // i.e. when id calls signalNext it signals the event for nextId
-    pauseEvents[nextId] @=> Event nextEvent;
-    nextEvent @=> nextEvents[id];
+    pauseEvents[nextId] @=> nextEvents[id];
     <<< "IN CONNECT ID", id, "NEXT_ID", nextId, "NEXT EVENT", this.nextEvents[id] >>>;
   }
 
@@ -51,46 +50,69 @@ public class Coroutine {
   }
 }
 
-class Thing {
-  int id;
-  Coroutine cor;
+/* class Lock extends Event { */
+/*   int id; */
+
+/*   fun void init(int id) { */
+/*     id => this.id; */
+/*   } */
+/* } */
+
+// Pattern is to extend this and implement a real ruan that does the work you want
+// and uses the coroutine chain to control controll flow
+/* class CoroutineDoSomethingExample { */
+/*   int id; */
+/*   Coroutine cor; */
+/*   Lock lock; */
+/*   int isHead; */
   
-  fun void init(int id, Coroutine cor) {
-    id => this.id;
-    cor @=> this.cor;
-  }
+/*   fun void init(int id, Coroutine cor, Lock lock, int isHead) { */
+/*     id => this.id; */
+/*     cor @=> this.cor; */
+/*     lock @=> this.lock; */
+/*     isHead => this.isHead; */
 
-  fun void run() {
-    <<< "IN RUN ", this.id >>>;
-    while(true) {
-      for (0 => int i; i < 5; i++) {
-        <<< "id", this.id >>>;
-      }
-      // Just to make each slice take longer
-      for (0 => int i; i < 100000; i++) {
-        // no-op
-      }
-      cor.yield(this.id);
-    }
-  }
-}
+/*     cor.register(id); */
+/*   } */
 
-fun void main() {
-  Coroutine cor;
+/*   fun void run() { */
+/*     <<< "IN RUN ", this.id >>>; */
+/*     if (! this.isHead) { */
+/*       this.lock => now; */
+/*     } */
+/*     <<< "UNLOCKED" >>>; */
+/*     while(true) { */
+/*       for (0 => int i; i < 5; i++) { */
+/*         <<< "id", this.id >>>; */
+/*       } */
+/*       // Just to make each slice take longer */
+/*       for (0 => int i; i < 100000; i++) { */
+/*         // no-op */
+/*       } */
+/*       cor.yield(this.id); */
+/*     } */
+/*   } */
+/* } */
 
-  Thing thing0;
-  thing0.init(0, cor); 
-  Thing thing1;
-  thing1.init(1, cor);
+/* fun void main() { */
+/*   Coroutine cor; */
+/*   Lock lock; */
 
-  cor.register(0);
-  cor.register(1);
-  cor.connect(0, 1);
-  cor.connect(1, 0);
+/*   CoroutineDoSomethingExample corr0; */
+/*   corr0.init(0, cor, lock, true); */ 
+/*   CoroutineDoSomethingExample corr1; */
+/*   corr1.init(1, cor, lock, false); */
+/*   CoroutineDoSomethingExample corr2; */
+/*   corr2.init(2, cor, lock, false); */
 
-  spork ~ runThing(thing0);
-  spork ~ runThing(thing1);
-  while (true) {1::second => now;}  // block process exit to force child threads to run
-}
+/*   cor.connect(0, 1); */
+/*   cor.connect(1, 2); */
+/*   cor.connect(2, 0); */
 
-main();
+/*   spork ~ runCorr(corr0); */
+/*   spork ~ runCorr(corr1); */
+/*   spork ~ runCorr(corr2); */
+/*   while (true) {1::second => now;}  // block process exit to force child threads to run */
+/* } */
+
+/* main(); */
