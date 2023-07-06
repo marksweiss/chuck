@@ -117,10 +117,15 @@ public class InCPlayer extends PlayerBase {
         // TEMP DEBUG
         <<< "PLAYER AFTER DO_UPDATE", "thread", me.id(), "cor id", corController.id  >>>; 
 
+        corController.signalNext();
+
+        // TEMP DEBUG
+        <<< "PLAYER AFTER SIGNAL_NEXT", "thread", me.id(), "cor id", corController.id  >>>; 
+
         /* if (corController.isHead) { */
         /*   corController.pause(); */
         /* } else { */
-        corController.yield();
+        /* corController.yield(); */
         /* } */
 
         if (! conductor.isPlaying()) {
@@ -161,7 +166,7 @@ public class InCPlayer extends PlayerBase {
         } 
 
         // TEMP DEBUG
-        /* <<< "BEFORE SET GAIN notes.size", c.notes.size() >>>; */
+        <<< "BEFORE SET GAIN notes.size", c.notes.size() >>>;
 
         // load the next chord into all the gens in the instrument
         for (0 => int j; j < c.notes.size(); j++) {
@@ -169,7 +174,7 @@ public class InCPlayer extends PlayerBase {
           instr.setAttr("freq", Std.mtof(n.pitch));
 
           // TEMP DEBUG
-          /* <<< "SET GAIN" >>>; */
+          <<< "SET GAIN" >>>;
 
           instr.setGain(this.gain);
         }
