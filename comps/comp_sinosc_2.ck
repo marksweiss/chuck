@@ -2,11 +2,11 @@
 /* lib/arg_parser/float_arg.ck lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck */
 /* lib/arg_parser/string_arg.ck lib/arg_parser/arg_parser.ck lib/collection/arg_map.ck */
 /* lib/collection/object_map.ck lib/collection/set.ck lib/util/util.ck lib/concurrency/lock.ck */
-/* lib/concurrency/coroutine.ck lib/concurrency/coroutine_controller.ck
+/* lib/concurrency/coroutine.ck lib/concurrency/coroutine_controller.ck */
 /* lib/comp/instrument/instrument_base.ck lib/comp/player_base.ck lib/comp/clock.ck lib/comp/note.ck */
 /* lib/comp/chord.ck lib/comp/scale.ck lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/note_const.ck */
 /* lib/comp/scale_const.ck lib/comp/instrument/sinosc2.ck lib/comp/conductor.ck lib/comp/in_c_conductor.ck */
-/* lib/comp/in_c_player.ck comps/comp_sinosc_2.ck *1/ */
+/* lib/comp/in_c_player.ck comps/comp_sinosc_2.ck */
 
 // For client to spork, which requires a free function as entry point
 public void runClock(Clock clock) {
@@ -75,7 +75,7 @@ fun void main () {
   Event playOutputEvent;
 
   Clock clock;
-  clock.init(BPM, startEvent, stepEvent, updateCompleteEvent, playOutputEvent);
+  clock.init(BPM, startEvent, stepEvent); // , updateCompleteEvent, playOutputEvent);
 
   // declare sequence containers
   true => int isLooping;
@@ -114,6 +114,7 @@ fun void main () {
   getConf(100, 40::ms, 30::ms, 30::ms) @=> ArgParser conf1;
   getConf(102.5, 25::ms, 40::ms, 50::ms) @=> ArgParser conf2;
   getConf(105, 35::ms, 35::ms, 70::ms) @=> ArgParser conf3;
+  // TODO MAKE NAMING 0-based consistent
   InstrSinOsc2 instr1;
   InstrSinOsc2 instr2; 
   InstrSinOsc2 instr3; 
@@ -131,33 +132,35 @@ fun void main () {
   // declare the Players whose behavior governed by calling the Conductor to
   // to check their state changes, performing the notes of the Sequences using the
   // Instruments to play the notes
+
   CoroutineController CC;
   Coroutine cor;
   Lock lock;
-
+  CoroutineController corPlayer0;
+  corPlayer0.init(0, "cor_player0", cor, lock, CC.IS_HEAD);
   CoroutineController corPlayer1;
-  corPlayer1.init(1, "cor_player1", cor, lock, CC.IS_HEAD);
+  corPlayer1.init(1, "cor_player1", cor, lock, CC.IS_NOT_HEAD);
   CoroutineController corPlayer2;
   corPlayer2.init(2, "cor_player2", cor, lock, CC.IS_NOT_HEAD);
-  CoroutineController corPlayer1;
-  corPlayer3.init(3, "cor_player3", cor, lock, CC.IS_NOT_HEAD);
+  cor.connect(0, 1);
+  cor.connect(1, 2);
+  cor.connect(2, 0);
 
+  InCPlayer player0;
+  player0.init("player0", seqs1, startEvent, stepEvent, // updateCompleteEvent, playOutputEvent,
+               corPlayer0, clock.stepDur, conductor, instr1);
   InCPlayer player1;
-  player1.init("player1", seqs1, startEvent, stepEvent, updateCompleteEvent, playOutputEvent,
-               clock.stepDur, conductor, instr1);
+  player1.init("player1", seqs2, startEvent, stepEvent, // updateCompleteEvent, playOutputEvent,
+               corPlayer1, clock.stepDur, conductor, instr2);
   InCPlayer player2;
-  player2.init("player2", seqs2, startEvent, stepEvent, updateCompleteEvent, playOutputEvent,
-               clock.stepDur, conductor, instr2);
-  InCPlayer player3;
-  player3.init("player3", seqs3, startEvent, stepEvent, updateCompleteEvent, playOutputEvent,
-               clock.stepDur, conductor, instr3);
-  clock.registerPlayers([player1, player2, player3]);
+  player2.init("player2", seqs3, startEvent, stepEvent, // updateCompleteEvent, playOutputEvent,
+               corPlayer2, clock.stepDur, conductor, instr3);
 
   // start clock thread and instrument play threads
   spork ~ runClock(clock);
+  spork ~ runPlayer(player0);
   spork ~ runPlayer(player1);
   spork ~ runPlayer(player2);
-  spork ~ runPlayer(player3);
 
   while (true) {1::second => now;}  // block process exit to force child threads to run
 }

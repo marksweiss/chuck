@@ -48,7 +48,7 @@ public class ScaleConst {
   Event dummyUpdateCompleteEvent;
   Event dummyPlayoutputEvent;
   0 => int NUM_PLAYERS;
-  k.init(BPM, dummyStartEvent, dummyStepEvent, dummyUpdateCompleteEvent, dummyPlayoutputEvent);  
+  k.init(BPM, dummyStartEvent, dummyStepEvent); // dummyUpdateCompleteEvent, dummyPlayoutputEvent);  
 
   // Rest Constants
   0.0 => float NO_GAIN;

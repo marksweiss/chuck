@@ -29,16 +29,17 @@ public class Clock {
 
   Event startEvent;
   Event stepEvent;
-  Event updateEvent;
-  Event updateCompleteEvent;
-  Event playOutputEvent;
+  /* Event updateEvent; */
+  /* Event updateCompleteEvent; */
+  /* Event playOutputEvent; */
   /* PlayerBase players[]; */
   0.0 => float NO_GAIN;
 
   // bpm - beats per minute, number of quarter notes per minute
   // i.e. 60 bpm means a quarter note is 1 second
-  fun void init(float bpm, Event startEvent, Event stepEvent, Event updateEvent,
-                Event updateCompleteEvent, Event playOutputEvent) {
+  fun void init(float bpm, Event startEvent, Event stepEvent) // Event updateEvent,
+                // Event updateCompleteEvent, Event playOutputEvent)
+  {
     <<< "Clock: BEAT_STEP", BEAT_STEP >>>;
     <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>;
     <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
@@ -59,9 +60,9 @@ public class Clock {
 
     startEvent @=> this.startEvent; 
     stepEvent @=> this.stepEvent;
-    updateEvent @=> this.updateEvent;
-    updateCompleteEvent @=> this.updateCompleteEvent;
-    playOutputEvent @=> this.playOutputEvent;
+    /* updateEvent @=> this.updateEvent; */
+    /* updateCompleteEvent @=> this.updateCompleteEvent; */
+    /* playOutputEvent @=> this.playOutputEvent; */
 
     D(0.015625) => SXTYFRTH;
     D(0.03125) => THRTYSCND;
@@ -89,8 +90,6 @@ public class Clock {
     // Sync again to closest next tempo duration unit, all threads are now using synced time.
     sync();
 
-    // NOTE: lol chuck lang, with this in the loop there is an NPE in in_c_conductor
-    // but with it outside the loop there is not
     Util u;
     while (true) {
 
@@ -159,7 +158,7 @@ public class Clock {
         //   TODO AGAIN THIS DOES NOT MAKE SENSE TO COUPLE UPDATE AND OUTPUT 
 
         /* players[playerIdxs[i]].signalUpdate(); */
-        updateEvent.signalUpdate(updateCompleteEvent);
+        /* updateEvent.signalUpdate(updateCompleteEvent); */
 
         // TEMP DEBUG
         /* <<< "CLOCK AFTER UPDATE() idx", playerIdxs[i] >>>; */
@@ -170,7 +169,7 @@ public class Clock {
       // TEMP DEBUG
       /* <<< "CLOCK BEFORE PLAY OUTPUT EVENT BROADCAST" >>>; */
 
-      playOutputEvent.broadcast();
+      /* playOutputEvent.broadcast(); */
 
       // TEMP DEBUG
       /* <<< "CLOCK AFTER PLAY OUTPUT EVENT BROADCAST" >>>; */

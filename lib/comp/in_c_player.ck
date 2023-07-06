@@ -21,8 +21,9 @@ public class InCPlayer extends PlayerBase {
   InCConductor conductor;
   InstrumentBase instr;
 
-  fun void init(string name, Sequences seqs, Event startEvent, Event stepEvent, Event updateEvent,
-                Event updateCompleteEvent, Event playOutputEvent, CoroutineController corController,
+  fun void init(string name, Sequences seqs, Event startEvent, Event stepEvent, // Event updateEvent,
+                // Event updateCompleteEvent, Event playOutputEvent,
+                CoroutineController corController,
                 dur stepDur, InCConductor conductor, InstrumentBase instr) {
     name => this.name;
     seqs @=> this.seqs;
@@ -40,9 +41,9 @@ public class InCPlayer extends PlayerBase {
 
   // TODO REMOVE AND FROM BASE CLASS
   /* Override */
-  fun void signalUpdate() {
-    updateEvent.signal();
-  }
+  /* fun void signalUpdate() { */
+  /*   updateEvent.signal(); */
+  /* } */
 
   // override
   fun void play() {
@@ -59,6 +60,11 @@ public class InCPlayer extends PlayerBase {
     0::samp => dur sinceLastNote;
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord c;
+
+    // No-op for all threads which aren't the head of the Coroutine, ensures that the coroutine starts each
+    // iteration on the head of the coroutine
+    corController.start();  
+
     while (true) {
 
       // TEMP DEBUG
@@ -93,7 +99,7 @@ public class InCPlayer extends PlayerBase {
 
         // TODO CAN WE GET RID OF THIS EVENT WHICH DOESN'T ACTUALLY WORK TO COORDINATE UPDATE, USE COR
         // BLOCK HERE, ENTER ONE AT A TIME
-        updateEvent => now;
+        /* updateEvent => now; */
 
         // TEMP DEBUG
         <<< "PLAYER AFTER BLOCK ON UPDATE EVENT", me.id() >>>; 
@@ -102,21 +108,16 @@ public class InCPlayer extends PlayerBase {
         instr.getEnv().keyOff();
         instr.getEnv().releaseTime() => now;
 
-        // TODO THIS IS THE GLOBAL STATE WE NEED TO SYNCHRONIZE ACCESS TO, DOES COR WORK?
-        if (! corController.isHead) {
-          corController.lock => now;
-        }
+        // TODO CLEAN UP ID SO WE JUST USE ONE KIND and it's the threadId or should it be decoupled from that?
         // Conductor update current phrase or advanced to next phrase
         conductor.doUpdate(me.id(), seq) @=> Sequence seq;
-        corController.yield(corController.id);
+        corController.yield();
 
         if (! conductor.isPlaying()) {
           break;
         }
 
-        if (! conductor.hasAdvanced(me.id())) {
-          updatedSeq @=> seq;
-        } else {
+        if (conductor.hasAdvanced(me.id())) {
           1 +=> seqsIdx;
           seqs.next() @=> seq;          
         }
@@ -126,14 +127,14 @@ public class InCPlayer extends PlayerBase {
         <<< "BEFORE UPDATE COMPLETE EVENT SIGNAL", me.id() >>>;
 
         // TODO SIGNAL CLOCK HERE THAT UPDATE IS DONE AND CLOCK SHOULD SIGNAL THE NEXT PLAYER TO UPDATE
-        updateCompleteEvent.signal();
+        /* updateCompleteEvent.signal(); */
 
         // TEMP DEBUG
         <<< "AFTER UPDATE COMPLETE EVENT SIGNAL BEFORE BLOCK PLAY OUTPUT EVENT", me.id() >>>;
 
         // TODO CAN WE GET RID OF THIS EVENT WHICH DOESN'T ACTUALLY WORK TO COORDINATE UPDATE, USE COR
         // BLOCK HERE AND THEN UNBLOCK BY CLOCK AND UPDATE LOCAL STATE AND PLAY OUTPUT CONCURRENTLY
-        playOutputEvent => now;
+        /* playOutputEvent => now; */
   
         // determine whether the next note is the next note in this sequence, or the
         // first note in this sequence (because we are looping and reached the end)

@@ -3,12 +3,11 @@
 /*   corr.run(); */
 /* } */
 
-
-// TODO THIS ONLY WORKS FOR TWO PROCESSES BECAUSE IT RELIES ON SIGNAL
-// TODO NEED A SEPARATE CO-ROUTINE CHAIN CLASS
-
 public class Coroutine {
   0 => int registeredProcesses;
+  // TODO Dynamic array
+  // TODO Decouple array indexes from id values of registered objects, right now we need the objects
+  //  to be id = 0, 1, 2, ...
   3 => int NUM_PROCESSES;
   Event nextEvents[NUM_PROCESSES];
   Event pauseEvents[NUM_PROCESSES];
@@ -27,7 +26,9 @@ public class Coroutine {
 
   fun void connect(int id, int nextId) {
     // get the Event bound to nextId and set it as the nextEvent for id, by reference
-    // i.e. when id calls signalNext it signals the event for nextId
+    // i.e. when id calls signalNext it signals the event for nextId. This wired up yield() to
+    // unpause the thread associated with nextId by calling signalNext() and pausing the thread associated
+    // with id by calling pause()
     pauseEvents[nextId] @=> nextEvents[id];
     <<< "IN CONNECT ID", id, "NEXT_ID", nextId, "NEXT EVENT", this.nextEvents[id] >>>;
   }

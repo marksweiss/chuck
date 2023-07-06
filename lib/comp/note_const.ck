@@ -16,9 +16,9 @@ public class NoteConst {
   120 => int BPM;
   Event dummyStartEvent;
   Event dummyStepEvent; 
-  Event dummyUpdateCompleteEvent;
-  Event dummyPlayoutputEvent;
-  k.init(BPM, dummyStartEvent, dummyStepEvent, dummyUpdateCompleteEvent, dummyPlayoutputEvent);  
+  /* Event dummyUpdateCompleteEvent; */
+  /* Event dummyPlayoutputEvent; */
+  k.init(BPM, dummyStartEvent, dummyStepEvent); // dummyUpdateCompleteEvent, dummyPlayoutputEvent);  
 
   // constants defining the pitch offset of each note, in any octave
   0 => static int C;
