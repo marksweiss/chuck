@@ -17,14 +17,13 @@ public class CoroutineController {
 
     // All objects / threads have their own Controller but share the Coroutine, which coordinates access
     cor.register(id);
-    pause();
   }
 
   // NOTE: Must be called only once, outside main event loop. Event loop relies on connect() order of
   // Coroutine and calls to yield() to yield critical section in order that threads are wired up in connect()
-  fun void start() {
-    if (isHead) {
-      signalNext();
+  fun void run() {
+    if (!isHead) {
+      pause();
     }
   }
 
@@ -39,5 +38,9 @@ public class CoroutineController {
 
   fun void signalNext() {
     cor.signalNext(id);
+  }
+
+  fun void signal() {
+    cor.signal(id);
   }
 }

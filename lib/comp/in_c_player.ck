@@ -60,11 +60,6 @@ public class InCPlayer extends PlayerBase {
     0::samp => dur sinceLastNote;
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord c;
-
-    // No-op for all threads which aren't the head of the Coroutine, ensures that the coroutine starts each
-    // iteration on the head of the coroutine
-    corController.start();  
-
     while (true) {
 
       // TEMP DEBUG
@@ -110,8 +105,23 @@ public class InCPlayer extends PlayerBase {
 
         // TODO CLEAN UP ID SO WE JUST USE ONE KIND and it's the threadId or should it be decoupled from that?
         // Conductor update current phrase or advanced to next phrase
+        /* if (!corController.isHead) { */
+        /*   corController.pause(); */
+        /* } */
+
+        // TEMP DEBUG
+        <<< "PLAYER BEFORE DO_UPDATE", "thread", me.id(), "cor id", corController.id  >>>; 
+
         conductor.doUpdate(me.id(), seq) @=> Sequence seq;
+
+        // TEMP DEBUG
+        <<< "PLAYER AFTER DO_UPDATE", "thread", me.id(), "cor id", corController.id  >>>; 
+
+        /* if (corController.isHead) { */
+        /*   corController.pause(); */
+        /* } else { */
         corController.yield();
+        /* } */
 
         if (! conductor.isPlaying()) {
           break;

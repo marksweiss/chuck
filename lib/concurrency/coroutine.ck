@@ -38,6 +38,12 @@ public class Coroutine {
     pause(id); 
   }
 
+  fun void signal(int id) {
+    <<< "IN SIGNAL BEFORE ", id >>>;
+    this.pauseEvents[id].signal();
+    <<< "IN SIGNAL AFTER ", id >>>;
+  }
+
   fun void signalNext(int id) {
     <<< "IN SIGNAL_NEXT BEFORE ", id, "NEXT EVENT", this.nextEvents[id] >>>;
     this.nextEvents[id].signal();
