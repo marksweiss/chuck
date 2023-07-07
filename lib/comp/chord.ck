@@ -52,12 +52,6 @@ public class Chord {
   fun static Chord make(Chord chord) {
     Chord ret;
     ret.init(chord.notes);
-
-    // TEMP DEBUG
-    /* for (0 => int i; i < chord.notes.size(); i++) { */
-    /*   <<< "IN CHORD NOTE GAIN", chord.notes[i].gain >>>; */
-    /* } */
-
     return ret;
   }  
 

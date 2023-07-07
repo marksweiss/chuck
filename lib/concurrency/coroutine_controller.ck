@@ -40,6 +40,10 @@ public class CoroutineController {
     cor.signalNext(id);
   }
 
+  fun void signalRandom() {
+    cor.signalRandom();
+  }
+
   fun void signal() {
     cor.signal(id);
   }

@@ -6,8 +6,10 @@
  */
 // TODO TEST
 public class OrderedObjectMap {
-  128 => int MAX_NUM_KEYS;
-  string keys[MAX_NUM_KEYS];
+  // Need fixed
+  /* 128 => int MAX_NUM_KEYS; */
+  /* string keys[MAX_NUM_KEYS]; */
+  string keys[0];
   Object  map[0];
   0 => int count;
 
@@ -18,28 +20,15 @@ public class OrderedObjectMap {
   -1 => static int END;
 
   fun void put(string key, Object val) {
-
-    // TEMP DEBUG
-    /* if (me.id() != 28) { */
-    /*   <<< "BEFORE MAP PUT BEFORE DELETE", map[key], "id", me.id() >>>; */
-    /* } */
-
-    // if key already present, clear value for key, don't add key to keys
     if (map.find(key) == 1) {
       map.erase(key);
-    // else new key, add key to keys
     } else {
-      key => keys[count++];
+      /* key => keys[count++]; */
+      keys << key;
+      count++;
     }
 
-    // TEMP DEBUG
-    /* <<< "BEFORE MAP PUT AFTER DELETE", map[key] >>>; */
-
-    // set value for key
     val @=> map[key];
-
-    // TEMP DEBUG
-    /* <<< "AFTER MAP PUT", map[key], "key", key, "val", val, "id", me.id() >>>; */
   }
 
   fun Object get(string key) {
@@ -56,7 +45,7 @@ public class OrderedObjectMap {
 
     // manually rebuild keys, skipping key being erased, because clear() and reset() don't remove
     // non-associative elements from arrays
-    string tempKeys[MAX_NUM_KEYS];
+    string tempKeys[count - 1];
     0 => int j;
     // copy the old keys, skipping the key being erased
     for (0 => int i; i < count; i++) {
@@ -66,11 +55,12 @@ public class OrderedObjectMap {
       }
     }
     // blank out all keys in the instance member
+    // NOTE: This memory leaks one entry each time we delete
     for (0 => int i; i < count; i++) {
       "" => keys[i];
     }
     // copy the new keys from temp back to the instance member
-    for (0 => int i; i < tempKeys.size(); i++) {
+    for (0 => int i; i < count - 1; i++) {
       tempKeys[i] => keys[i];
     }
 

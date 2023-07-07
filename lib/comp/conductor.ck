@@ -268,10 +268,6 @@ public class Conductor {
   // Private Helpers
 
   fun /*private*/ void putHelper(int shredId, string key, ArgBase val) {
-
-    // TEMP DEBUG
-    /* <<< "PUT HELPER key", key, "shredId", shredId, "val", val >>>; */
-
     Std.itoa(shredId) => string shredKey;
     if (state.find(shredKey) > 1) {
       <<< "ERROR: ILLEGAL STATE. shredKey should have 0 or 1 entries in Conductor" >>>;
@@ -279,10 +275,6 @@ public class Conductor {
     }
 
     if (!keys.hasKey(key)) {
-
-      // TEMP DEBUG
-      /* <<< "PUT HELPER NOT HAS KEY key", key, "shredId", shredId, "val", val >>>; */
-
       keys.put(key); 
     }
 
@@ -293,9 +285,6 @@ public class Conductor {
       shredId @=> shredIds[shredIdCount++];
     }
     state[shredKey] @=> OrderedArgMap shredStateMap;
-
-    // TEMP DEBUG
-    /* <<< "PUT HELPER BEFORE PUT CALL key", key, "shredId", shredId, "val", val >>>; */
 
     shredStateMap.put(key, val);
   }

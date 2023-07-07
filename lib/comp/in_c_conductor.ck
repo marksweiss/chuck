@@ -273,26 +273,13 @@ public class InCConductor extends Conductor {
    */
   // Override
   fun void update(int playerId, Sequence playerPhrase) {
-
-    // TODO HACK TO FIX BUG, where is shredId 0 coming from?
-    /* if (playerId == 0) return; */
-
-    // TEMP DEBUG
-    /* <<< "IN update() playerId", playerId >>>; */
-
     // Store state for player before running instructions
     playerPhraseMap.put(idToKey(playerId), playerPhrase);
-
-    // TEMP DEBUG
-    /* <<< "IN update() AFTER playerId", playerId >>>; */
 
     // reset state for player that must be reset before each update
     put(playerId, PLAYER_HAS_ADVANCED, false);
     put(playerId, PLAYER_HAS_REACHED_UNISON, false);
     put(playerId, PLAYER_AT_REST, false);
-
-    // TEMP DEBUG
-    <<< "UPDATE playerId", playerId >>>;
 
     // Call all Instructions to update this player's state
     instructionAdvancePhraseIdx(playerId);
@@ -304,9 +291,6 @@ public class InCConductor extends Conductor {
     // Store phrase for player back after running instructions, fetch it from state to get update
     phrase(playerId) @=> Sequence updatedPlayerPhrase;
     playerPhraseMap.put(idToKey(playerId), updatedPlayerPhrase);
-
-    // TEMP DEBUG
-    /* <<< "IN update() SECOND AFTER playerId", playerId >>>; */
   }
 
   // Override
@@ -387,10 +371,6 @@ public class InCConductor extends Conductor {
   fun void instructionAdvancePhraseIdx(int playerId) {
     if (!hasAdvanced(playerId) && isAdvancingPhraseIdx(playerId)) {
       increment(playerId, PHRASE_IDX);
-
-      // TEMP DEBUG
-      /* <<< "INSTRUCTION_ADV_PHRASE_IDX playerId", playerId, "key", PLAYER_HAS_ADVANCED >>>; */
-
       put(playerId, PLAYER_HAS_ADVANCED, true);
     }
   }
@@ -462,22 +442,12 @@ public class InCConductor extends Conductor {
       // get the current Phrase and append it into the adjusted phrase after the isResting note
       phrase(playerId) @=> Sequence currentPhrase; 
 
-      // TEMP DEBUG
-      /* <<< "BEFORE ADJ PHRASE currentPhrase.size()", currentPhrase.size(), "playerId", playerId >>>; */
-
       for (0 => int i; i < currentPhrase.size(); i++) {
         adjustedPhrase.add(currentPhrase.chords[i]);
       }
 
-      // TEMP DEBUG
-      /* <<< "AFTER ADJ PHRASE adjustedPhrase.size()", adjustedPhrase.size() >>>; */
-
       // replace the phrase state for the player with the new phrase with the new alignment
       playerPhraseMap.put(idToKey(playerId), adjustedPhrase);
-      /* for (0 => int i; i < currentPhrase.chords[0].size(); i++) { */
-      /*   currentPhrase.chords[0].notes[i].duration => dur curDur; */
-      /*   curDur + phaseAdjisRestingNote.duration => currentPhrase.chords[0].notes[i].duration; */ 
-      /* } */
     }
   }
 
@@ -709,9 +679,6 @@ public class InCConductor extends Conductor {
     }
     playerMaxGain(idToKey(playerId)) => float maxGain;
 
-    // TEMP DEBUG
-    /* <<< "playerMaxGain", maxGain >>>; */
-
     maxGain / enMaxGain => float gainRatio;
     if (isSeekingCrescendo(playerId) &&
         AS.assertFloatLessThan(gainRatio, GAIN_ADJ_CRESCENDO_RATIO_THRESHOLD)) {
@@ -744,9 +711,6 @@ public class InCConductor extends Conductor {
 
   fun /*private*/ float playerMaxGain(string playerId) {
     playerPhraseMap.get(playerId) $ Sequence @=> Sequence playerPhrase;
-
-    // TEMP DEBUG
-    /* <<< "DEBUG in_c_conductor playerMaxGain() playerId", playerId, "playerPhrase", playerPhrase >>>; */
 
     0.0 => float maxGain;
     for (0 => int i; i < playerPhrase.size(); i++) {
