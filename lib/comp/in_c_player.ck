@@ -75,9 +75,8 @@ public class InCPlayer extends PlayerBase {
         instr.getEnv().keyOff();
         instr.getEnv().releaseTime() => now;
 
-        conductor.doUpdate(me.id(), seq) @=> Sequence seq;
-        /* corController.signalNext(); */
         corController.signalRandom();
+        conductor.doUpdate(me.id(), seq) @=> Sequence seq;
 
         if (! conductor.isPlaying()) {
           break;
