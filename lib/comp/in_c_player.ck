@@ -47,7 +47,7 @@ public class InCPlayer extends PlayerBase {
     0 => int loopCount;
     while (true) {
       
-      // DEBUG LOGGING
+      // TEMP DEBUG LOGGING
       if ((loopCount % 10) == 0) {
         <<< "loop count", loopCount, "player", name >>>;
       }
@@ -93,6 +93,7 @@ public class InCPlayer extends PlayerBase {
         seq.next() @=> c;
         if (c == null) {
 
+          // TEMP DEBUG LOGGING
           <<< "reset loop for player", name >>>;
 
           // reset this sequence to its 0th position for next usage as we loop through sequences
