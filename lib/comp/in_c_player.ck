@@ -46,12 +46,6 @@ public class InCPlayer extends PlayerBase {
     seq.current() @=> Chord chrd;
     0 => int loopCount;
     while (true) {
-      // TEMP DEBUG LOGGING
-      if ((loopCount % 100) == 0) {
-        <<< "loop count", loopCount, "player", name >>>;
-      }
-      loopCount++;
-
       // NOTE: assumes all notes in current chord are same duration
       chrd.notes[0].duration => dur nextNoteDur;
       sinceLastNote + stepDur => sinceLastNote; 
@@ -89,10 +83,6 @@ public class InCPlayer extends PlayerBase {
         // first note in this sequence (because we are looping and reached the end)
         seq.next() @=> chrd;
         if (chrd == null) {
-
-          // TEMP DEBUG LOGGING
-          <<< "", name, "reset loop for player" >>>;
-
           // reset this sequence to its 0th position for next usage as we loop through sequences
           seq.reset();
           seq.next() @=> chrd;

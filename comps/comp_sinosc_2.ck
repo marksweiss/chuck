@@ -100,11 +100,6 @@ fun void main () {
   ScaleConst S;
   S.init(BPM);
 
-  // TEMP DEBUG
-  /* T.make(60, 0, 0.5, clock.ETH) @=> Note tempNote; */
-  /* <<< "TEMP DEBUG IN COMP_SINOSC TEMP NOTE N.C4_8 duration", tempNote.duration >>>; */    
-  /* <<< "TEMP DEBUG IN COMP_SINOSC NOTE_CONST N.C4_8 duration", N.C4_8.duration >>>; */    
-
   addPhrase([N.C4_8, N.E4_4, N.C4_8, N.E4_4, N.C4_8, N.E4_4], seqs);
   addPhrase([N.C4_8, N.E4_8, N.F4_8, N.E4_4], seqs);
   addPhrase([N.REST_8, N.E4_8, N.F4_8, N.E4_8], seqs);
