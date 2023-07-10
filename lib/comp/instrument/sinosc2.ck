@@ -8,7 +8,7 @@
  */ 
 public class InstrSinOsc2 extends InstrumentBase {
   string name;
-  2 => int NUM_GENS;
+  1 => int NUM_GENS;
   // TODO - DO WE NEED THIS?
 
   // Store conf because this also defines the attrs we can modify
@@ -23,7 +23,7 @@ public class InstrSinOsc2 extends InstrumentBase {
   SinOsc so4;
   SinOsc so5;
   /* [so1, so2, so3, so4, so5] @=> SinOsc gens[]; */
-  [so1, so2] @=> SinOsc gens[];
+  [so1] @=> SinOsc gens[];
   // envelope
   ADSR env;
   // effects
@@ -123,9 +123,9 @@ public class InstrSinOsc2 extends InstrumentBase {
     /* so => env => echo => chorus => modulate => delay => rev => env => pan => dac; */
     0.05 => g.gain;
     /* chorus => modulate => delay => rev => pan => env => g => dac; */
-    chorus => delay => rev => pan => env => g => dac;
+    chorus => echo => delay => rev => pan => env => g => dac;
     so1 => chorus;
-    so2 => chorus;
+    /* so2 => chorus; */
     /* so3 => delay; */
     /* so4 => delay; */
     /* so5 => delay; */

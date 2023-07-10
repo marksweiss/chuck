@@ -92,7 +92,7 @@ public class InCConductor extends Conductor {
   // The most important factor governing advance of Players through phrases, this is simply
   // the percentage prob that they advance on any given iteration  
   // assumes range [0, 100), i.e. this advances 28% of the time
-  28 => int PHRASE_ADVANCE_PROB;
+  5 => int PHRASE_ADVANCE_PROB;
 
   // Player Phrase Phase 
   // Tunable parms for shifting playing of current phrase out of its current
@@ -114,13 +114,13 @@ public class InCConductor extends Conductor {
 
   // Prob that a Player will seek unison on any given iteration.  The idea is that
   // to seek unison the Ensemble and all the Players must seek unison  
-  20 => int PLAYER_UNISON_PROB;
+  10 => int PLAYER_UNISON_PROB;
 
   // Player isResting/Play
   // Tunable parms for probability that Player will isResting rather than playing a note.
   // Supports score directive to listen as well as play and not always play
   // Prob that a Player will try to isResting on a given iteration (not play)
-  10 => int REST_PROB;
+  5 => int REST_PROB;
   // Factor multiplied by isResting_prob_factor if the Player is already at isResting  
   1.5 => float STAY_AT_REST_PROB_FACTOR;
   
@@ -137,14 +137,14 @@ public class InCConductor extends Conductor {
   1.2 => float GAIN_ADJ_DECRESCENDO_RATIO_THRESHOLD;
   1.1 => float GAIN_DECRESCENDO_ADJ_FACTOR;
   // Prob that a Player is seeking de/crescendo  
-  50 => int CRESCENDO_PROB;
-  50 => int DECRESCENDO_PROB;
+  10 => int CRESCENDO_PROB;
+  10 => int DECRESCENDO_PROB;
   
   // Player Transpose
   // Tunable parms for transposing the playing of a phrase.  Suppports score directive
   //  to transpose as desired.
   // Prob that a Player will seek to transpose its current phrase
-  20 => int TRANSPOSE_PROB_FACTOR;
+  10 => int TRANSPOSE_PROB_FACTOR;
   // Number of octaves to transpose if the Player does do so
   1 => int TRANSPOSE_SHIFT_NUM_OCTAVES;
   // Factor for shift down
@@ -154,7 +154,7 @@ public class InCConductor extends Conductor {
   // From the Instructions: "Transposing down by octaves works best on the patterns containing notes of long durations."
   // Minimum average duration of notes in a phrase for that phrase to be more likely
   //  to transpose down rather than up
-  50 => int TRANSPOSE_DOWN_PROB_FACTOR;
+  20 => int TRANSPOSE_DOWN_PROB_FACTOR;
   // Minimum average duration of notes in a phrase for that phrase to be more likely
   //  to transpose down rather than up  
   2::second => dur TRANSPOSE_DOWN_DUR_THRESHOLD;
@@ -170,7 +170,7 @@ public class InCConductor extends Conductor {
   3 => int PHRASES_IDX_RANGE_THRESHOLD;
   // Prob that the Ensemble will seek to have all Players play the same phrase
   // on any one iteration
-  90 => int ENSEMBLE_UNISON_PROB;
+  20 => int ENSEMBLE_UNISON_PROB;
   // Threshold number of phrases apart within which all players 
   // must be for Ensemble to seek unison
   3 => int MAX_PHRASES_IDX_RANGE_FOR_SEEKING_UNISON;
