@@ -43,18 +43,17 @@ public class InCPlayer extends PlayerBase {
     // time to play the next one
     0::samp => dur sinceLastNote;
     this.seqs.current() @=> Sequence seq;
-    seq.current() @=> Chord c;
+    seq.current() @=> Chord chrd;
     0 => int loopCount;
     while (true) {
-      
       // TEMP DEBUG LOGGING
-      if ((loopCount % 10) == 0) {
+      if ((loopCount % 100) == 0) {
         <<< "loop count", loopCount, "player", name >>>;
       }
       loopCount++;
 
       // NOTE: assumes all notes in current chord are same duration
-      c.notes[0].duration => dur nextNoteDur;
+      chrd.notes[0].duration => dur nextNoteDur;
       sinceLastNote + stepDur => sinceLastNote; 
 
       // Block on event of next beat step broadcast by clock. Each player blocks until
@@ -69,8 +68,7 @@ public class InCPlayer extends PlayerBase {
       stepEvent => now;
 
       // if enough time has passed, emit the next note, silence the previous note
-      if (sinceLastNote == nextNoteDur) {
-
+      if (sinceLastNote >= nextNoteDur) {
         // previous note ending, trigger release
         instr.getEnv().keyOff();
         instr.getEnv().releaseTime() => now;
@@ -89,25 +87,25 @@ public class InCPlayer extends PlayerBase {
 
         // determine whether the next note is the next note in this sequence, or the
         // first note in this sequence (because we are looping and reached the end)
-        seq.next() @=> c;
-        if (c == null) {
+        seq.next() @=> chrd;
+        if (chrd == null) {
 
           // TEMP DEBUG LOGGING
-          <<< "reset loop for player", name >>>;
+          <<< "", name, "reset loop for player" >>>;
 
           // reset this sequence to its 0th position for next usage as we loop through sequences
           seq.reset();
-          seq.next() @=> c;
+          seq.next() @=> chrd;
           // assert that the sequence isn't empty so that resetting and taking first note is valid
-          if (c == null) {
+          if (chrd == null) {
             <<< "ERROR: sequence should return a non-null note after calling reset()" >>>;
             me.exit();
           }
-        } 
+        }
 
         // load the next chord into all the gens in the instrument
-        for (0 => int j; j < c.notes.size(); j++) {
-          c.notes[j] @=> Note n;
+        for (0 => int j; j < chrd.notes.size(); j++) {
+          chrd.notes[j] @=> Note n;
           instr.setAttr("freq", Std.mtof(n.pitch));
           instr.setGain(this.gain);
         }
@@ -117,7 +115,7 @@ public class InCPlayer extends PlayerBase {
 
         // trigger envelope start
         instr.getEnv().keyOn();
-      }
+      } 
     }
   }
 

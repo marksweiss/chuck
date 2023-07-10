@@ -350,7 +350,7 @@ public class InCConductor extends Conductor {
   // All performers must play strictly in rhythm and it is essential that everyone play each pattern carefully"
 
   // TODO IMPLEMENT THIS
-  // "It is important to think of patterns periodically so that when you are isRestinging you are conscious of the larger 
+  // "It is important to think of patterns periodically so that when you are resting you are conscious of the larger 
   //  periodic composite accents that are sounding, and when you re-enter you are aware of what effect your entrance 
   //  will have on the music’s flow."
 
@@ -658,8 +658,6 @@ public class InCConductor extends Conductor {
   }
 
   fun /*private*/ Sequence phrase(int playerId) {
-    if (me.id() != playerId) {
-    }
     return playerPhraseMap.get(idToKey(playerId)) $ Sequence;
   }
 
@@ -709,6 +707,7 @@ public class InCConductor extends Conductor {
     return TRANSPOSE_UP_FACTOR;
   }
 
+  // TODO THERE IS STILL A CONCURRENCY BUG HERE TRIGGERED BY LINE 726, sporadic
   fun /*private*/ float playerMaxGain(string playerId) {
     playerPhraseMap.get(playerId) $ Sequence @=> Sequence playerPhrase;
 

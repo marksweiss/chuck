@@ -17,24 +17,25 @@ public void runPlayer(PlayerBase player) {
   player.play();
 }
 
+// TODO PARAMETERIZE ALL THESE PER PLAYER
 fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur release) {
   ArgParser conf;
   conf.addDurationArg("adsrAttack", attack);
   conf.addDurationArg("adsrDecay", decay);
   conf.addFloatArg("adsrSustain", 0.5);
   conf.addDurationArg("adsrRelease", release);
-  /* conf.addFloatArg("chorusModFreq", 200.0); */
-  /* conf.addFloatArg("chorusModDepth", 0.2); */
-  /* conf.addFloatArg("chorusMix", 0.4); */
+  /* conf.addFloatArg("chorusModFreq", 1000.0); */
+  /* conf.addFloatArg("chorusModDepth", 0.05); */
+  /* conf.addFloatArg("chorusMix", 0.15); */
   /* conf.addFloatArg("modulateVibratoRate", modulateVibratoRate); */
-  /* conf.addFloatArg("modulateVibratoGain", 0.05); */
-  /* conf.addFloatArg("modulateRandomGain", 0.1); */
-  conf.addDurationArg("delayDelay", 10::ms);
-  conf.addDurationArg("delayMax", 20::ms);
-  conf.addDurationArg("echoDelay", 55::ms);
+  /* conf.addFloatArg("modulateVibratoGain", 0.5); */
+  /* conf.addFloatArg("modulateRandomGain", 0.5); */
+  /* conf.addDurationArg("delayDelay", 50::ms); */
+  /* conf.addDurationArg("delayMax", 100::ms); */
+  /* conf.addDurationArg("echoDelay", 55::ms); */
   /* conf.addDurationArg("echoMax", 100::ms); */
-  /* conf.addFloatArg("echoMix", 0.3); */
-  /* conf.addFloatArg("reverbMix", 0.05); */
+  conf.addFloatArg("echoMix", 0.2);
+  conf.addFloatArg("reverbMix", 0.1);
   /* conf.addFloatArg("panPan", 0.0); */
   /* conf.addFloatArg("mixPan", 1.0); */
   conf.loadArgs();
@@ -68,14 +69,13 @@ fun void main () {
   10 => int NUM_PHRASES;
   3 => int NUM_PLAYERS;
 
-  60 => int BPM;
+  // TODO BUG BMP < 30 loops but produces no audio
+  120 => int BPM;
   Event startEvent;
   Event stepEvent; 
-  Event updateCompleteEvent;
-  Event playOutputEvent;
 
   Clock clock;
-  clock.init(BPM, startEvent, stepEvent); // , updateCompleteEvent, playOutputEvent);
+  clock.init(BPM, startEvent, stepEvent);
 
   // declare sequence containers
   true => int isLooping;
@@ -95,8 +95,16 @@ fun void main () {
 
   // declare chords / notes for each sequence
   NoteConst N;
+  N.init(BPM);
   Note T;
   ScaleConst S;
+  S.init(BPM);
+
+  // TEMP DEBUG
+  /* T.make(60, 0, 0.5, clock.ETH) @=> Note tempNote; */
+  /* <<< "TEMP DEBUG IN COMP_SINOSC TEMP NOTE N.C4_8 duration", tempNote.duration >>>; */    
+  /* <<< "TEMP DEBUG IN COMP_SINOSC NOTE_CONST N.C4_8 duration", N.C4_8.duration >>>; */    
+
   addPhrase([N.C4_8, N.E4_4, N.C4_8, N.E4_4, N.C4_8, N.E4_4], seqs);
   addPhrase([N.C4_8, N.E4_8, N.F4_8, N.E4_4], seqs);
   addPhrase([N.REST_8, N.E4_8, N.F4_8, N.E4_8], seqs);
@@ -110,11 +118,17 @@ fun void main () {
   addPhrase([N.B4_16, N.G4_16, N.REST_8, N.REST_4, N.REST_4, N.REST_4], seqs);
   addPhrase([N.B4_16, N.G4_16], seqs);
 
+  // TODO PERFORMANCE
+  // Add the rest of the phrases
+
+  // TODO SOME OF THESE SHOULD BE DEFINED IN TERMS OF CLOCK calls to whole(), half() etc.
   // configure instruments, pass clock, Events, sequences of phrases and conductor to them 
-  getConf(100, 40::ms, 30::ms, 30::ms) @=> ArgParser conf1;
-  getConf(102.5, 25::ms, 40::ms, 50::ms) @=> ArgParser conf2;
-  getConf(105, 35::ms, 35::ms, 70::ms) @=> ArgParser conf3;
+  getConf(100, 10::ms, 10::ms, 10::ms) @=> ArgParser conf1;
+  getConf(102.5, 10::ms, 10::ms, 10::ms) @=> ArgParser conf2;
+  getConf(105, 10::ms, 10::ms, 10::ms) @=> ArgParser conf3;
   // TODO MAKE NAMING 0-based consistent
+  // TODO PERFORMANCE
+  // tune the instruments, add new kinds of instruments, add more players, make the performance interesting
   InstrSinOsc2 instr1;
   InstrSinOsc2 instr2; 
   InstrSinOsc2 instr3; 
@@ -142,18 +156,19 @@ fun void main () {
   corPlayer1.init(1, "cor_player1", cor, lock, CC.IS_NOT_HEAD);
   CoroutineController corPlayer2;
   corPlayer2.init(2, "cor_player2", cor, lock, CC.IS_NOT_HEAD);
+  // TODO using signalRandom() now so don't need to wire up ordered connection
   cor.connect(0, 1);
   cor.connect(1, 2);
   cor.connect(2, 0);
 
   InCPlayer player0;
-  player0.init("player0", seqs1, startEvent, stepEvent, // updateCompleteEvent, playOutputEvent,
+  player0.init("player0", seqs1, startEvent, stepEvent,
                corPlayer0, clock.stepDur, conductor, instr1);
   InCPlayer player1;
-  player1.init("player1", seqs2, startEvent, stepEvent, // updateCompleteEvent, playOutputEvent,
+  player1.init("player1", seqs2, startEvent, stepEvent,
                corPlayer1, clock.stepDur, conductor, instr2);
   InCPlayer player2;
-  player2.init("player2", seqs3, startEvent, stepEvent, // updateCompleteEvent, playOutputEvent,
+  player2.init("player2", seqs3, startEvent, stepEvent,
                corPlayer2, clock.stepDur, conductor, instr3);
 
   // start clock thread and instrument play threads

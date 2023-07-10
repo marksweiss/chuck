@@ -15,6 +15,12 @@ public class Clock {
   BEAT_STEP_NOTE / QUARTER_NOTE => static float BEAT_STEP;
   44100.0 => static float SAMPLING_RATE_PER_SEC;
   1::minute / 60 => dur SAMPLES_PER_SEC;
+  // This is the resolution for updating state. Samples per second is the internal resolution for the data ultimately
+  // making up the audio. This is the resoltuion at which the event loop advances the clock and therefore at which
+  // the internal state is updated. So, effectively, samples are written at this resolution and repeat for the length
+  // of this resoluttion: 1.5, 1.5, 1.5, 2.5, 2.5, 2.5, 6.42, 6.42, 6.42, ...
+  10000 => float BPM_RESOLUTION_PER_SEC;
+  SAMPLES_PER_SEC / BPM_RESOLUTION_PER_SEC => dur SAMPLES_PER_STEP; 
 
   dur SXTYFRTH;
   dur THRTYSCND;
@@ -29,40 +35,32 @@ public class Clock {
 
   Event startEvent;
   Event stepEvent;
-  /* Event updateEvent; */
-  /* Event updateCompleteEvent; */
-  /* Event playOutputEvent; */
-  /* PlayerBase players[]; */
   0.0 => float NO_GAIN;
 
   // bpm - beats per minute, number of quarter notes per minute
   // i.e. 60 bpm means a quarter note is 1 second
-  fun void init(float bpm, Event startEvent, Event stepEvent) // Event updateEvent,
-                // Event updateCompleteEvent, Event playOutputEvent)
-  {
+  fun void init(float bpm, Event startEvent, Event stepEvent) {
+    <<< "Clock: BPM", bpm >>>;
     <<< "Clock: BEAT_STEP", BEAT_STEP >>>;
     <<< "Clock: SAMPLING_RATE_PER_SEC", SAMPLING_RATE_PER_SEC >>>;
     <<< "Clock: SAMPLES_PER_SEC", SAMPLES_PER_SEC >>>;
+    <<< "Clock: SAMPLES_PER_STEP", SAMPLES_PER_STEP >>>;
 
     bpm / 60.0 => float beatsPerSec;
-
-    <<< "Clock: bpm", bpm, "beatsPerSec", beatsPerSec >>>;
+    <<< "beatsPerSec", beatsPerSec >>>;
 
     SAMPLES_PER_SEC / beatsPerSec =>  dur samplesPerBeat;
-
     <<< "Clock: samplesPerBeat", samplesPerBeat >>>;
 
     samplesPerBeat => beatDur;
-    samplesPerBeat / BEAT_STEP => stepDur;
-
     <<< "Clock: beatDur", beatDur >>>;
+
+    // TODO GET RID OF THIS AS A CLASS-LEVEL FIELD, it's const
+    SAMPLES_PER_STEP => stepDur;
     <<< "Clock: stepDur", stepDur >>>;
 
     startEvent @=> this.startEvent; 
     stepEvent @=> this.stepEvent;
-    /* updateEvent @=> this.updateEvent; */
-    /* updateCompleteEvent @=> this.updateCompleteEvent; */
-    /* playOutputEvent @=> this.playOutputEvent; */
 
     D(0.015625) => SXTYFRTH;
     D(0.03125) => THRTYSCND;
@@ -75,6 +73,8 @@ public class Clock {
     <<< "Clock: SXTYFRTH", SXTYFRTH, "THRTYSCND", THRTYSCND, "SXTNTH", SXTNTH, "ETH", ETH, "QRTR", QRTR, "HLF", HLF, "WHL", WHL >>>;
   }
 
+  // TODO BELOW SUGGESTION WON'T REMOVE DEPENDENCY
+  //  correct approach is a wrapper ClockPlayers class with a Clock member and an array of Players
   // Split from init() so users like NoteConst and ScaleConst which only need to calculate durations
   // don't need a dependency on Player. TODO would likely be better to refactor into two classes
   /* fun void registerPlayers(PlayerBase players[]) { */

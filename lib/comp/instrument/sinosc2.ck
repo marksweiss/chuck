@@ -8,7 +8,7 @@
  */ 
 public class InstrSinOsc2 extends InstrumentBase {
   string name;
-  5 => int NUM_GENS;
+  2 => int NUM_GENS;
   // TODO - DO WE NEED THIS?
 
   // Store conf because this also defines the attrs we can modify
@@ -22,7 +22,8 @@ public class InstrSinOsc2 extends InstrumentBase {
   SinOsc so3;
   SinOsc so4;
   SinOsc so5;
-  [so1, so2, so3, so4, so5] @=> SinOsc gens[];
+  /* [so1, so2, so3, so4, so5] @=> SinOsc gens[]; */
+  [so1, so2] @=> SinOsc gens[];
   // envelope
   ADSR env;
   // effects
@@ -121,12 +122,13 @@ public class InstrSinOsc2 extends InstrumentBase {
     // See: https://learning.oreilly.com/library/view/programming-for-musicians/9781617291708/OEBPS/Text/kindle_split_018.html 
     /* so => env => echo => chorus => modulate => delay => rev => env => pan => dac; */
     0.05 => g.gain;
-    delay => rev => pan => env => g => dac;
-    so1 => delay;
-    so2 => delay;
-    so3 => delay;
-    so4 => delay;
-    so5 => delay;
+    /* chorus => modulate => delay => rev => pan => env => g => dac; */
+    chorus => delay => rev => pan => env => g => dac;
+    so1 => chorus;
+    so2 => chorus;
+    /* so3 => delay; */
+    /* so4 => delay; */
+    /* so5 => delay; */
   }
 
   // Override
@@ -167,13 +169,35 @@ public class InstrSinOsc2 extends InstrumentBase {
   // global attribute applied to or set up when patches are wired to apply to all gens
   fun void setAttr(string attrName, float attrVal) {
     if (attrName  == "freq") {
-      for (0 => int i; i < NUM_GENS; i++) {
+      for (0 => int i; i < genCount; i++) {
         attrVal => gens[i].freq; 
       }
     }
-    if (attrName  == "reverbMix") {
+    if (attrName  == "modFreq") {
+      attrVal => chorus.modFreq;
+    }
+    if (attrName  == "modDepth") {
+      attrVal => chorus.modDepth;
+    }
+    if (attrName  == "chorusMix") {
+      attrVal => chorus.mix;
+    }
+    if (attrName  == "echoMix") {
       attrVal => rev.mix;
     }
+    if (attrName  == "reverbMix") {
+      attrVal => echo.mix;
+    }
+    if (attrName  == "vibratoRate") {
+      attrVal => modulate.vibratoRate;
+    }
+    if (attrName  == "vibratoGain") {
+      attrVal => modulate.vibratoGain;
+    }
+    if (attrName  == "randomGain") {
+      attrVal => modulate.randomGain;
+    }
+
     if (attrName  == "mixPan") {
       attrVal => mix.pan;
     }
@@ -186,6 +210,12 @@ public class InstrSinOsc2 extends InstrumentBase {
     }
     if (attrName  == "delayMax") {
       attrVal => delay.max;
+    }
+    if (attrName  == "echoDelay") {
+      attrVal => echo.delay;
+    }
+    if (attrName  == "echoMax") {
+      attrVal => echo.max;
     }
   } 
 
