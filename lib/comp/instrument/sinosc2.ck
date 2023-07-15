@@ -18,10 +18,10 @@ public class InstrSinOsc2 extends InstrumentBase {
   Gain g;
   // generators
   SinOsc so1;
-  SinOsc so2;
-  SinOsc so3;
-  SinOsc so4;
-  SinOsc so5;
+  /* SinOsc so2; */
+  /* SinOsc so3; */
+  /* SinOsc so4; */
+  /* SinOsc so5; */
   /* [so1, so2, so3, so4, so5] @=> SinOsc gens[]; */
   [so1] @=> SinOsc gens[];
   // envelope
@@ -123,8 +123,8 @@ public class InstrSinOsc2 extends InstrumentBase {
     /* so => env => echo => chorus => modulate => delay => rev => env => pan => dac; */
     0.05 => g.gain;
     /* chorus => modulate => delay => rev => pan => env => g => dac; */
-    chorus => echo => delay => rev => pan => env => g => dac;
-    so1 => chorus;
+    /* chorus => echo => delay => rev => pan => env => g => dac; */
+    /* so1 => chorus; */
     /* so2 => chorus; */
     /* so3 => delay; */
     /* so4 => delay; */
@@ -157,13 +157,14 @@ public class InstrSinOsc2 extends InstrumentBase {
 
   // Override
   fun UGen getGen(int genIdx) {
-    return gens[genIdx];
+    return so1;
+    /* return gens[genIdx]; */
   }
 
   // Override
-  fun UGen[] getGens() {
-    return gens;
-  }
+  /* fun UGen[] getGens() { */
+  /*   return gens; */
+  /* } */
 
   // Override
   // global attribute applied to or set up when patches are wired to apply to all gens

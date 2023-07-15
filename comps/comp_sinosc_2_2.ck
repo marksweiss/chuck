@@ -30,12 +30,12 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   /* conf.addFloatArg("modulateVibratoRate", modulateVibratoRate); */
   /* conf.addFloatArg("modulateVibratoGain", 0.5); */
   /* conf.addFloatArg("modulateRandomGain", 0.5); */
-  conf.addDurationArg("delayDelay", 35::ms);
-  conf.addDurationArg("delayMax", 70::ms);
-  conf.addDurationArg("echoDelay", 10::ms);
-  conf.addDurationArg("echoMax", 20::ms);
-  conf.addFloatArg("echoMix", 0.15);
-  conf.addFloatArg("reverbMix", 0.05);
+  conf.addDurationArg("delayDelay", 75::ms);
+  conf.addDurationArg("delayMax", 100::ms);
+  /* conf.addDurationArg("echoDelay", 10::ms); */
+  /* conf.addDurationArg("echoMax", 20::ms); */
+  /* conf.addFloatArg("echoMix", 0.5); */
+  /* conf.addFloatArg("reverbMix", 0.05); */
   /* conf.addFloatArg("panPan", 0.0); */
   /* conf.addFloatArg("mixPan", 1.0); */
   conf.loadArgs();
@@ -69,7 +69,8 @@ fun void main () {
   10 => int NUM_PHRASES;
   3 => int NUM_PLAYERS;
 
-  120 => int BPM;
+  // TODO BUG BMP < 30 loops but produces no audio
+  60 => int BPM;
   Event startEvent;
   Event stepEvent; 
 
@@ -140,8 +141,8 @@ fun void main () {
   /* instr3.so1 => instr3.chorus => instr3.echo => instr3.delay => instr3.rev => instr3.pan => instr3.env => instr3.g; */
   instr0.g => dac.right; 
   instr1.g => dac.left; 
-  instr2.g => instr1.g; 
-  instr3.g => instr1.g; 
+  /* instr2.g => dac; */ 
+  /* instr1.g => dac; */ 
 
   // global coordinator of interprocess state governing composition behavior, such
   // as in this case whether instruments move to the next phrase or stay on the current one

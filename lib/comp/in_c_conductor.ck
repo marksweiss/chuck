@@ -87,12 +87,12 @@ public class InCConductor extends Conductor {
  
   // Player must play each phrase at least this long
   // Insures that short phrases are played enough to counterpoint with longer phrases
-  2.0 * NC.REST_1.duration => dur MIN_REPEAT_PHRASE_DURATION;
+  4.0 * NC.REST_1.duration => dur MIN_REPEAT_PHRASE_DURATION;
 
   // The most important factor governing advance of Players through phrases, this is simply
   // the percentage prob that they advance on any given iteration  
-  // assumes range [0, 100), i.e. this advances 28% of the time
-  5 => int PHRASE_ADVANCE_PROB;
+  // assumes range [0, 100)
+  10 => int PHRASE_ADVANCE_PROB;
 
   // Player Phrase Phase 
   // Tunable parms for shifting playing of current phrase out of its current
@@ -102,7 +102,7 @@ public class InCConductor extends Conductor {
   // during a performance
   
   // Percentage prob that a Player will adjust phase on any given iteration
-  7 => int ADJ_PHASE_PROB;
+  20 => int ADJ_PHASE_PROB;
   // Supports Instruction that Player this is too often in alignment should favor
   // trying to be out of phase a bit more. If Player hasn't adjusted phase
   // this many times or more, then adj_phase_prob_increase_factor will be applied
@@ -114,13 +114,13 @@ public class InCConductor extends Conductor {
 
   // Prob that a Player will seek unison on any given iteration.  The idea is that
   // to seek unison the Ensemble and all the Players must seek unison  
-  10 => int PLAYER_UNISON_PROB;
+  0 => int PLAYER_UNISON_PROB;
 
   // Player isResting/Play
   // Tunable parms for probability that Player will isResting rather than playing a note.
   // Supports score directive to listen as well as play and not always play
   // Prob that a Player will try to isResting on a given iteration (not play)
-  5 => int REST_PROB;
+  0=> int REST_PROB;
   // Factor multiplied by isResting_prob_factor if the Player is already at isResting  
   1.5 => float STAY_AT_REST_PROB_FACTOR;
   
