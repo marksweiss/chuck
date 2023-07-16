@@ -1,15 +1,17 @@
-public class InstrSinOsc extends InstrumentEffectsBase {
+public class InstrTriOsc extends InstrumentEffectsBase {
   string name;
 
-  SinOsc osc;
+  TriOsc osc;
   Gain g;
   ArgParser conf;
 
-  fun void init(string name, float phase, ArgParser conf) {
+  fun void init(string name, float phase, float width, ArgParser conf) {
     1 => genCount;
 
     name => this.name;
     phase => osc.phase;
+    width => osc.width;
+    0 => osc.sync;
     conf @=> this.conf;
 
     initEffects(conf);
@@ -50,6 +52,8 @@ public class InstrSinOsc extends InstrumentEffectsBase {
       attrVal => osc.freq;
     } else if (attrName  == "phase") {
       attrVal => osc.phase; 
+    } else if (attrName  == "width") {
+      attrVal => osc.width; 
     } else {
       setEffectsAttr(attrName, attrVal);
     }

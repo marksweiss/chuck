@@ -103,19 +103,22 @@ fun void main () {
   getConf(300, 10::ms, 20::ms, 10::ms) @=> ArgParser conf0;
   getConf(150, 20::ms, 20::ms, 20::ms) @=> ArgParser conf1;
 
-  InstrSinOsc instr0;
-  InstrSinOsc instr1; 
-  0.0 => float phase;
-  instr0.init("instr0", phase, conf0);
-  0.5 => phase;
-  instr1.init("instr1", phase, conf1);
+  InstrSawOsc instr0;
+  0.5 => float phase;
+  0.4 => float width;
+  instr0.init("instr0", phase, width, conf0);
+
+  InstrSawOsc instr1; 
+  0.8 => phase;
+  0.9 => width;
+  instr1.init("instr1", phase, width, conf1);
   
   // create patch chain
   // always precede dac with Gain, because Gain goes out of scope when code stops running,
   // breaking Ugen connection to dac output, but dac does not without explicit use of =< operator.
   // See: https://learning.oreilly.com/library/view/programming-for-musicians/9781617291708/OEBPS/Text/kindle_split_018.html 
-  instr0.so => instr0.chorus => instr0.echo => instr0.delay => instr0.rev => instr0.pan => instr0.env => instr0.g;
-  instr1.so => instr1.chorus => instr1.echo => instr1.delay => instr1.rev => instr1.pan => instr1.env => instr1.g;
+  instr0.osc => instr0.chorus => instr0.echo => instr0.delay => instr0.rev => instr0.pan => instr0.env => instr0.g;
+  instr1.osc => instr1.chorus => instr1.echo => instr1.delay => instr1.rev => instr1.pan => instr1.env => instr1.g;
   instr0.g => dac.right; 
   instr1.g => dac.left; 
 
@@ -132,9 +135,9 @@ fun void main () {
   CoroutineController CC;
   Coroutine cor;
   Lock lock;
-  CoroutineController corPlayer0;
   // TODO init() overload that doesn't require IS_NOT_HEAD / IS_HEAD because now support signalRandom()
   //  which doesn't require that an ordered chain of coroutine threads be set up
+  CoroutineController corPlayer0;
   corPlayer0.init(0, "cor_player0", cor, lock, CC.IS_NOT_HEAD);
   CoroutineController corPlayer1;
   corPlayer1.init(1, "cor_player1", cor, lock, CC.IS_NOT_HEAD);
