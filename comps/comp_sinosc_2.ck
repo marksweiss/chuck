@@ -67,7 +67,7 @@ fun void main () {
 
   // init clock, tempo and time advance Events
   10 => int NUM_PHRASES;
-  3 => int NUM_PLAYERS;
+  2 => int NUM_PLAYERS;
 
   40 => int BPM;
   Event startEvent;
@@ -86,11 +86,7 @@ fun void main () {
   seqs0.init("seqs0", isLooping);
   Sequences seqs1;
   seqs1.init("seqs1", isLooping);
-  Sequences seqs2;
-  seqs2.init("seqs2", isLooping);
-  Sequences seqs3;
-  seqs3.init("seqs3", isLooping);
-  [seqs0, seqs1, seqs2, seqs3] @=> Sequences seqs[];
+  [seqs0, seqs1] @=> Sequences seqs[];
 
   // declare chords / notes for each sequence
   NoteConst N;
@@ -115,55 +111,24 @@ fun void main () {
   // TODO PERFORMANCE
   // Add the rest of the phrases
 
-  // TODO SOME OF THESE SHOULD BE DEFINED IN TERMS OF CLOCK calls to whole(), half() etc.
   // configure instruments, pass clock, Events, sequences of phrases and conductor to them 
-  getConf(400, 10::ms, 20::ms, 10::ms) @=> ArgParser conf0;
+  getConf(300, 10::ms, 20::ms, 10::ms) @=> ArgParser conf0;
   getConf(150, 20::ms, 20::ms, 20::ms) @=> ArgParser conf1;
-  getConf(100, 30::ms, 60::ms, 30::ms) @=> ArgParser conf2;
-  getConf(200, 15::ms, 40::ms, 75::ms) @=> ArgParser conf3;
+
   // TODO MAKE NAMING 0-based consistent
   // TODO PERFORMANCE
   // tune the instruments, add new kinds of instruments, add more players, make the performance interesting
   InstrSinOsc2 instr0;
   InstrSinOsc2 instr1; 
-  InstrSinOsc2 instr2; 
-  InstrSinOsc2 instr3; 
-  InstrSinOsc2 instr4; 
-  InstrSinOsc2 instr5; 
-  InstrSinOsc2 instr6; 
-  InstrSinOsc2 instr7; 
-  instr0.init("instr0", conf0);
-  instr1.init("instr1", conf1);
-  instr2.init("instr2", conf2);
-  instr3.init("instr3", conf3);
-  instr4.init("instr4", conf0);
-  instr5.init("instr5", conf1);
-  instr6.init("instr6", conf2);
-  instr7.init("instr7", conf3);
-
+  0.0 => float phase;
+  instr0.init("instr0", phase, conf0);
+  0.5 => phase;
+  instr1.init("instr1", phase, conf1);
   
-  instr0.so1 => instr0.chorus => instr0.echo => instr0.delay => instr0.rev => instr0.pan => instr0.env => instr0.g;
-  instr1.so1 => instr1.chorus => instr1.echo => instr1.delay => instr1.rev => instr1.pan => instr1.env => instr1.g;
-  instr2.so1 => instr2.chorus => instr2.echo => instr2.delay => instr2.rev => instr2.pan => instr2.env => instr2.g;
-  instr3.so1 => instr3.chorus => instr3.echo => instr3.delay => instr3.rev => instr3.pan => instr3.env => instr3.g;
-  instr4.so1 => instr4.chorus => instr4.echo => instr4.delay => instr4.rev => instr4.pan => instr4.env => instr4.g;
-  instr5.so1 => instr5.chorus => instr5.echo => instr5.delay => instr5.rev => instr5.pan => instr5.env => instr5.g;
-  instr6.so1 => instr6.chorus => instr6.echo => instr6.delay => instr6.rev => instr6.pan => instr6.env => instr6.g;
-  instr7.so1 => instr7.chorus => instr7.echo => instr7.delay => instr7.rev => instr7.pan => instr7.env => instr7.g;
+  instr0.so => instr0.chorus => instr0.echo => instr0.delay => instr0.rev => instr0.pan => instr0.env => instr0.g;
+  instr1.so => instr1.chorus => instr1.echo => instr1.delay => instr1.rev => instr1.pan => instr1.env => instr1.g;
   instr0.g => dac.right; 
   instr1.g => dac.left; 
-  instr2.g => dac.right; 
-  instr3.g => dac.left; 
-  instr4.g => dac.right; 
-  instr5.g => dac.left; 
-  instr6.g => dac.right; 
-  instr7.g => dac.left; 
-  /* instr2.g => instr0.g; */
-  /* instr3.g => instr1.g; */ 
-  /* instr4.g => instr0.g; */ 
-  /* instr5.g => instr1.g; */
-  /* instr6.g => instr0.g; */ 
-  /* instr7.g => instr1.g; */ 
 
   // global coordinator of interprocess state governing composition behavior, such
   // as in this case whether instruments move to the next phrase or stay on the current one
@@ -185,10 +150,6 @@ fun void main () {
   corPlayer0.init(0, "cor_player0", cor, lock, CC.IS_NOT_HEAD);
   CoroutineController corPlayer1;
   corPlayer1.init(1, "cor_player1", cor, lock, CC.IS_NOT_HEAD);
-  CoroutineController corPlayer2;
-  corPlayer2.init(2, "cor_player2", cor, lock, CC.IS_NOT_HEAD);
-  CoroutineController corPlayer3;
-  corPlayer3.init(3, "cor_player3", cor, lock, CC.IS_NOT_HEAD);
 
   InCPlayer player0;
   player0.init("player0", seqs0, startEvent, stepEvent,
@@ -196,19 +157,11 @@ fun void main () {
   InCPlayer player1;
   player1.init("player1", seqs1, startEvent, stepEvent,
                corPlayer1, clock.stepDur, conductor, instr1);
-  InCPlayer player2;
-  player2.init("player2", seqs2, startEvent, stepEvent,
-               corPlayer2, clock.stepDur, conductor, instr2);
-  InCPlayer player3;
-  player2.init("player3", seqs3, startEvent, stepEvent,
-               corPlayer3, clock.stepDur, conductor, instr3);
 
   // start clock thread and instrument play threads
   spork ~ runClock(clock);
   spork ~ runPlayer(player0);
   spork ~ runPlayer(player1);
-  spork ~ runPlayer(player2);
-  spork ~ runPlayer(player3);
 
   while (true) {1::second => now;}  // block process exit to force child threads to run
 }

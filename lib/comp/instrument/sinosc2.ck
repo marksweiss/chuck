@@ -17,13 +17,12 @@ public class InstrSinOsc2 extends InstrumentBase {
 
   Gain g;
   // generators
-  SinOsc so1;
-  /* SinOsc so2; */
-  /* SinOsc so3; */
-  /* SinOsc so4; */
-  /* SinOsc so5; */
-  /* [so1, so2, so3, so4, so5] @=> SinOsc gens[]; */
-  [so1] @=> SinOsc gens[];
+  SinOsc so;
+  [so] @=> SinOsc gens[];
+  // TODO GET RID OF THE ARRAY
+
+  // phase
+  float phase;
   // envelope
   ADSR env;
   // effects
@@ -39,8 +38,10 @@ public class InstrSinOsc2 extends InstrumentBase {
   Pan2 pan;  // -1 to 1 // .pan
   Mix2 mix;  // stereo to mono mixdown  // .pan
 
-  fun void init(string name, ArgParser conf) {
+  fun void init(string name, float phase, ArgParser conf) {
     name => this.name;
+    phase => this.phase;
+    phase => so.phase;
     NUM_GENS => genCount;
     conf @=> this.conf;
 
@@ -124,7 +125,7 @@ public class InstrSinOsc2 extends InstrumentBase {
     0.05 => g.gain;
     /* chorus => modulate => delay => rev => pan => env => g => dac; */
     /* chorus => echo => delay => rev => pan => env => g => dac; */
-    /* so1 => chorus; */
+    /* so => chorus; */
     /* so2 => chorus; */
     /* so3 => delay; */
     /* so4 => delay; */
@@ -157,7 +158,7 @@ public class InstrSinOsc2 extends InstrumentBase {
 
   // Override
   fun UGen getGen(int genIdx) {
-    return so1;
+    return so;
     /* return gens[genIdx]; */
   }
 
