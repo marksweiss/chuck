@@ -17,12 +17,12 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   conf.addFloatArg("chorusModFreq", 1100.0);
   conf.addFloatArg("chorusModDepth", 0.05);
   conf.addFloatArg("chorusMix", 0.05);
-  conf.addFloatArg("modulateVibratoRate", modulateVibratoRate);
-  conf.addFloatArg("modulateVibratoGain", 0.2);
-  conf.addFloatArg("modulateRandomGain", 0.0);
-  conf.addDurationArg("delayDelay", 35::ms);
-  conf.addDurationArg("delayMax", 70::ms);
-  conf.addDurationArg("echoDelay", 10::ms);
+  /* conf.addFloatArg("modulateVibratoRate", modulateVibratoRate); */
+  /* conf.addFloatArg("modulateVibratoGain", 0.2); */
+  /* conf.addFloatArg("modulateRandomGain", 0.0); */
+  /* conf.addDurationArg("delayDelay", 35::ms); */
+  /* conf.addDurationArg("delayMax", 70::ms); */
+  /* conf.addDurationArg("echoDelay", 10::ms); */
   conf.addDurationArg("echoMax", 20::ms);
   conf.addFloatArg("echoMix", 0.15);
   conf.addFloatArg("reverbMix", 0.05);
@@ -75,29 +75,8 @@ fun void main () {
   seqs1.init("seqs1", isLooping);
   [seqs0, seqs1] @=> Sequences seqs[];
 
-  // declare chords / notes for each sequence
-  NoteConst N;
-  N.init(BPM);
-  Note T;
-  ScaleConst S;
-  S.init(BPM);
-
-  // The 53 phrases of "In C"
-  addPhrase([N.C4_8, N.E4_4, N.C4_8, N.E4_4, N.C4_8, N.E4_4], seqs);
-  addPhrase([N.C4_8, N.E4_8, N.F4_8, N.E4_4], seqs);
-  addPhrase([N.REST_8, N.E4_8, N.F4_8, N.E4_8], seqs);
-  addPhrase([N.REST_8, N.E4_8, N.F4_8, N.G4_8], seqs);
-  addPhrase([N.E4_8, N.F4_8, N.G4_8, N.REST_8], seqs);
-  addPhrase([N.C5_1, N.C5_1], seqs);
-  addPhrase([N.REST_4, N.REST_4, N.REST_4, N.REST_8,
-             N.C4_8, N.C4_8, N.C4_8,
-             N.REST_8, N.REST_4, N.REST_4, N.REST_4], seqs);
-  addPhrase([T.dotN(N.G4_1), N.F4_1, N.F4_1], seqs);
-  addPhrase([N.B4_16, N.G4_16, N.REST_8, N.REST_4, N.REST_4, N.REST_4], seqs);
-  addPhrase([N.B4_16, N.G4_16], seqs);
-
-  // TODO PERFORMANCE
-  // Add the rest of the phrases
+  InCHelper helper;
+  helper.getScore(BPM, seqs);
 
   // configure instruments, pass clock, Events, sequences of phrases and conductor to them 
   getConf(300, 10::ms, 20::ms, 10::ms) @=> ArgParser conf0;
@@ -125,7 +104,8 @@ fun void main () {
   // global coordinator of interprocess state governing composition behavior, such
   // as in this case whether instruments move to the next phrase or stay on the current one
   0 => int id;
-  makePhrase([N.B4_16, N.G4_16], id) @=> Sequence lastPhrase;
+  NoteConst N;
+  helper.makePhrase([N.B4_16, N.G4_16], id) @=> Sequence lastPhrase;
   InCConductor conductor;
   conductor.init(NUM_PHRASES, NUM_PLAYERS, seqs0, lastPhrase);
 
