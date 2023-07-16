@@ -14,18 +14,6 @@
 // Machine.add("lib/concurrency/coroutine.ck"); 
 // Machine.add("lib/concurrency/coroutine_controller.ck"); 
 
-// NOTES and Questions From Previous Implementation
-// https://github.com/marksweiss/aleatoric/blob/master/compositions/Terry_Riley-In_C/midi/In_C_midi_user_instruction.rb 
-// DONT NEED Pre play rules and Post play rules - do we need this?
-// DONE Players hold their own state
-// DONE Ensemble holds its own state and can check Players' state, some of it state
-//  is derived from checking Players' state
-// DONE Separate "business logic" implentations of the rules execute rule logic against
-//  DONE Player and Ensemble state and determine whether:
-//  - DONE Player advances
-//  - DONE Player prepends a isResting note
-//  - DONE Player raises or lowers volume or goes silent, itself to "listen" or with group
-//    logic orchestrated by the Ensemble if going into crescendo / descrescendo
 // TODO
 //  - Player improvises
 
@@ -35,8 +23,6 @@
 // a cascade and handle early exit on should advance, should be encapsulated from Player
 public class InCConductor extends Conductor {
 
-  // TODO HACK
-  /* Event stateLocks[100]; */
   // *******************
   // PLAYER CONF
   // *******************

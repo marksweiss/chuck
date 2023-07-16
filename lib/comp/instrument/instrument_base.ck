@@ -51,6 +51,18 @@ public class InstrumentBase {
   // ger array of references to all gens
   fun UGen[] getGens() {}
 
+  fun int genSize() {
+    return genCount;
+  }
+
+  fun int attributeSize() {
+    return attrCount;
+  }
+
+  fun string[] attributeNames() {
+    return attrNames;
+  }
+
   // Override
   // set an attribute by name for a single gen 
   fun void setAttr(int genIdx, string attrName, float attrVal) {}
@@ -66,18 +78,6 @@ public class InstrumentBase {
   fun void setAttr(string attrName, time attrVal) {}
   fun void setAttr(string attrName, dur attrVal) {}
   fun void setAttr(string attrName, string attrVal) {}
-
-  fun int genSize() {
-    return genCount;
-  }
-
-  fun int attributeSize() {
-    return attrCount;
-  }
-
-  fun string[] attributeNames() {
-    return attrNames;
-  }
 
   // Override - each instrument should at a minimum call the built-in help on its UGen.
   // Better implementations provide pruned and specific information about arguments taken to

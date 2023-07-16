@@ -1,28 +1,5 @@
-// Machine.add("lib/comp/instrument/instrument_base.ck");
-// Machine.add("test/assert.ck");
-
-/**
- * SinOsc wrapper, with envelope, adjustable global gain and multiple effects,
- * configurable from CLI args or programmatic call to init(). Supports up to 5
- * polyphonic gens, and so can play chords of up to 5 notes.
- */ 
-public class InstrSinOsc2 extends InstrumentBase {
-  string name;
-  1 => int NUM_GENS;
-  // TODO - DO WE NEED THIS?
-
-  // Store conf because this also defines the attrs we can modify
-  // TODO these should probably be independent, so we could define a separate ArgParser
-  ArgParser conf;
-
-  Gain g;
-  // generators
-  SinOsc so;
-  [so] @=> SinOsc gens[];
-  // TODO GET RID OF THE ARRAY
-
-  // phase
-  float phase;
+public class InstrumentEffectsBase extends InstrumentBase {
+  // effects
   // envelope
   ADSR env;
   // effects
@@ -38,14 +15,7 @@ public class InstrSinOsc2 extends InstrumentBase {
   Pan2 pan;  // -1 to 1 // .pan
   Mix2 mix;  // stereo to mono mixdown  // .pan
 
-  fun void init(string name, float phase, ArgParser conf) {
-    name => this.name;
-    phase => this.phase;
-    phase => so.phase;
-    NUM_GENS => genCount;
-    conf @=> this.conf;
-
-    // init all ugens to passthru initially, only set ugens with conf arguments to be sum inputs
+  fun void initEffects(ArgParser conf) {
     env.op(OP_PASSTHRU);
     chorus.op(OP_PASSTHRU);
     modulate.op(OP_PASSTHRU);
@@ -115,39 +85,6 @@ public class InstrSinOsc2 extends InstrumentBase {
     if (conf.hasAnyArg("--mix")) {
       pan.op(OP_SUM);
     }
-    
-    // TODO LOOK AT CHUCK GROUPS FROM CHUCK BOOK
-    // create patch chain
-    // always precede dac with Gain, because Gain goes out of scope when code stops running,
-    // breaking Ugen connection to dac output, but dac does not without explicit use of =< operator.
-    // See: https://learning.oreilly.com/library/view/programming-for-musicians/9781617291708/OEBPS/Text/kindle_split_018.html 
-    /* so => env => echo => chorus => modulate => delay => rev => env => pan => dac; */
-    0.05 => g.gain;
-    /* chorus => modulate => delay => rev => pan => env => g => dac; */
-    /* chorus => echo => delay => rev => pan => env => g => dac; */
-    /* so => chorus; */
-    /* so2 => chorus; */
-    /* so3 => delay; */
-    /* so4 => delay; */
-    /* so5 => delay; */
-  }
-
-  // Override
-  // global gain 
-  fun Gain getGain() {
-    return g;
-  }
-
-  // Override
-  fun void setGain(int genIdx, float gainVal) {
-    gainVal => gens[genIdx].gain;
-  }
-
-  // Override
-  fun void setGain(float gainVal) {
-    for (0 => int i; i < genCount; i++) {
-      setGain(i, gainVal);
-    } 
   }
 
   // Override
@@ -156,25 +93,7 @@ public class InstrSinOsc2 extends InstrumentBase {
     return env;
   }
 
-  // Override
-  fun UGen getGen(int genIdx) {
-    return so;
-    /* return gens[genIdx]; */
-  }
-
-  // Override
-  /* fun UGen[] getGens() { */
-  /*   return gens; */
-  /* } */
-
-  // Override
-  // global attribute applied to or set up when patches are wired to apply to all gens
-  fun void setAttr(string attrName, float attrVal) {
-    if (attrName  == "freq") {
-      for (0 => int i; i < genCount; i++) {
-        attrVal => gens[i].freq; 
-      }
-    }
+  fun void setEffectsAttr(string attrName, float attrVal) {
     if (attrName  == "modFreq") {
       attrVal => chorus.modFreq;
     }
@@ -199,14 +118,15 @@ public class InstrSinOsc2 extends InstrumentBase {
     if (attrName  == "randomGain") {
       attrVal => modulate.randomGain;
     }
-
     if (attrName  == "mixPan") {
       attrVal => mix.pan;
     }
+
+    attrName => attrNames[attrCount++];
   } 
 
   // Override
-  fun void setAttr(string attrName, dur attrVal) {
+  fun void setEffectsAttr(string attrName, dur attrVal) {
     if (attrName  == "delayDelay") {
       attrVal => delay.delay;
     }
@@ -219,11 +139,8 @@ public class InstrSinOsc2 extends InstrumentBase {
     if (attrName  == "echoMax") {
       attrVal => echo.max;
     }
-  } 
 
-  // Override
-  // TODO
-  fun void instrHelp() {
-    <<< "Args:" >>>;
-  }
+    attrName => attrNames[attrCount++];
+  } 
 }
+

@@ -1,13 +1,3 @@
-/* chuck --loop test/assert.ck lib/arg_parser/arg_base.ck lib/arg_parser/int_arg.ck */
-/* lib/arg_parser/float_arg.ck lib/arg_parser/time_arg.ck lib/arg_parser/duration_arg.ck */
-/* lib/arg_parser/string_arg.ck lib/arg_parser/arg_parser.ck lib/collection/arg_map.ck */
-/* lib/collection/object_map.ck lib/collection/set.ck lib/util/util.ck lib/concurrency/lock.ck */
-/* lib/concurrency/coroutine.ck lib/concurrency/coroutine_controller.ck */
-/* lib/comp/instrument/instrument_base.ck lib/comp/player_base.ck lib/comp/clock.ck lib/comp/note.ck */
-/* lib/comp/chord.ck lib/comp/scale.ck lib/comp/sequence.ck lib/comp/sequences.ck lib/comp/note_const.ck */
-/* lib/comp/scale_const.ck lib/comp/instrument/sinosc2.ck lib/comp/conductor.ck lib/comp/in_c_conductor.ck */
-/* lib/comp/in_c_player.ck comps/comp_sinosc_2.ck */
-
 // For client to spork, which requires a free function as entry point
 public void runClock(Clock clock) {
   clock.play();
@@ -36,8 +26,6 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   conf.addDurationArg("echoMax", 20::ms);
   conf.addFloatArg("echoMix", 0.15);
   conf.addFloatArg("reverbMix", 0.05);
-  /* conf.addFloatArg("panPan", 0.0);/ */
-  /* conf.addFloatArg("mixPan", 1.0); */
   conf.loadArgs();
 
   return conf;
@@ -56,15 +44,14 @@ fun Sequence makePhrase(Note phraseNotes[], int id) {
   return seq;
 }
 
+// TODO
+// - Look at other UGens, work on better timbres for composition
+// - Experiment with micro-detune, (see detune example in book)
+// - JUST INTONATION!!!
+// - Dynamic signal processing example from Chuck book, Chapter 8
+// - Cleanup
+//   - move In C stuff into it's own directory
 fun void main () {
-  // TODO
-  // - Look at other UGens, work on better timbres for composition
-  // - Experiment with micro-detune, (see detune example in book)
-  // - JUST INTONATION!!!
-  // - Dynamic signal processing example from Chuck book, Chapter 8
-  // - Cleanup
-  //   - move In C stuff into it's own directory
-
   // init clock, tempo and time advance Events
   10 => int NUM_PHRASES;
   2 => int NUM_PLAYERS;
@@ -95,6 +82,7 @@ fun void main () {
   ScaleConst S;
   S.init(BPM);
 
+  // The 53 phrases of "In C"
   addPhrase([N.C4_8, N.E4_4, N.C4_8, N.E4_4, N.C4_8, N.E4_4], seqs);
   addPhrase([N.C4_8, N.E4_8, N.F4_8, N.E4_4], seqs);
   addPhrase([N.REST_8, N.E4_8, N.F4_8, N.E4_8], seqs);
@@ -115,16 +103,17 @@ fun void main () {
   getConf(300, 10::ms, 20::ms, 10::ms) @=> ArgParser conf0;
   getConf(150, 20::ms, 20::ms, 20::ms) @=> ArgParser conf1;
 
-  // TODO MAKE NAMING 0-based consistent
-  // TODO PERFORMANCE
-  // tune the instruments, add new kinds of instruments, add more players, make the performance interesting
-  InstrSinOsc2 instr0;
-  InstrSinOsc2 instr1; 
+  InstrSinOsc instr0;
+  InstrSinOsc instr1; 
   0.0 => float phase;
   instr0.init("instr0", phase, conf0);
   0.5 => phase;
   instr1.init("instr1", phase, conf1);
   
+  // create patch chain
+  // always precede dac with Gain, because Gain goes out of scope when code stops running,
+  // breaking Ugen connection to dac output, but dac does not without explicit use of =< operator.
+  // See: https://learning.oreilly.com/library/view/programming-for-musicians/9781617291708/OEBPS/Text/kindle_split_018.html 
   instr0.so => instr0.chorus => instr0.echo => instr0.delay => instr0.rev => instr0.pan => instr0.env => instr0.g;
   instr1.so => instr1.chorus => instr1.echo => instr1.delay => instr1.rev => instr1.pan => instr1.env => instr1.g;
   instr0.g => dac.right; 
@@ -140,7 +129,6 @@ fun void main () {
   // declare the Players whose behavior governed by calling the Conductor to
   // to check their state changes, performing the notes of the Sequences using the
   // Instruments to play the notes
-
   CoroutineController CC;
   Coroutine cor;
   Lock lock;
