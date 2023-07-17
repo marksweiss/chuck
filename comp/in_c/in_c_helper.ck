@@ -1,6 +1,5 @@
 public class InCHelper {
-
-  fun void getScore(int bpm, Sequences seqs[]) {
+  fun static void getScore(int bpm, Sequences seqs[]) {
     // declare chords / notes for each sequence
     NoteConst N;
     N.init(bpm);
@@ -89,14 +88,14 @@ public class InCHelper {
     addPhrase([N.Bf4_16, N.G4_16], seqs);
   }
   
-  fun Sequence makePhrase(Note phraseNotes[], int id) {
+  fun static Sequence makePhrase(Note phraseNotes[], int id) {
     Sequence seq;
     seq.init(Std.itoa(id), true);  // looping phrases 
     seq.add(phraseNotes);
     return seq;
   }
 
-  fun /*private*/ void addPhrase(Note phraseNotes[], Sequences seqs[]) {
+  fun /*private*/ static void addPhrase(Note phraseNotes[], Sequences seqs[]) {
     for (0 => int i; i < seqs.size(); ++i) {
       seqs[i].add(makePhrase(phraseNotes, i));
     } 

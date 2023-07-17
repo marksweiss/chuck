@@ -66,15 +66,19 @@ public class Sequence {
       }
     }
     
-    // TODO THIS WAS A BUG RUNS OFF THE END, CATCH IN UNIT TEST
-    if (idx + 1 < chords.size()) {
-      idx++;
-      return chords[idx];
-    }
-    return null;
+    idx++;
+    return chords[idx - 1];
   }
 
   fun Chord current() {
+    if (idx >= chords.size()) {
+      if (!isLooping) {
+        <<< "ERROR: call to current() when idx >= size and !isLooping" >>>;
+        me.exit();
+      } else {
+        reset();
+      }
+    }
     return chords[idx];
   }
 

@@ -17,14 +17,14 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   conf.addFloatArg("chorusModFreq", 1100.0);
   conf.addFloatArg("chorusModDepth", 0.05);
   conf.addFloatArg("chorusMix", 0.05);
-  conf.addFloatArg("modulateVibratoRate", modulateVibratoRate);
-  conf.addFloatArg("modulateVibratoGain", 0.2);
-  conf.addFloatArg("modulateRandomGain", 0.0);
-  conf.addDurationArg("delayDelay", 35::ms);
-  conf.addDurationArg("delayMax", 70::ms);
-  conf.addDurationArg("echoDelay", 10::ms);
-  conf.addDurationArg("echoMax", 20::ms);
-  conf.addFloatArg("echoMix", 0.15);
+  /* conf.addFloatArg("modulateVibratoRate", modulateVibratoRate); */
+  /* conf.addFloatArg("modulateVibratoGain", 0.2); */
+  /* conf.addFloatArg("modulateRandomGain", 0.0); */
+  /* conf.addDurationArg("delayDelay", 35::ms); */
+  /* conf.addDurationArg("delayMax", 70::ms); */
+  /* conf.addDurationArg("echoDelay", 10::ms); */
+  /* conf.addDurationArg("echoMax", 20::ms); */
+  /* conf.addFloatArg("echoMix", 0.15); */
   conf.addFloatArg("reverbMix", 0.05);
   conf.loadArgs();
 
@@ -83,7 +83,7 @@ fun void main () {
   getConf(150, 20::ms, 20::ms, 20::ms) @=> ArgParser conf1;
 
   InstrSinOsc instr0;
-  0.2 => float phase;
+  0.0 => float phase;
   instr0.init("instr0", phase, conf0);
 
   InstrSinOsc instr1; 
@@ -121,10 +121,10 @@ fun void main () {
   corPlayer1.init(1, "cor_player1", cor, lock, CC.IS_NOT_HEAD);
 
   InCPlayer player0;
-  player0.init("player0", seqs0, startEvent, stepEvent,
+  player0.init("sinosc player0", seqs0, startEvent, stepEvent,
                corPlayer0, clock.stepDur, conductor, instr0);
   InCPlayer player1;
-  player1.init("player1", seqs1, startEvent, stepEvent,
+  player1.init("sinosc player1", seqs1, startEvent, stepEvent,
                corPlayer1, clock.stepDur, conductor, instr1);
 
   // start clock thread and instrument play threads

@@ -34,8 +34,12 @@ public class InCPlayer extends PlayerBase {
     // block on startEvent to all sync start time on clock.sync()
     startEvent => now;
 
+    /* corController.signalRandom(); */
     // set initial state in conductor for this player
     conductor.initPlayer(me.id());
+
+    // TEMP DEBUG
+    0 => int phraseCount;
 
     // index of chord in sequence to play
     0 => int i;
@@ -44,7 +48,6 @@ public class InCPlayer extends PlayerBase {
     0::samp => dur sinceLastNote;
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord chrd;
-    0 => int loopCount;
     while (true) {
       // NOTE: assumes all notes in current chord are same duration
       chrd.notes[0].duration => dur nextNoteDur;
@@ -70,12 +73,17 @@ public class InCPlayer extends PlayerBase {
         corController.signalRandom();
         conductor.doUpdate(me.id(), seq) @=> Sequence seq;
 
+        /* corController.signalRandom(); */
         if (! conductor.isPlaying()) {
           break;
         }
 
+        /* corController.signalRandom(); */
         if (conductor.hasAdvanced(me.id())) {
           seqs.next() @=> seq;          
+
+          // TEMP DEBUG
+          phraseCount++;
         }
         // /Conductor update current phrase or advanced to next phrase
 
@@ -86,9 +94,14 @@ public class InCPlayer extends PlayerBase {
           // reset this sequence to its 0th position for next usage as we loop through sequences
           seq.reset();
           seq.next() @=> chrd;
+
           // assert that the sequence isn't empty so that resetting and taking first note is valid
           if (chrd == null) {
-            <<< "ERROR: sequence should return a non-null note after calling reset()" >>>;
+
+            // TEMP DEBUG
+            <<< "phraseCount", phraseCount, "seq size", seq.size(), "seq index", seq.idx, "seq isLooping", seq.isLooping >>>;
+
+            <<< "ERROR: sequence should return a non-null note after calling reset(), player", name >>>;
             me.exit();
           }
         }

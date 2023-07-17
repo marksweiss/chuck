@@ -17,14 +17,14 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   conf.addFloatArg("chorusModFreq", 1100.0);
   conf.addFloatArg("chorusModDepth", 0.05);
   conf.addFloatArg("chorusMix", 0.05);
-  conf.addFloatArg("modulateVibratoRate", modulateVibratoRate);
-  conf.addFloatArg("modulateVibratoGain", 0.2);
-  conf.addFloatArg("modulateRandomGain", 0.0);
+  /* conf.addFloatArg("modulateVibratoRate", modulateVibratoRate); */
+  /* conf.addFloatArg("modulateVibratoGain", 0.2); */
+  /* conf.addFloatArg("modulateRandomGain", 0.0); */
   /* conf.addDurationArg("delayDelay", 35::ms); */
   /* conf.addDurationArg("delayMax", 70::ms); */
-  conf.addDurationArg("echoDelay", 10::ms);
-  conf.addDurationArg("echoMax", 20::ms);
-  conf.addFloatArg("echoMix", 0.15);
+  /* conf.addDurationArg("echoDelay", 10::ms); */
+  /* conf.addDurationArg("echoMax", 20::ms); */
+  /* conf.addFloatArg("echoMix", 0.15); */
   conf.addFloatArg("reverbMix", 0.05);
   conf.loadArgs();
 
@@ -50,12 +50,11 @@ fun void main () {
   Clock clock;
   clock.init(BPM, startEvent, stepEvent);
 
-  // declare sequence containers
-  true => int isLooping;
-
   // For passing a copy of the initial, unmodified source sequences to the Conductor
   // so it can advance players to a clean copy of the next sequences, or undo changes
   // to the player copy of a sequence
+  // sequences are not looping -- when we get to last phrase we end
+  false => int isLooping;
   Sequences seqs0;
   seqs0.init("seqs0", isLooping);
   Sequences seqs1;
@@ -70,13 +69,13 @@ fun void main () {
   getConf(150, 20::ms, 20::ms, 20::ms) @=> ArgParser conf1;
 
   InstrSqrOsc instr0;
-  0.3 => float phase;
+  0.0 => float phase;
   0.4 => float width; 
   instr0.init("instr0", phase, width, conf0);
 
   InstrSqrOsc instr1; 
-  0.7 => phase;
-  0.8 => width; 
+  0.0 => phase;
+  0.0 => width; 
   instr1.init("instr1", phase, width, conf1);
   
   // create patch chain
@@ -110,10 +109,10 @@ fun void main () {
   corPlayer1.init(1, "cor_player1", cor, lock, CC.IS_NOT_HEAD);
 
   InCPlayer player0;
-  player0.init("player0", seqs0, startEvent, stepEvent,
+  player0.init("sqrosc player0", seqs0, startEvent, stepEvent,
                corPlayer0, clock.stepDur, conductor, instr0);
   InCPlayer player1;
-  player1.init("player1", seqs1, startEvent, stepEvent,
+  player1.init("sqrosc player1", seqs1, startEvent, stepEvent,
                corPlayer1, clock.stepDur, conductor, instr1);
 
   // start clock thread and instrument play threads

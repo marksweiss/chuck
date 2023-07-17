@@ -78,7 +78,7 @@ public class InCConductor extends Conductor {
   // The most important factor governing advance of Players through phrases, this is simply
   // the percentage prob that they advance on any given iteration  
   // assumes range [0, 100)
-  10 => int PHRASE_ADVANCE_PROB;
+  90 => int PHRASE_ADVANCE_PROB;
 
   // Player Phrase Phase 
   // Tunable parms for shifting playing of current phrase out of its current
