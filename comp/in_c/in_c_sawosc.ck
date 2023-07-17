@@ -53,7 +53,7 @@ fun Sequence makePhrase(Note phraseNotes[], int id) {
 //   - move In C stuff into it's own directory
 fun void main () {
   // init clock, tempo and time advance Events
-  10 => int NUM_PHRASES;
+  53 => int NUM_PHRASES;
   2 => int NUM_PLAYERS;
 
   40 => int BPM;
@@ -63,12 +63,10 @@ fun void main () {
   Clock clock;
   clock.init(BPM, startEvent, stepEvent);
 
-  // declare sequence containers
-  true => int isLooping;
-
   // For passing a copy of the initial, unmodified source sequences to the Conductor
   // so it can advance players to a clean copy of the next sequences, or undo changes
   // to the player copy of a sequence
+  true => int isLooping;
   Sequences seqs0;
   seqs0.init("seqs0", isLooping);
   Sequences seqs1;

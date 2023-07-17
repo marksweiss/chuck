@@ -1,19 +1,3 @@
-// Machine.add("lib/arg_parser/arg_base.ck"); 
-// Machine.add("lib/arg_parser/float_arg.ck"); 
-// Machine.add("lib/arg_parser/int_arg.ck"); 
-// Machine.add("lib/arg_parser/dur_arg.ck"); 
-// Machine.add("lib/collection/arg_map.ck");
-// Machine.add("lib/collection/object_map.ck");
-// Machine.add("lib/comp/clock.ck"); 
-// Machine.add("lib/comp/note.ck"); 
-// Machine.add("lib/comp/note_const.ck"); 
-// Machine.add("lib/comp/chord.ck"); 
-// Machine.add("lib/comp/conductor.ck"); 
-// Machine.add("lib/test/assert.ck"); 
-// Machine.add("lib/concurrency/lock.ck"); 
-// Machine.add("lib/concurrency/coroutine.ck"); 
-// Machine.add("lib/concurrency/coroutine_controller.ck"); 
-
 // TODO
 //  - Player improvises
 
@@ -78,7 +62,7 @@ public class InCConductor extends Conductor {
   // The most important factor governing advance of Players through phrases, this is simply
   // the percentage prob that they advance on any given iteration  
   // assumes range [0, 100)
-  90 => int PHRASE_ADVANCE_PROB;
+  10 => int PHRASE_ADVANCE_PROB;
 
   // Player Phrase Phase 
   // Tunable parms for shifting playing of current phrase out of its current
@@ -397,11 +381,13 @@ public class InCConductor extends Conductor {
 
       // for each chord in the phrase
       while (playerPhrase.next() != null) {
-        playerPhrase.current() @=> Chord c;
-        for (0 => int i; i < c.size(); i++) {
-          // adjust the note's gain, normalize to be <= 1.0
-          Math.min(c.notes[i].gain * gainAdj, 0.95) => c.notes[i].gain;
-        } 
+        playerPhrase.currentNoReset() @=> Chord c;
+        if (c != null) {
+          for (0 => int i; i < c.size(); i++) {
+            // adjust the note's gain, normalize to be <= 1.0
+            Math.min(c.notes[i].gain * gainAdj, 0.95) => c.notes[i].gain;
+          }
+        }
       }
 
       playerPhraseMap.put(idToKey(playerId), playerPhrase);
@@ -449,9 +435,11 @@ public class InCConductor extends Conductor {
 
       phrase(playerId) @=> Sequence currentPhrase; 
       while (currentPhrase.next() != null) {
-        currentPhrase.current() @=> Chord c;
-        for (0 => int i; i < c.size(); i++) {
-          transposeInterval +=> c.notes[i].pitch;
+        currentPhrase.currentNoReset() @=> Chord c;
+        if (c != null) {
+          for (0 => int i; i < c.size(); i++) {
+            transposeInterval +=> c.notes[i].pitch;
+          }
         }
       }
       playerPhraseMap.put(idToKey(playerId), currentPhrase);
@@ -538,7 +526,10 @@ public class InCConductor extends Conductor {
     dur seqDuration;
     Chord chord;
     while (seq.next() != null) {
-      seq.current().notes[0].duration +=> seqDuration; 
+      seq.currentNoReset() @=> Chord c;
+      if (c != null) {
+        c.notes[0].duration +=> seqDuration;
+      }
     }
     return curPhrasePlayCount * seqDuration < MIN_REPEAT_PHRASE_DURATION;
   }
@@ -682,8 +673,12 @@ public class InCConductor extends Conductor {
 
     phrase(playerId) @=> Sequence playerPhrase;
     dur total;
+
     while (playerPhrase.next() != null) {
-      playerPhrase.current().notes[0].duration +=> total; 
+      playerPhrase.currentNoReset() @=> Chord c;
+      if (c != null) {
+        c.notes[0].duration +=> total; 
+      }
     }
     total / playerPhrase.size() => dur meanPhraseDuration;
 

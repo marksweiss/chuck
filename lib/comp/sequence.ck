@@ -58,6 +58,10 @@ public class Sequence {
 
   // *** Iterator interface
   fun Chord next() {
+
+    // TEMP DEBUG
+    <<< "IN next(), size", chords.size(), "idx", idx >>>;
+  
     if (idx == chords.size()) {
       if (!isLooping) {
         return null;
@@ -71,13 +75,21 @@ public class Sequence {
   }
 
   fun Chord current() {
-    if (idx >= chords.size()) {
-      if (!isLooping) {
-        <<< "ERROR: call to current() when idx >= size and !isLooping" >>>;
-        me.exit();
-      } else {
+
+    // TEMP DEBUG
+    <<< "IN current(), size", chords.size(), "idx", idx >>>;
+  
+    if (idx == chords.size()) {
+      if (isLooping) {
         reset();
       }
+    }
+    return chords[idx];
+  }
+
+  fun Chord currentNoReset() {
+    if (idx == chords.size()) {
+      return null;
     }
     return chords[idx];
   }

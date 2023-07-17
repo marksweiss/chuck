@@ -40,7 +40,7 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
 //   - move In C stuff into it's own directory
 fun void main () {
   // init clock, tempo and time advance Events
-  10 => int NUM_PHRASES;
+  53 => int NUM_PHRASES;
   2 => int NUM_PLAYERS;
 
   40 => int BPM;
@@ -53,8 +53,7 @@ fun void main () {
   // For passing a copy of the initial, unmodified source sequences to the Conductor
   // so it can advance players to a clean copy of the next sequences, or undo changes
   // to the player copy of a sequence
-  // sequences are not looping -- when we get to last phrase we end
-  false => int isLooping;
+  true => int isLooping;
   Sequences seqs0;
   seqs0.init("seqs0", isLooping);
   Sequences seqs1;

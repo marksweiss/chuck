@@ -40,6 +40,7 @@ public class InCPlayer extends PlayerBase {
 
     // TEMP DEBUG
     0 => int phraseCount;
+    /* 0 => int loopCount; */
 
     // index of chord in sequence to play
     0 => int i;
@@ -49,6 +50,13 @@ public class InCPlayer extends PlayerBase {
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord chrd;
     while (true) {
+
+      // TEMP DEBUG
+      /* loopCount++; */
+      /* if (loopCount % 50000 == 0) { */
+      /*   <<< "name", name, "phraseCount", phraseCount >>>; */
+      /* } */
+
       // NOTE: assumes all notes in current chord are same duration
       chrd.notes[0].duration => dur nextNoteDur;
       sinceLastNote + stepDur => sinceLastNote; 
@@ -84,6 +92,7 @@ public class InCPlayer extends PlayerBase {
 
           // TEMP DEBUG
           phraseCount++;
+          <<< "name", name, "phraseCount", phraseCount >>>;
         }
         // /Conductor update current phrase or advanced to next phrase
 
@@ -97,10 +106,6 @@ public class InCPlayer extends PlayerBase {
 
           // assert that the sequence isn't empty so that resetting and taking first note is valid
           if (chrd == null) {
-
-            // TEMP DEBUG
-            <<< "phraseCount", phraseCount, "seq size", seq.size(), "seq index", seq.idx, "seq isLooping", seq.isLooping >>>;
-
             <<< "ERROR: sequence should return a non-null note after calling reset(), player", name >>>;
             me.exit();
           }
