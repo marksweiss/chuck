@@ -66,10 +66,28 @@ public class Sequence {
       if (!isLooping) {
         return null;
       } else {
+
+        // TEMP DEBUG
+        <<< "IN next() RESET, size", chords.size(), "idx", idx >>>;
+  
         reset(); 
       }
     }
     
+    idx++;
+
+    // TEMP DEBUG
+    if (idx > 1) {
+      <<< "IN next() AFTER idx incr, size", chords.size(), "idx", idx >>>;
+    } 
+
+    return chords[idx - 1];
+  }
+
+  fun Chord nextOnce() {
+    if (idx == chords.size()) {
+      return null;
+    }
     idx++;
     return chords[idx - 1];
   }
@@ -79,7 +97,7 @@ public class Sequence {
     // TEMP DEBUG
     <<< "IN current(), size", chords.size(), "idx", idx >>>;
   
-    if (idx == chords.size()) {
+    if (idx >= chords.size()) {
       if (isLooping) {
         reset();
       }
@@ -88,7 +106,7 @@ public class Sequence {
   }
 
   fun Chord currentNoReset() {
-    if (idx == chords.size()) {
+    if (idx >= chords.size()) {
       return null;
     }
     return chords[idx];

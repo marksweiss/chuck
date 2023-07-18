@@ -84,13 +84,13 @@ public class InCConductor extends Conductor {
 
   // Prob that a Player will seek unison on any given iteration.  The idea is that
   // to seek unison the Ensemble and all the Players must seek unison  
-  0 => int PLAYER_UNISON_PROB;
+  10 => int PLAYER_UNISON_PROB;
 
   // Player isResting/Play
   // Tunable parms for probability that Player will isResting rather than playing a note.
   // Supports score directive to listen as well as play and not always play
   // Prob that a Player will try to isResting on a given iteration (not play)
-  0=> int REST_PROB;
+  5 => int REST_PROB;
   // Factor multiplied by isResting_prob_factor if the Player is already at isResting  
   1.5 => float STAY_AT_REST_PROB_FACTOR;
   
@@ -333,6 +333,12 @@ public class InCConductor extends Conductor {
   // *******************
   // instruction business logic, call predicates and adjust player and player phrase state
 
+
+  // TODO BUG RIGHT NERE
+  // ALL THESE ADVANCE() FUNCTIONS NEED TO CHECK isRepeatingCurPhrase()
+  // THIS ENFORCES MIN NUMBER OF TIMES PLAYING CURRENT PHRASE
+  // REQUIRES PLAYER TO TRACK STATE OF HOW MANY TIMES THEY HAVE PLAYED THE PHRASE 
+
   // "Patterns are to be played consecutively with each performer having the freedom to determine how many 
   //  times he or she will repeat each pattern before moving on to the next.  There is no fixed rule 
   //  as to the number of repetitions a pattern may have, however, since performances normally average 
@@ -380,13 +386,11 @@ public class InCConductor extends Conductor {
       phrase(playerId) @=> Sequence playerPhrase;
 
       // for each chord in the phrase
-      while (playerPhrase.next() != null) {
-        playerPhrase.currentNoReset() @=> Chord c;
-        if (c != null) {
-          for (0 => int i; i < c.size(); i++) {
-            // adjust the note's gain, normalize to be <= 1.0
-            Math.min(c.notes[i].gain * gainAdj, 0.95) => c.notes[i].gain;
-          }
+      Chord c;
+      while ((playerPhrase.nextOnce() @=> c) != null) {
+        for (0 => int i; i < c.size(); i++) {
+          // adjust the note's gain, normalize to be <= 1.0
+          Math.min(c.notes[i].gain * gainAdj, 0.95) => c.notes[i].gain;
         }
       }
 
@@ -434,12 +438,10 @@ public class InCConductor extends Conductor {
         SCL.NUM_NOTES_IN_OCTAVE => int transposeInterval;
 
       phrase(playerId) @=> Sequence currentPhrase; 
-      while (currentPhrase.next() != null) {
-        currentPhrase.currentNoReset() @=> Chord c;
-        if (c != null) {
-          for (0 => int i; i < c.size(); i++) {
-            transposeInterval +=> c.notes[i].pitch;
-          }
+      Chord c;
+      while ((currentPhrase.nextOnce() @=> c) != null) {
+        for (0 => int i; i < c.size(); i++) {
+          transposeInterval +=> c.notes[i].pitch;
         }
       }
       playerPhraseMap.put(idToKey(playerId), currentPhrase);
@@ -524,12 +526,9 @@ public class InCConductor extends Conductor {
 
   fun /*private*/ int isRepeatingCurPhrase(Sequence seq, int curPhrasePlayCount) {
     dur seqDuration;
-    Chord chord;
-    while (seq.next() != null) {
-      seq.currentNoReset() @=> Chord c;
-      if (c != null) {
-        c.notes[0].duration +=> seqDuration;
-      }
+    Chord c;
+    while ((seq.nextOnce() @=> c) != null) {
+      c.notes[0].duration +=> seqDuration;
     }
     return curPhrasePlayCount * seqDuration < MIN_REPEAT_PHRASE_DURATION;
   }
@@ -674,11 +673,9 @@ public class InCConductor extends Conductor {
     phrase(playerId) @=> Sequence playerPhrase;
     dur total;
 
-    while (playerPhrase.next() != null) {
-      playerPhrase.currentNoReset() @=> Chord c;
-      if (c != null) {
-        c.notes[0].duration +=> total; 
-      }
+    Chord c;
+    while ((playerPhrase.nextOnce() @=> c) != null) {
+      c.notes[0].duration +=> total; 
     }
     total / playerPhrase.size() => dur meanPhraseDuration;
 
