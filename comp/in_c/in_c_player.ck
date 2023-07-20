@@ -3,6 +3,11 @@
 public class InCPlayer extends PlayerBase {
   string name;
   Sequences seqs;
+
+  // Player must repeat each phrase a minimum number of times
+  1 => int MIN_TIMES_REPEAT_PHRASE;
+  0 => int phrasePlayCount;
+
   0.5 => float DEFAULT_GAIN;
   // Players store the gain they are currently setting for all notes they play, allows
   // per-Player dynamics to be controlled by Conductor
@@ -39,8 +44,8 @@ public class InCPlayer extends PlayerBase {
     conductor.initPlayer(me.id());
 
     // TEMP DEBUG
-    0 => int phraseCount;
-    /* 0 => int loopCount; */
+    /* 0 => int phraseCount; */
+    0 => int loopCount;
 
     // index of chord in sequence to play
     0 => int i;
@@ -52,10 +57,12 @@ public class InCPlayer extends PlayerBase {
     while (true) {
 
       // TEMP DEBUG
-      /* loopCount++; */
-      /* if (loopCount % 50000 == 0) { */
-      /*   <<< "name", name, "phraseCount", phraseCount >>>; */
-      /* } */
+      loopCount++;
+      if (name == "sinosc player0") {
+        /* if (loopCount % 50 == 0) { */
+          <<< "name", name, "TOP OF LOOP, seq.idx", seq.idx >>>;
+        /* } */
+      }
 
       // NOTE: assumes all notes in current chord are same duration
       chrd.notes[0].duration => dur nextNoteDur;
@@ -86,22 +93,57 @@ public class InCPlayer extends PlayerBase {
           break;
         }
 
+        // TEMP DEBUG
+        /* <<< "name", name, "phrasePlayCount > MIN", phrasePlayCount > MIN_TIMES_REPEAT_PHRASE >>>; */
+
         /* corController.signalRandom(); */
-        if (conductor.hasAdvanced(me.id())) {
+        if (phrasePlayCount > MIN_TIMES_REPEAT_PHRASE && conductor.hasAdvanced(me.id())) {
+
+          // TEMP DEBUG
+          if (name == "sinosc player0") {
+            <<< "name", name, "GETTING NEXT PHRASE" >>>;
+          }
+
           seqs.next() @=> seq;          
 
           // TEMP DEBUG
-          phraseCount++;
-          <<< "name", name, "phraseCount", phraseCount >>>;
+          /* <<< "name", name, "phrase idx", seqs.idx >>>; */
+
+          0 => phrasePlayCount;
+
+          // TEMP DEBUG
+          /* phraseCount++; */
+          /* <<< "name", name, "phrasePlayCount reset", phrasePlayCount >>>; */
         }
         // /Conductor update current phrase or advanced to next phrase
+
+        // TEMP DEBUG
+        if (name == "sinosc player0") {
+          <<< "name", name, "phrase chord idx BEFORE, seq.idx", seq.idx >>>;
+        }
 
         // determine whether the next note is the next note in this sequence, or the
         // first note in this sequence (because we are looping and reached the end)
         seq.next() @=> chrd;
+
+        // TEMP DEBUG
+        if (name == "sinosc player0") {
+          <<< "name", name, "phrase chord idx AFTER NEXT, seq.idx", seq.idx , "chrd", chrd >>>;
+        }
+
         if (chrd == null) {
+          phrasePlayCount++;
+
+          // TEMP DEBUG
+          /* <<< "name", name, "phrasePlayCount incremented", phrasePlayCount >>>; */
+          <<< "name", name, "phrase chord idx BEFORE RESET", seq.idx >>>;
+
           // reset this sequence to its 0th position for next usage as we loop through sequences
           seq.reset();
+
+          // TEMP DEBUG
+          <<< "name", name, "phrase chord idx AFTER RESET", seq.idx >>>;
+
           seq.next() @=> chrd;
 
           // assert that the sequence isn't empty so that resetting and taking first note is valid
@@ -109,6 +151,11 @@ public class InCPlayer extends PlayerBase {
             <<< "ERROR: sequence should return a non-null note after calling reset(), player", name >>>;
             me.exit();
           }
+        }
+
+        // TEMP DEBUG
+        if (name == "sinosc player0") {
+          <<< "name", name, "phrase chord idx AFTER, seq.idx", seq.idx >>>;
         }
 
         // load the next chord into all the gens in the instrument
@@ -123,6 +170,11 @@ public class InCPlayer extends PlayerBase {
 
         // trigger envelope start
         instr.getEnv().keyOn();
+
+        // TEMP DEBUG
+        if (name == "sinosc player0") {
+          <<< "name", name, "phrase chord idx BOTTOM OF LOOP, seq.idx", seq.idx >>>;
+        }
       } 
     }
   }
@@ -133,5 +185,9 @@ public class InCPlayer extends PlayerBase {
 
   fun void setGain(float gain) {
     gain => this.gain;
+  }
+
+  fun int getPhrasePlayCount() {
+    return phrasePlayCount;
   }
 }

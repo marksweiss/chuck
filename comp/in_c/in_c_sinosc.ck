@@ -53,7 +53,7 @@ fun Sequence makePhrase(Note phraseNotes[], int id) {
 //   - move In C stuff into it's own directory
 fun void main () {
   // init clock, tempo and time advance Events
-  53 => int NUM_PHRASES;
+  1 => int NUM_PHRASES;
   2 => int NUM_PLAYERS;
 
   40 => int BPM;

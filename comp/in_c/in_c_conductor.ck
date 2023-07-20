@@ -62,7 +62,7 @@ public class InCConductor extends Conductor {
   // The most important factor governing advance of Players through phrases, this is simply
   // the percentage prob that they advance on any given iteration  
   // assumes range [0, 100)
-  10 => int PHRASE_ADVANCE_PROB;
+  80 => int PHRASE_ADVANCE_PROB;
 
   // Player Phrase Phase 
   // Tunable parms for shifting playing of current phrase out of its current
@@ -286,6 +286,10 @@ public class InCConductor extends Conductor {
    * after the update.
    */
   fun int hasAdvanced(int playerId) {
+
+    // TEMP DEBUG
+    /* <<< "IN hasAdvanced(), playerId", playerId, "value", getBool(playerId, PLAYER_HAS_ADVANCED) >>>; */ 
+
     return getBool(playerId, PLAYER_HAS_ADVANCED);
   }
 
@@ -347,6 +351,10 @@ public class InCConductor extends Conductor {
   fun void instructionAdvancePhraseIdx(int playerId) {
     if (!hasAdvanced(playerId) && isAdvancingPhraseIdx(playerId)) {
       increment(playerId, PHRASE_IDX);
+
+      // TEMP DEBUG
+      /* <<< "instructionAdvancePhraseIdx() hasAdvanced true" >>>; */
+
       put(playerId, PLAYER_HAS_ADVANCED, true);
     }
   }
@@ -355,6 +363,10 @@ public class InCConductor extends Conductor {
   fun void instructionAdvancePhraseIdxTooFarBehind(int playerId) {
     if (!hasAdvanced(playerId) && isTooFarBehind(playerId)) {
       increment(playerId, PHRASE_IDX);
+
+      // TEMP DEBUG
+      /* <<< "instructionAdvancePhraseIdx() hasAdvanced true" >>>; */
+
       put(playerId, PLAYER_HAS_ADVANCED, true);
     }
   }
@@ -363,6 +375,10 @@ public class InCConductor extends Conductor {
   fun void instructionAdvancePhraseIdxSeekingUnison(int playerId) {
     if (!hasAdvanced(playerId) && isSeekingUnison(playerId) && ensembleIsSeekingUnison()) {
       increment(playerId, PHRASE_IDX);
+
+      // TEMP DEBUG
+      /* <<< "instructionAdvancePhraseIdxSeekingUnison() hasAdvanced true" >>>; */
+
       put(playerId, PLAYER_HAS_ADVANCED, true);
       put(playerId, PLAYER_HAS_REACHED_UNISON, true);
     }
@@ -387,10 +403,11 @@ public class InCConductor extends Conductor {
 
       // for each chord in the phrase
       Chord c;
-      while ((playerPhrase.nextOnce() @=> c) != null) {
-        for (0 => int i; i < c.size(); i++) {
+      for (0 => int i; i < playerPhrase.size(); i++) {
+        playerPhrase.chords[i] @=> c;
+        for (0 => int j; j < c.size(); j++) {
           // adjust the note's gain, normalize to be <= 1.0
-          Math.min(c.notes[i].gain * gainAdj, 0.95) => c.notes[i].gain;
+          Math.min(c.notes[j].gain * gainAdj, 0.95) => c.notes[j].gain;
         }
       }
 
@@ -439,9 +456,10 @@ public class InCConductor extends Conductor {
 
       phrase(playerId) @=> Sequence currentPhrase; 
       Chord c;
-      while ((currentPhrase.nextOnce() @=> c) != null) {
-        for (0 => int i; i < c.size(); i++) {
-          transposeInterval +=> c.notes[i].pitch;
+      for (0 => int i; i < currentPhrase.size(); i++) {
+        currentPhrase.chords[i] @=> c;
+        for (0 => int j; j < c.size(); j++) {
+          transposeInterval +=> c.notes[j].pitch;
         }
       }
       playerPhraseMap.put(idToKey(playerId), currentPhrase);
@@ -521,13 +539,18 @@ public class InCConductor extends Conductor {
   }
 
   fun /*private*/ int isAdvancingPhraseIdx(int playerId) {
+
+    // TEMP DEBUG
+    /* <<< "isAdvancingPhraseIdx() PHRASE_ADVANCE_PROB", PHRASE_ADVANCE_PROB, "exceedsThreshold", exceedsThreshold(PHRASE_ADVANCE_PROB) >>>; */
+
     return !hasReachedLastPhrase(playerId) && exceedsThreshold(PHRASE_ADVANCE_PROB);
   }
 
   fun /*private*/ int isRepeatingCurPhrase(Sequence seq, int curPhrasePlayCount) {
     dur seqDuration;
     Chord c;
-    while ((seq.nextOnce() @=> c) != null) {
+    for (0 => int i; i < seq.size(); i++) {
+      seq.chords[i] @=> c;
       c.notes[0].duration +=> seqDuration;
     }
     return curPhrasePlayCount * seqDuration < MIN_REPEAT_PHRASE_DURATION;
@@ -575,7 +598,7 @@ public class InCConductor extends Conductor {
   }
 
   fun /*private*/ int isTooFarBehind(int playerId) {
-    if (hasReachedLastPhrase(playerId) || getInt(playerId, PLAYER_HAS_ADVANCED)) {
+    if (hasReachedLastPhrase(playerId) || getBool(playerId, PLAYER_HAS_ADVANCED)) {
       return false;
     }
     return getAllMaxInt(PHRASE_IDX) - getInt(playerId, PHRASE_IDX) >= PHRASES_IDX_RANGE_THRESHOLD;
@@ -638,6 +661,10 @@ public class InCConductor extends Conductor {
   }
 
   fun /*private*/ int hasAdvanced(int playerId) {
+
+    // TEMP DEBUG
+    /* <<< "IN hasAdvanced(), playerId", playerId, "value", getBool(playerId, PLAYER_HAS_ADVANCED) >>>; */ 
+
     return getBool(playerId, PLAYER_HAS_ADVANCED);
   }
 
@@ -674,7 +701,8 @@ public class InCConductor extends Conductor {
     dur total;
 
     Chord c;
-    while ((playerPhrase.nextOnce() @=> c) != null) {
+    for (0 => int i; i < playerPhrase.size(); i++) {
+      playerPhrase.chords[i] @=> c;
       c.notes[0].duration +=> total; 
     }
     total / playerPhrase.size() => dur meanPhraseDuration;
