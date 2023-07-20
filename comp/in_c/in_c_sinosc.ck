@@ -45,12 +45,24 @@ fun Sequence makePhrase(Note phraseNotes[], int id) {
 }
 
 // TODO
-// - Look at other UGens, work on better timbres for composition
+// Swing, pacing is too regular
+// Play with envelopes a bit
+// More reverb and subtle delay
+// More Ugens
+// More Effects
+// Panning, can switch channels dynamically?
+
+// IDEA
+// Get this just nice
+// Then practice playing the piece and do live improv against this
+
+// OLD TODOS
 // - Experiment with micro-detune, (see detune example in book)
 // - JUST INTONATION!!!
 // - Dynamic signal processing example from Chuck book, Chapter 8
 // - Cleanup
 //   - move In C stuff into it's own directory
+
 fun void main () {
   // init clock, tempo and time advance Events
   1 => int NUM_PHRASES;
