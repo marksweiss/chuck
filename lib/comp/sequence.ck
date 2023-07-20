@@ -57,57 +57,26 @@ public class Sequence {
   // ***
 
   // *** Iterator interface
+  // NOTE: This should not be used concurrently by multiple threads as each will advance idx
+  // causing each to skip elements
   fun Chord next() {
-
-    // TEMP DEBUG
-    <<< "IN next(), size", chords.size(), "idx", idx >>>;
-  
     if (idx == chords.size()) {
       if (!isLooping) {
         return null;
       } else {
-
-        // TEMP DEBUG
-        /* <<< "IN next() RESET, size", chords.size(), "idx", idx >>>; */
-  
         reset(); 
       }
     }
     
     idx++;
-
-    // TEMP DEBUG
-    /* if (idx > 1) { */
-      <<< "IN next() AFTER idx incr, size", chords.size(), "idx", idx >>>;
-    /* } */ 
-
-    return chords[idx - 1];
-  }
-
-  fun Chord nextOnce() {
-    if (idx == chords.size()) {
-      return null;
-    }
-    idx++;
     return chords[idx - 1];
   }
 
   fun Chord current() {
-
-    // TEMP DEBUG
-    /* <<< "IN current(), size", chords.size(), "idx", idx >>>; */
-  
     if (idx >= chords.size()) {
       if (isLooping) {
         reset();
       }
-    }
-    return chords[idx];
-  }
-
-  fun Chord currentNoReset() {
-    if (idx >= chords.size()) {
-      return null;
     }
     return chords[idx];
   }

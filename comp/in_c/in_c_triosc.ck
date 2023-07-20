@@ -17,9 +17,9 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   conf.addFloatArg("chorusModFreq", 1100.0);
   conf.addFloatArg("chorusModDepth", 0.05);
   conf.addFloatArg("chorusMix", 0.05);
-  /* conf.addFloatArg("modulateVibratoRate", modulateVibratoRate); */
-  /* conf.addFloatArg("modulateVibratoGain", 0.2); */
-  /* conf.addFloatArg("modulateRandomGain", 0.0); */
+  conf.addFloatArg("modulateVibratoRate", modulateVibratoRate);
+  conf.addFloatArg("modulateVibratoGain", 0.2);
+  conf.addFloatArg("modulateRandomGain", 0.0);
   /* conf.addDurationArg("delayDelay", 35::ms); */
   /* conf.addDurationArg("delayMax", 70::ms); */
   /* conf.addDurationArg("echoDelay", 10::ms); */
@@ -56,7 +56,7 @@ fun void main () {
   53 => int NUM_PHRASES;
   2 => int NUM_PLAYERS;
 
-  40 => int BPM;
+  80 => int BPM;
   Event startEvent;
   Event stepEvent; 
 

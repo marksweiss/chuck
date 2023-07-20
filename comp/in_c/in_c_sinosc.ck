@@ -22,9 +22,9 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   /* conf.addFloatArg("modulateRandomGain", 0.0); */
   /* conf.addDurationArg("delayDelay", 35::ms); */
   /* conf.addDurationArg("delayMax", 70::ms); */
-  /* conf.addDurationArg("echoDelay", 10::ms); */
-  /* conf.addDurationArg("echoMax", 20::ms); */
-  /* conf.addFloatArg("echoMix", 0.15); */
+  conf.addDurationArg("echoDelay", 10::ms);
+  conf.addDurationArg("echoMax", 20::ms);
+  conf.addFloatArg("echoMix", 0.15);
   conf.addFloatArg("reverbMix", 0.05);
   conf.loadArgs();
 
@@ -56,7 +56,7 @@ fun void main () {
   1 => int NUM_PHRASES;
   2 => int NUM_PLAYERS;
 
-  40 => int BPM;
+  80 => int BPM;
   Event startEvent;
   Event stepEvent; 
 

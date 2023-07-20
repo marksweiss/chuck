@@ -286,10 +286,6 @@ public class InCConductor extends Conductor {
    * after the update.
    */
   fun int hasAdvanced(int playerId) {
-
-    // TEMP DEBUG
-    /* <<< "IN hasAdvanced(), playerId", playerId, "value", getBool(playerId, PLAYER_HAS_ADVANCED) >>>; */ 
-
     return getBool(playerId, PLAYER_HAS_ADVANCED);
   }
 
@@ -351,10 +347,6 @@ public class InCConductor extends Conductor {
   fun void instructionAdvancePhraseIdx(int playerId) {
     if (!hasAdvanced(playerId) && isAdvancingPhraseIdx(playerId)) {
       increment(playerId, PHRASE_IDX);
-
-      // TEMP DEBUG
-      /* <<< "instructionAdvancePhraseIdx() hasAdvanced true" >>>; */
-
       put(playerId, PLAYER_HAS_ADVANCED, true);
     }
   }
@@ -363,10 +355,6 @@ public class InCConductor extends Conductor {
   fun void instructionAdvancePhraseIdxTooFarBehind(int playerId) {
     if (!hasAdvanced(playerId) && isTooFarBehind(playerId)) {
       increment(playerId, PHRASE_IDX);
-
-      // TEMP DEBUG
-      /* <<< "instructionAdvancePhraseIdx() hasAdvanced true" >>>; */
-
       put(playerId, PLAYER_HAS_ADVANCED, true);
     }
   }
@@ -375,10 +363,6 @@ public class InCConductor extends Conductor {
   fun void instructionAdvancePhraseIdxSeekingUnison(int playerId) {
     if (!hasAdvanced(playerId) && isSeekingUnison(playerId) && ensembleIsSeekingUnison()) {
       increment(playerId, PHRASE_IDX);
-
-      // TEMP DEBUG
-      /* <<< "instructionAdvancePhraseIdxSeekingUnison() hasAdvanced true" >>>; */
-
       put(playerId, PLAYER_HAS_ADVANCED, true);
       put(playerId, PLAYER_HAS_REACHED_UNISON, true);
     }
@@ -539,10 +523,6 @@ public class InCConductor extends Conductor {
   }
 
   fun /*private*/ int isAdvancingPhraseIdx(int playerId) {
-
-    // TEMP DEBUG
-    /* <<< "isAdvancingPhraseIdx() PHRASE_ADVANCE_PROB", PHRASE_ADVANCE_PROB, "exceedsThreshold", exceedsThreshold(PHRASE_ADVANCE_PROB) >>>; */
-
     return !hasReachedLastPhrase(playerId) && exceedsThreshold(PHRASE_ADVANCE_PROB);
   }
 
@@ -661,10 +641,6 @@ public class InCConductor extends Conductor {
   }
 
   fun /*private*/ int hasAdvanced(int playerId) {
-
-    // TEMP DEBUG
-    /* <<< "IN hasAdvanced(), playerId", playerId, "value", getBool(playerId, PLAYER_HAS_ADVANCED) >>>; */ 
-
     return getBool(playerId, PLAYER_HAS_ADVANCED);
   }
 

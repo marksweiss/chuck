@@ -43,7 +43,7 @@ fun void main () {
   53 => int NUM_PHRASES;
   2 => int NUM_PLAYERS;
 
-  40 => int BPM;
+  80 => int BPM;
   Event startEvent;
   Event stepEvent; 
 

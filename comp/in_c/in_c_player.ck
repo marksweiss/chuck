@@ -43,10 +43,6 @@ public class InCPlayer extends PlayerBase {
     // set initial state in conductor for this player
     conductor.initPlayer(me.id());
 
-    // TEMP DEBUG
-    /* 0 => int phraseCount; */
-    0 => int loopCount;
-
     // index of chord in sequence to play
     0 => int i;
     // state triggering time elapsed is == to the duration of previous note played,
@@ -55,15 +51,6 @@ public class InCPlayer extends PlayerBase {
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord chrd;
     while (true) {
-
-      // TEMP DEBUG
-      loopCount++;
-      if (name == "sinosc player0") {
-        /* if (loopCount % 50 == 0) { */
-          <<< "name", name, "TOP OF LOOP, seq.idx", seq.idx >>>;
-        /* } */
-      }
-
       // NOTE: assumes all notes in current chord are same duration
       chrd.notes[0].duration => dur nextNoteDur;
       sinceLastNote + stepDur => sinceLastNote; 
@@ -93,57 +80,22 @@ public class InCPlayer extends PlayerBase {
           break;
         }
 
-        // TEMP DEBUG
-        /* <<< "name", name, "phrasePlayCount > MIN", phrasePlayCount > MIN_TIMES_REPEAT_PHRASE >>>; */
-
         /* corController.signalRandom(); */
         if (phrasePlayCount > MIN_TIMES_REPEAT_PHRASE && conductor.hasAdvanced(me.id())) {
-
-          // TEMP DEBUG
-          if (name == "sinosc player0") {
-            <<< "name", name, "GETTING NEXT PHRASE" >>>;
-          }
-
           seqs.next() @=> seq;          
-
-          // TEMP DEBUG
-          /* <<< "name", name, "phrase idx", seqs.idx >>>; */
-
           0 => phrasePlayCount;
-
-          // TEMP DEBUG
-          /* phraseCount++; */
-          /* <<< "name", name, "phrasePlayCount reset", phrasePlayCount >>>; */
         }
         // /Conductor update current phrase or advanced to next phrase
-
-        // TEMP DEBUG
-        if (name == "sinosc player0") {
-          <<< "name", name, "phrase chord idx BEFORE, seq.idx", seq.idx >>>;
-        }
 
         // determine whether the next note is the next note in this sequence, or the
         // first note in this sequence (because we are looping and reached the end)
         seq.next() @=> chrd;
 
-        // TEMP DEBUG
-        if (name == "sinosc player0") {
-          <<< "name", name, "phrase chord idx AFTER NEXT, seq.idx", seq.idx , "chrd", chrd >>>;
-        }
-
         if (chrd == null) {
           phrasePlayCount++;
 
-          // TEMP DEBUG
-          /* <<< "name", name, "phrasePlayCount incremented", phrasePlayCount >>>; */
-          <<< "name", name, "phrase chord idx BEFORE RESET", seq.idx >>>;
-
           // reset this sequence to its 0th position for next usage as we loop through sequences
           seq.reset();
-
-          // TEMP DEBUG
-          <<< "name", name, "phrase chord idx AFTER RESET", seq.idx >>>;
-
           seq.next() @=> chrd;
 
           // assert that the sequence isn't empty so that resetting and taking first note is valid
@@ -151,11 +103,6 @@ public class InCPlayer extends PlayerBase {
             <<< "ERROR: sequence should return a non-null note after calling reset(), player", name >>>;
             me.exit();
           }
-        }
-
-        // TEMP DEBUG
-        if (name == "sinosc player0") {
-          <<< "name", name, "phrase chord idx AFTER, seq.idx", seq.idx >>>;
         }
 
         // load the next chord into all the gens in the instrument
@@ -170,11 +117,6 @@ public class InCPlayer extends PlayerBase {
 
         // trigger envelope start
         instr.getEnv().keyOn();
-
-        // TEMP DEBUG
-        if (name == "sinosc player0") {
-          <<< "name", name, "phrase chord idx BOTTOM OF LOOP, seq.idx", seq.idx >>>;
-        }
       } 
     }
   }
