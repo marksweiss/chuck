@@ -44,7 +44,7 @@ public class InCPlayer extends PlayerBase {
     conductor.initPlayer(me.id());
 
     // index of chord in sequence to play
-    0 => int i;
+    0 => int chordIdx;
     // state triggering time elapsed is == to the duration of previous note played,
     // time to play the next one
     0::samp => dur sinceLastNote;
@@ -76,6 +76,20 @@ public class InCPlayer extends PlayerBase {
       // sequence, it is is the first note in the same sequence (if not advancing
       // to the next sequence) or the first note in the next sequence (if advancing).
       stepEvent => now;
+
+      // TODO ONE BUG HERE - UPDATE CAN RESET CHORD POSITION TO 0
+      // Update player state
+      corController.signalRandom();
+      conductor.doUpdate(me.id(), seq) @=> Sequence seq;
+
+      /* corController.signalRandom(); */
+      if (! conductor.isPlaying()) {
+        break;
+      }
+
+      // Restore chord in sequence we were playing before update, which returns
+      // a new altered sequence
+      chordIdx => seq.idx;
 
       // TEMP DEBUG
       /* if (name == "sinosc player0") { */
@@ -160,16 +174,7 @@ public class InCPlayer extends PlayerBase {
         }
       }
  
-      // TODO ONE BUG HERE - UPDATE CAN RESET CHORD POSITION TO 0
-      // Update player state
-      corController.signalRandom();
-      conductor.doUpdate(me.id(), seq) @=> Sequence seq;
-
-      /* corController.signalRandom(); */
-      if (! conductor.isPlaying()) {
-        break;
-      }
-
+      seq.idx => chordIdx;
       // TEMP DEBUG
       /* if (name == "sinosc player0") { */
       /*   <<< "BOTTOM", name, seqs.idx, seq.size(), seq.idx >>>; */
