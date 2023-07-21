@@ -44,7 +44,7 @@ public class InCPlayer extends PlayerBase {
     conductor.initPlayer(me.id());
 
     // index of chord in sequence to play
-    0 => int i;
+    0 => int seqIdx;
     // state triggering time elapsed is == to the duration of previous note played,
     // time to play the next one
     0::samp => dur sinceLastNote;
@@ -73,7 +73,10 @@ public class InCPlayer extends PlayerBase {
         instr.getEnv().releaseTime() => now;
 
         corController.signalRandom();
+        seq.idx => seqIdx;
         conductor.doUpdate(me.id(), seq) @=> Sequence seq;
+        // restore chord index in sequence after update, which can return a new altered sequence
+        seqIdx => seq.idx;
 
         /* corController.signalRandom(); */
         if (! conductor.isPlaying()) {
