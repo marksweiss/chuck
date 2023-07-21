@@ -51,9 +51,20 @@ public class InCPlayer extends PlayerBase {
     this.seqs.current() @=> Sequence seq;
     seq.current() @=> Chord chrd;
     while (true) {
+
+      // TEMP DEBUG
+      /* if (name == "sinosc player0") { */
+      /*   <<< "TOP", name, seqs.idx, seq.size(), seq.idx >>>; */
+      /* } */
+
       // NOTE: assumes all notes in current chord are same duration
       chrd.notes[0].duration => dur nextNoteDur;
       sinceLastNote + stepDur => sinceLastNote; 
+
+      // TEMP DEBUG
+      /* if (name == "sinosc player0") { */
+      /*   <<< "BEFORE STEP", name, seqs.idx, seq.size(), seq.idx >>>; */
+      /* } */
 
       // Block on event of next beat step broadcast by clock. Each player blocks until
       // the clock advances global `now` one tempo duration and then broadcasts on this
@@ -66,19 +77,33 @@ public class InCPlayer extends PlayerBase {
       // to the next sequence) or the first note in the next sequence (if advancing).
       stepEvent => now;
 
+      // TEMP DEBUG
+      /* if (name == "sinosc player0") { */
+      /*   <<< "AFTER STEP", name, seqs.idx, seq.size(), seq.idx >>>; */
+      /* } */
+
+      // TEMP DEBUG
+      /* if (name == "sinosc player0") { */
+      /*   <<< "BEFORE UPDATE", name, seqs.idx, seq.size(), seq.idx >>>; */
+      /* } */
+
+      // TEMP DEBUG
+      /* if (name == "sinosc player0") { */
+      /*   <<< "AFTER UPDATE", name, seqs.idx, seq.size(), seq.idx >>>; */
+      /* } */
+
       // if enough time has passed, emit the next note, silence the previous note
       if (sinceLastNote >= nextNoteDur) {
+
+        // TEMP DEBUG
+        if (name == "sinosc player0") {
+          <<< "PLAYING", name, sinceLastNote, nextNoteDur >>>;
+          <<< "PLAYING", name, seqs.idx, seq.size(), seq.idx >>>;
+        }
+
         // previous note ending, trigger release
         instr.getEnv().keyOff();
         instr.getEnv().releaseTime() => now;
-
-        corController.signalRandom();
-        conductor.doUpdate(me.id(), seq) @=> Sequence seq;
-
-        /* corController.signalRandom(); */
-        if (! conductor.isPlaying()) {
-          break;
-        }
 
         /* corController.signalRandom(); */
         if (phrasePlayCount > MIN_TIMES_REPEAT_PHRASE && conductor.hasAdvanced(me.id())) {
@@ -87,12 +112,34 @@ public class InCPlayer extends PlayerBase {
         }
         // /Conductor update current phrase or advanced to next phrase
 
+        // TEMP DEBUG
+        if (name == "sinosc player0") {
+          <<< "BEFORE CHORD", name, seqs.idx, seq.size(), seq.idx >>>;
+        }
+
+        // reset note triggering state
+        0::samp => sinceLastNote;
+
+        // trigger envelope start
+        instr.getEnv().keyOn();
+
+        // adjust index to play the next note
         // determine whether the next note is the next note in this sequence, or the
         // first note in this sequence (because we are looping and reached the end)
         seq.next() @=> chrd;
 
+        // TEMP DEBUG
+        if (name == "sinosc player0") {
+          <<< "AFTER CHORD", name, seqs.idx, seq.size(), seq.idx >>>;
+        }
+
         if (chrd == null) {
           phrasePlayCount++;
+
+          // TEMP DEBUG
+          if (name == "sinosc player0") {
+            <<< "BEFORE RESET", name, seqs.idx, seq.size(), seq.idx >>>;
+          }
 
           // reset this sequence to its 0th position for next usage as we loop through sequences
           seq.reset();
@@ -111,13 +158,22 @@ public class InCPlayer extends PlayerBase {
           instr.setAttr("freq", Std.mtof(n.pitch));
           instr.setGain(this.gain);
         }
+      }
+ 
+      // TODO ONE BUG HERE - UPDATE CAN RESET CHORD POSITION TO 0
+      // Update player state
+      corController.signalRandom();
+      conductor.doUpdate(me.id(), seq) @=> Sequence seq;
 
-        // reset note triggering state
-        0::samp => sinceLastNote;
+      /* corController.signalRandom(); */
+      if (! conductor.isPlaying()) {
+        break;
+      }
 
-        // trigger envelope start
-        instr.getEnv().keyOn();
-      } 
+      // TEMP DEBUG
+      /* if (name == "sinosc player0") { */
+      /*   <<< "BOTTOM", name, seqs.idx, seq.size(), seq.idx >>>; */
+      /* } */
     }
   }
 

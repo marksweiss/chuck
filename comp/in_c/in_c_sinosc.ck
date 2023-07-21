@@ -12,20 +12,20 @@ fun ArgParser getConf(float modulateVibratoRate, dur attack, dur decay, dur rele
   ArgParser conf;
   conf.addDurationArg("adsrAttack", attack);
   conf.addDurationArg("adsrDecay", decay);
-  conf.addFloatArg("adsrSustain", 0.5);
+  conf.addFloatArg("adsrSustain", 0.6);
   conf.addDurationArg("adsrRelease", release);
-  conf.addFloatArg("chorusModFreq", 1100.0);
-  conf.addFloatArg("chorusModDepth", 0.05);
-  conf.addFloatArg("chorusMix", 0.05);
+  /* conf.addFloatArg("chorusModFreq", 1100.0); */
+  /* conf.addFloatArg("chorusModDepth", 0.05); */
+  /* conf.addFloatArg("chorusMix", 0.05); */
   /* conf.addFloatArg("modulateVibratoRate", modulateVibratoRate); */
   /* conf.addFloatArg("modulateVibratoGain", 0.2); */
   /* conf.addFloatArg("modulateRandomGain", 0.0); */
   /* conf.addDurationArg("delayDelay", 35::ms); */
   /* conf.addDurationArg("delayMax", 70::ms); */
-  conf.addDurationArg("echoDelay", 10::ms);
-  conf.addDurationArg("echoMax", 20::ms);
-  conf.addFloatArg("echoMix", 0.15);
-  conf.addFloatArg("reverbMix", 0.05);
+  /* conf.addDurationArg("echoDelay", 10::ms); */
+  /* conf.addDurationArg("echoMax", 20::ms); */
+  /* conf.addFloatArg("echoMix", 0.15); */
+  conf.addFloatArg("reverbMix", 0.025);
   conf.loadArgs();
 
   return conf;
@@ -65,10 +65,10 @@ fun Sequence makePhrase(Note phraseNotes[], int id) {
 
 fun void main () {
   // init clock, tempo and time advance Events
-  1 => int NUM_PHRASES;
-  2 => int NUM_PLAYERS;
+  53 => int NUM_PHRASES;
+  1 => int NUM_PLAYERS;
 
-  80 => int BPM;
+  65 => int BPM;
   Event startEvent;
   Event stepEvent; 
 
@@ -81,39 +81,41 @@ fun void main () {
   true => int isLooping;
   Sequences seqs0;
   seqs0.init("seqs0", isLooping);
-  Sequences seqs1;
-  seqs1.init("seqs1", isLooping);
-  [seqs0, seqs1] @=> Sequences seqs[];
+  /* Sequences seqs1; */
+  /* seqs1.init("seqs1", isLooping); */
+  [seqs0 /*, seqs1*/] @=> Sequences seqs[];
 
   InCHelper helper;
   helper.getScore(BPM, seqs);
 
   // configure instruments, pass clock, Events, sequences of phrases and conductor to them 
-  getConf(300, 10::ms, 20::ms, 10::ms) @=> ArgParser conf0;
-  getConf(150, 20::ms, 20::ms, 20::ms) @=> ArgParser conf1;
+  getConf(300, 10::ms, 10::ms, 15::ms) @=> ArgParser conf0;
+  /* getConf(150, 5::ms, 5::ms, 10::ms) @=> ArgParser conf1; */
 
   InstrSinOsc instr0;
   0.0 => float phase;
   instr0.init("instr0", phase, conf0);
 
-  InstrSinOsc instr1; 
-  0.0 => phase;
-  instr1.init("instr1", phase, conf1);
+  /* InstrSinOsc instr1; */ 
+  /* 0.0 => phase; */
+  /* instr1.init("instr1", phase, conf1); */
   
   // create patch chain
   // always precede dac with Gain, because Gain goes out of scope when code stops running,
   // breaking Ugen connection to dac output, but dac does not without explicit use of =< operator.
   // See: https://learning.oreilly.com/library/view/programming-for-musicians/9781617291708/OEBPS/Text/kindle_split_018.html 
   instr0.osc => instr0.chorus => instr0.echo => instr0.delay => instr0.rev => instr0.pan => instr0.env => instr0.g;
-  instr1.osc => instr1.chorus => instr1.echo => instr1.delay => instr1.rev => instr1.pan => instr1.env => instr1.g;
+  /* instr1.osc => instr1.chorus => instr1.echo => instr1.delay => instr1.rev => instr1.pan => instr1.env => instr1.g; */
   instr0.g => dac.right; 
-  instr1.g => dac.left; 
+  /* instr1.g => dac.left; */ 
 
   // global coordinator of interprocess state governing composition behavior, such
   // as in this case whether instruments move to the next phrase or stay on the current one
   0 => int id;
   NoteConst N;
   helper.makePhrase([N.B4_16, N.G4_16], id) @=> Sequence lastPhrase;
+
+  // TODO IS THIS THE BUG????????????? OMG
   InCConductor conductor;
   conductor.init(NUM_PHRASES, NUM_PLAYERS, seqs0, lastPhrase);
 
@@ -127,20 +129,20 @@ fun void main () {
   //  which doesn't require that an ordered chain of coroutine threads be set up
   CoroutineController corPlayer0;
   corPlayer0.init(0, "cor_player0", cor, lock, CC.IS_NOT_HEAD);
-  CoroutineController corPlayer1;
-  corPlayer1.init(1, "cor_player1", cor, lock, CC.IS_NOT_HEAD);
+  /* CoroutineController corPlayer1; */
+  /* corPlayer1.init(1, "cor_player1", cor, lock, CC.IS_NOT_HEAD); */
 
   InCPlayer player0;
   player0.init("sinosc player0", seqs0, startEvent, stepEvent,
                corPlayer0, clock.stepDur, conductor, instr0);
-  InCPlayer player1;
-  player1.init("sinosc player1", seqs1, startEvent, stepEvent,
-               corPlayer1, clock.stepDur, conductor, instr1);
+  /* InCPlayer player1; */
+  /* player1.init("sinosc player1", seqs1, startEvent, stepEvent, */
+  /*              corPlayer1, clock.stepDur, conductor, instr1); */
 
   // start clock thread and instrument play threads
   spork ~ runClock(clock);
   spork ~ runPlayer(player0);
-  spork ~ runPlayer(player1);
+  /* spork ~ runPlayer(player1); */
 
   while (true) {1::second => now;}  // block process exit to force child threads to run
 }
